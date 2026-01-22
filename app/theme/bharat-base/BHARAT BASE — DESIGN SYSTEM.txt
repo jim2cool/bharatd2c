@@ -1,0 +1,330 @@
+BHARAT BASE — DESIGN SYSTEM
+(Theme-Wide, Authoritative Reference)
+
+Audience: Designers, UI engineers, theme contributors
+Scope: ALL pages — Home, PLP, PDP, CMS, Checkout shells
+Status: LOCKED BASELINE
+
+0. Core Principle (Read First)
+
+Bharat Base is not expressive.
+It is predictable, calm, scalable, and conversion-safe.
+
+Creativity belongs in Bharat Premium, not here.
+
+1. Header / Navigation — Visual Tokens
+Intent
+
+Immediate trust
+
+Zero distraction
+
+No visual tricks
+
+Header Surface
+--header-bg: var(--white);
+--header-border: var(--gray-200);
+--header-height-desktop: 72px;
+--header-height-mobile: 64px;
+
+
+Rules
+
+Always solid background
+
+Always visible boundary (border-bottom)
+
+Never transparent
+
+Never overlay hero
+
+Logo
+--logo-max-height-desktop: 32px;
+--logo-max-height-mobile: 28px;
+
+
+Single logo only
+
+No wordmark + icon duplication
+
+Centered on mobile, left-aligned on desktop
+
+Navigation Links
+--nav-text-size: var(--text-sm);
+--nav-text-color: var(--gray-900);
+--nav-text-hover: var(--color-accent);
+
+
+Rules:
+
+No underlines
+
+No pills
+
+Hover = color change only
+
+Active state = saffron underline (2px)
+
+Icons (Cart, Account)
+--nav-icon-size: 20px;
+--nav-icon-color: var(--gray-900);
+
+
+Icons always visible
+
+Cart badge uses saffron
+
+Mobile Drawer
+--drawer-bg: var(--white);
+--drawer-width: 85vw;
+--drawer-max-width: 360px;
+
+
+Rules:
+
+Slides from left only
+
+Overlays page (no push)
+
+Body scroll locked
+
+Height = content-driven
+
+No blur, no opacity layers
+
+2. PDP (Product Detail Page) — Design Extensions
+
+PDP is where Bharat Base earns money.
+No experiments here.
+
+PDP Layout Zones (Fixed Order)
+
+Image Gallery
+
+Product Title
+
+Price + Offers
+
+Trust Signals
+
+Variant Selector
+
+Primary CTA
+
+Secondary Info
+
+Long Description
+
+Typography Tokens (PDP)
+--pdp-title-size: var(--text-2xl);
+--pdp-price-size: var(--text-lg);
+--pdp-body-size: var(--text-base);
+
+
+Rules:
+
+Product title max 2 lines
+
+Price visually stronger than description
+
+No decorative emphasis
+
+Price System
+--price-color: var(--gray-900);
+--compare-price-color: var(--gray-500);
+--discount-color: var(--color-accent);
+
+
+Discount % uses saffron
+
+Strike-through only for MRP
+
+No flashing badges
+
+Primary CTA (Add to Cart)
+--cta-height: 48px;
+--cta-radius: 6px;
+--cta-bg: var(--color-accent);
+--cta-text: var(--white);
+
+
+Rules:
+
+One primary CTA only
+
+Always saffron
+
+Full width on mobile
+
+Sticky CTA allowed on mobile only
+
+Trust Signals (Below CTA)
+--trust-icon-size: 18px;
+--trust-text-size: var(--text-xs);
+--trust-color: var(--gray-600);
+
+
+Examples:
+
+Secure checkout
+
+Easy returns
+
+Authentic sourcing
+
+3. Forms & Input System (Global)
+Philosophy
+
+Forms must feel:
+
+Calm
+
+Effortless
+
+Non-judgmental
+
+Input Fields
+--input-height: 44px;
+--input-radius: 6px;
+--input-border: var(--gray-300);
+--input-focus: var(--color-accent);
+
+
+Rules:
+
+Always outlined (never filled)
+
+Focus = saffron border
+
+No glowing shadows
+
+Labels
+--label-size: var(--text-sm);
+--label-color: var(--gray-700);
+
+
+Labels always visible
+
+No placeholder-only forms
+
+Placeholders
+--placeholder-color: var(--gray-400);
+
+
+Informational, not instructional
+
+Error States
+--error-color: var(--color-error);
+
+
+Rules:
+
+Inline below field
+
+Small text
+
+No icons
+
+No shaking animations
+
+Checkboxes & Radios
+--control-accent: var(--color-accent);
+
+
+Square checkbox
+
+Circular radio
+
+Saffron only when checked
+
+4. Mobile-Only Overrides (Critical)
+
+Mobile is not “desktop shrunk”.
+It is priority UX.
+
+Typography Adjustments
+--mobile-h1: var(--text-xl);
+--mobile-section-title: var(--text-lg);
+
+
+Reduce hierarchy
+
+Preserve clarity
+
+Spacing Adjustments
+--mobile-section-padding: var(--space-24);
+
+
+Rules:
+
+Less vertical air
+
+Same rhythm
+
+Buttons (Mobile)
+
+Primary buttons = full width
+
+Minimum tap height = 48px
+
+No side-by-side CTAs
+
+PDP Mobile Specifics
+
+Image gallery first
+
+Sticky Add to Cart allowed
+
+Accordions for long content
+
+No modal-heavy UX
+
+Navigation Mobile Rules
+
+Burger always visible
+
+Cart always visible
+
+No secondary nav bars
+
+No bottom nav (reserved for premium)
+
+5. Saffron Usage — Final Reminder
+
+Allowed:
+
+CTAs
+
+Active states
+
+Highlights
+
+Accents
+
+Forbidden:
+
+Body text
+
+Large backgrounds
+
+Decorative usage
+
+Target usage: ≤15% per page
+
+6. What NOT To Do (Hard Rules)
+
+No gradients
+
+No glassmorphism
+
+No heavy shadows
+
+No animation without UX reason
+
+No per-page visual logic
+
+7. Status
+
+✅ Official Design System for Bharat Base
+🔒 Applies across all pages, sections, and components
+🧠 Any deviation requires design review

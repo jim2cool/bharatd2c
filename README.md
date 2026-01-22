@@ -1,2 +1,3 @@
-# bharatd2c
-India-first D2C commerce platform
+# Bharat D2C Platform
+
+India-first D2C commerce platform.

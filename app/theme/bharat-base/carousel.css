@@ -1,0 +1,66 @@
+/* =========================================================
+   BHARAT BASE — CAROUSEL SKIN (FINAL / LOCKED)
+   ========================================================= */
+
+/* TRACK */
+.carousel-track {
+  display: flex;
+  align-items: stretch;
+}
+
+/* ARROWS — OPTICALLY CENTERED */
+.carousel-arrow {
+  position: absolute;
+  top: calc(50% + 12px);
+
+  background: transparent;
+  border: none;
+  box-shadow: none;
+
+  color: var(--gray-700);
+  font-size: 22px;
+
+  width: auto;
+  height: auto;
+
+  cursor: pointer;
+  z-index: 3;
+}
+
+.carousel-arrow:hover {
+  color: var(--gray-900);
+}
+
+/* Optical nudge for icons/text inside */
+.carousel-arrow svg,
+.carousel-arrow span {
+  position: relative;
+  top: 1px;
+}
+
+.carousel-arrow:hover {
+  background: var(--gray-100);
+  transform: translateY(-51%);
+}
+
+/* LEFT / RIGHT */
+.carousel-arrow.left {
+  left: 8px;
+}
+
+.carousel-arrow.right {
+  right: 8px;
+}
+
+/* SPACING BETWEEN CARDS */
+.carousel-item {
+  padding-right: 16px;
+}
+
+/* MOBILE — QUIETER CONTROLS */
+@media (max-width: 768px) {
+  .carousel-arrow {
+    width: 32px;
+    height: 32px;
+  }
+}

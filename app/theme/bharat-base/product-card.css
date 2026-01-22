@@ -1,0 +1,180 @@
+/* =========================================================
+   BHARAT BASE — PRODUCT CARD (FINAL / LOCKED)
+   ========================================================= */
+
+.product-card {
+  position: relative;
+  background: var(--white);
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--gray-200);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.06);
+}
+
+/* =========================================================
+   IMAGE AREA
+   ========================================================= */
+
+.product-media {
+  position: relative;
+  z-index: 1;
+  display: block;
+  aspect-ratio: 1 / 1;
+  background: #f6f6f6;
+  overflow: hidden;
+}
+.product-media > a {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+
+.product-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.35s ease;
+}
+
+.product-image.secondary {
+  opacity: 0;
+}
+
+@media (hover: hover) {
+  .product-card:hover .product-image.primary {
+    opacity: 0;
+  }
+
+  .product-card:hover .product-image.secondary {
+    opacity: 1;
+  }
+}
+
+/* =========================================================
+   DISCOUNT BADGE
+   ========================================================= */
+
+.product-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 4px 8px;
+
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+
+  border-radius: 6px;
+  background: var(--color-accent);
+  color: var(--white);
+
+  z-index: 3;
+}
+
+/* =========================================================
+   PRODUCT INFO — COMMERCE SLAB
+   ========================================================= */
+
+.product-info {
+  position: relative;
+  padding: 16px;
+  background: var(--white);
+  border-top: 1px solid var(--gray-200);
+  box-shadow: 0 -1px 0 rgba(0,0,0,0.04);
+}
+
+.product-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gray-900);
+  line-height: 1.45;
+  margin-bottom: 10px;
+}
+
+.product-price {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.price-current {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gray-700);
+}
+
+.price-compare {
+  font-size: 13px;
+  color: var(--gray-500);
+  text-decoration: line-through;
+}
+
+/* =========================================================
+   ADD TO CART — ALWAYS VISIBLE / STACK-SAFE
+   ========================================================= */
+
+.quick-add {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+
+  background: transparent;
+  border: none;
+  padding: 0;
+
+  cursor: pointer;
+  z-index: 5;
+}
+
+.quick-add img {
+  width: 28px;
+  height: 28px;
+  opacity: 0.55;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.quick-add:hover img {
+  transform: scale(1.08);
+}
+
+/* Tooltip */
+.quick-add::after {
+  content: "Add to cart";
+  position: absolute;
+  right: 0;
+  bottom: 28px;
+
+  background: var(--gray-900);
+  color: var(--white);
+
+  font-size: 11px;
+  padding: 4px 6px;
+  border-radius: 6px;
+
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(4px);
+  pointer-events: none;
+
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.quick-add:hover::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (max-width: 640px) {
+  .quick-add img {
+    width: 24px;
+    height: 24px;
+  }
+}

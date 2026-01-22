@@ -1,0 +1,13 @@
+/* =========================================================
+   BHARAT BASE — SECTION SKIN
+   ========================================================= */
+
+/* Default section surface */
+.section {
+  background-color: var(--bg-section);
+}
+
+/* Muted sections (testimonials, etc.) */
+.section--muted {
+  background-color: var(--bg-muted);
+}

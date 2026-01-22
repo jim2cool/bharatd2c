@@ -1,0 +1,124 @@
+/* =========================================================
+   SITE HEADER — BHARAT BASE
+   ========================================================= */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb; /* gray-200 */
+
+  /* subtle separation from page */
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
+}
+
+/* Inner container */
+.site-header-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Desktop */
+.site-header-inner.desktop {
+  height: 56px;
+}
+
+/* Mobile */
+.site-header-inner.mobile {
+  height: 48px;
+}
+
+/* Logo */
+.site-logo {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111111;
+  text-decoration: none;
+}
+
+/* Nav */
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+
+  font-size: 14px;
+  font-weight: 600;
+  color: #111111;
+}
+
+/* Cart */
+.site-cart {
+  position: relative;
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Cart badge */
+.cart-badge {
+  position: absolute;
+  top: -6px;
+  right: -10px;
+
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+
+  border-radius: 999px;
+  background: #1e2a5e;
+  color: #ffffff;
+
+  font-size: 11px;
+  font-weight: 600;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Mobile-only */
+@media (min-width: 768px) {
+  .site-header-inner.mobile {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .site-header-inner.desktop {
+    display: none;
+  }
+}
+
+/* Mobile drawer */
+.mobile-drawer {
+  border-top: 1px solid #e5e7eb;
+  background: #ffffff;
+}
+
+.mobile-nav {
+  padding: 12px 20px 20px;
+}
+
+.mobile-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mobile-nav a {
+  font-size: 16px;
+  font-weight: 500;
+  color: #111111;
+  text-decoration: none;
+}

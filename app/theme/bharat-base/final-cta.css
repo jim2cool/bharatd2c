@@ -1,0 +1,6 @@
+.final-cta {
+  background: var(--white);
+  border-top: 1px solid var(--gray-100);
+  padding: 56px 0 64px;
+  text-align: center;
+}
