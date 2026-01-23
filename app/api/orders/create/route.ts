@@ -9,9 +9,27 @@ const supabase = createClient(
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name, phone, address, pincode, total_amount, product_id } = body;
 
-    /* Validate phone server-side */
+    const {
+      name,
+      phone,
+      address,
+      pincode,
+      city,
+      state,
+      cart,
+      pincode_meta,
+    } = body;
+
+    /* ---------------- BASIC VALIDATION ---------------- */
+
+    if (!Array.isArray(cart) || cart.length === 0) {
+      return NextResponse.json(
+        { success: false, error: "Invalid order data" },
+        { status: 400 }
+      );
+    }
+
     if (!/^[6-9]\d{9}$/.test(phone)) {
       return NextResponse.json(
         { success: false, error: "Invalid phone" },
@@ -19,33 +37,8 @@ export async function POST(req: Request) {
       );
     }
 
-    /* Get or create customer */
-    const { data: existingCustomer } = await supabase
-      .from("customers")
-      .select("id")
-      .eq("phone", phone)
-      .single();
+    /* ---------------- STORE ---------------- */
 
-    let customerId = existingCustomer?.id;
-
-    if (!customerId) {
-      const { data: newCustomer, error } = await supabase
-        .from("customers")
-        .insert([{ phone }])
-        .select()
-        .single();
-
-      if (error) {
-        return NextResponse.json(
-          { success: false, error },
-          { status: 500 }
-        );
-      }
-
-      customerId = newCustomer.id;
-    }
-
-    /* Get store */
     const { data: store } = await supabase
       .from("stores")
       .select("id")
@@ -59,59 +52,115 @@ export async function POST(req: Request) {
       );
     }
 
-    /* Create order */
-    const { data: orderRow, error: orderError } = await supabase
-  .from("orders")
-  .insert([
-    {
-      store_id: store.id,
-      customer_id: customerId,
-      status: "new",
-      payment_mode: "cod",
-      total_amount: total_amount || 0,
-      risk_level: "low",
-      meta: {
-        name: name || "",
-        phone: phone || "",
-        address: address || "",
-        pincode: pincode || "",
-      },
-    },
-  ])
-  .select()
-  .single();
+    /* ---------------- CUSTOMER ---------------- */
 
-if (orderError || !orderRow) {
-  return NextResponse.json(
-    { success: false, error: orderError },
-    { status: 500 }
-  );
-}
-// Create order item (Buy Now = single item)
-if (product_id) {
-  await supabase.from("order_items").insert([
-    {
-      order_id: orderRow.id,
-      product_id: product_id,
-      qty: 1,
-      price: total_amount || 0,
-    },
-  ]);
-}
+    const { data: existingCustomer } = await supabase
+      .from("customers")
+      .select("id")
+      .eq("phone", phone)
+      .single();
 
+    let customerId = existingCustomer?.id;
 
-    if (orderError) {
+    if (!customerId) {
+      const { data: newCustomer } = await supabase
+        .from("customers")
+        .insert([{ phone, name }])
+        .select()
+        .single();
+
+      customerId = newCustomer.id;
+    }
+
+    /* ---------------- PRICE ANCHORING (SERVER) ---------------- */
+
+    const productIds = cart.map((i: any) => i.product_id);
+
+    const { data: products } = await supabase
+      .from("products")
+      .select("id, price")
+      .in("id", productIds)
+      .eq("status", "published");
+
+    if (!products || products.length !== cart.length) {
       return NextResponse.json(
-        { success: false, error: orderError },
+        { success: false, error: "PRODUCT_LOOKUP_FAILED" },
+        { status: 400 }
+      );
+    }
+
+    const priceMap = new Map(
+      products.map(p => [p.id, p.price])
+    );
+
+    let total_amount = 0;
+
+    const orderItems = cart.map((item: any) => {
+      const price = priceMap.get(item.product_id);
+      const qty = Math.max(1, Number(item.qty) || 1);
+
+      total_amount += price * qty;
+
+      return {
+        product_id: item.product_id,
+        qty,
+        price,
+      };
+    });
+
+    /* ---------------- ORDER ---------------- */
+
+    const { data: order } = await supabase
+      .from("orders")
+      .insert([
+        {
+          store_id: store.id,
+          customer_id: customerId,
+          status: "new",
+          payment_mode: "cod",
+          total_amount,
+          meta: {
+            name,
+            phone,
+            address,
+            pincode,
+            city,
+            state,
+            pincode_meta: pincode_meta || null,
+          },
+        },
+      ])
+      .select()
+      .single();
+
+    if (!order) {
+      return NextResponse.json(
+        { success: false, error: "Order creation failed" },
         { status: 500 }
       );
     }
 
-    /* ALWAYS return JSON */
-    return NextResponse.json({ success: true }, { status: 200 });
+    /* ---------------- ORDER ITEMS ---------------- */
+
+    await supabase.from("order_items").insert(
+      orderItems.map(item => ({
+        order_id: order.id,
+        product_id: item.product_id,
+        qty: item.qty,
+        price: item.price,
+      }))
+    );
+
+    return NextResponse.json(
+      { success: true, order_id: order.id },
+      { status: 200 }
+    );
   } catch (err: any) {
     return NextResponse.json(
-      { success: false, error: err?.message || err },
+      {
+        success: false,
+        error: err?.message || "Server error",
+      },
       { status: 500 }
     );
   }

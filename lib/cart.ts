@@ -1,4 +1,4 @@
-type CartItem = {
+export type CartItem = {
   product_id: string;
   title: string;
   image: string;
@@ -34,20 +34,49 @@ export function getCart(): CartItem[] {
   return loadCart();
 }
 
-export function addToCart(item: CartItem) {
-  saveCart([item]); // still single-item cart
-}
-
-export function updateQty(qty: number) {
+export function addToCart(item: any) {
   const cart = loadCart();
-  if (!cart.length) return;
 
-  cart[0].qty = Math.max(1, qty);
+  // 🔒 Normalize product id once
+  const pid = item.product_id || item.id;
+  if (!pid) return;
+
+  const index = cart.findIndex(
+    c => c.product_id === pid
+  );
+
+  if (index >= 0) {
+    cart[index].qty += item.qty || 1;
+  } else {
+    cart.push({
+      product_id: pid,
+      title: item.title,
+      image: item.image,
+      price: item.price,
+      qty: item.qty || 1,
+    });
+  }
+
   saveCart(cart);
 }
 
-export function removeFromCart() {
-  saveCart([]);
+export function updateQty(product_id: string, qty: number) {
+  const cart = loadCart();
+
+  const index = cart.findIndex(
+    c => c.product_id === product_id
+  );
+
+  if (index === -1) return;
+
+  cart[index].qty = Math.max(1, qty);
+  saveCart(cart);
+}
+
+export function removeFromCart(product_id: string) {
+  saveCart(
+    loadCart().filter(c => c.product_id !== product_id)
+  );
 }
 
 export function clearCart() {
