@@ -1,33 +1,15 @@
 import { supabase } from "@/lib/supabase";
 
 /* ======================================================
-   SINGLE PRODUCT
+   PRODUCTS (HOMEPAGE)
    ====================================================== */
-export async function getProductBySlug(slug: string) {
-  const { data, error } = await supabase
-    .from("products")
-    .select("*")
-    .eq("slug", slug)
-    .eq("status", "published")
-    .maybeSingle();
-
-  if (error) {
-    console.error("getProductBySlug error:", error);
-    return null;
-  }
-
-  return data ?? null;
-}
-
-/* ======================================================
-   ALL PRODUCTS (NO PAGINATION)
-   ====================================================== */
-export async function getProducts() {
+export async function getProducts(limit = 8) {
   const { data, error } = await supabase
     .from("products")
     .select("*")
     .eq("status", "published")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(limit);
 
   if (error) {
     console.error("getProducts error:", error);
@@ -38,12 +20,12 @@ export async function getProducts() {
 }
 
 /* ======================================================
-   PRODUCTS — PAGINATED (PLP)
+   PRODUCTS (ALL) — PAGINATED
    ====================================================== */
 export async function getProductsPaginated(
   page: number,
-  pageSize = 12,
-  sort = "newest"
+  pageSize: number,
+  sort: string
 ) {
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
@@ -51,19 +33,21 @@ export async function getProductsPaginated(
   let query = supabase
     .from("products")
     .select("*", { count: "exact" })
-    .eq("status", "published")
-    .range(from, to);
+    .eq("status", "published");
 
-  switch (sort) {
-    case "price_asc":
-      query = query.order("sellingPrice", { ascending: true });
-      break;
-    case "price_desc":
-      query = query.order("sellingPrice", { ascending: false });
-      break;
-    default:
-      query = query.order("created_at", { ascending: false });
+  if (sort === "price_asc") {
+    query = query
+      .not("price", "is", null)
+      .order("price", { ascending: true });
+  } else if (sort === "price_desc") {
+    query = query
+      .not("price", "is", null)
+      .order("price", { ascending: false });
+  } else {
+    query = query.order("created_at", { ascending: false });
   }
+
+  query = query.range(from, to);
 
   const { data, error, count } = await query;
 
@@ -79,7 +63,7 @@ export async function getProductsPaginated(
 }
 
 /* ======================================================
-   PRODUCTS BY COLLECTION (FINAL / SAFE)
+   PRODUCTS BY COLLECTION — PAGINATED
    ====================================================== */
 export async function getProductsByCollection(
   slug: string,
@@ -91,21 +75,24 @@ export async function getProductsByCollection(
   const to = from + pageSize - 1;
 
   let query = supabase
-  .from("products")
-  .select("*", { count: "exact" })
-  .eq("status", "published")
-  .or(
-    `collection_slugs_text.ilike.%${slug}%,collection_slugs_text.eq.${slug}`
-  );
-
+    .from("products")
+    .select("*", { count: "exact" })
+    .eq("status", "published")
+    .contains("collection_slug", [slug]);
 
   if (sort === "price_asc") {
-    query = query.order("sellingPrice", { ascending: true });
+    query = query
+      .not("price", "is", null)
+      .order("price", { ascending: true });
   } else if (sort === "price_desc") {
-    query = query.order("sellingPrice", { ascending: false });
+    query = query
+      .not("price", "is", null)
+      .order("price", { ascending: false });
   } else {
     query = query.order("created_at", { ascending: false });
   }
+
+  query = query.range(from, to);
 
   const { data, error, count } = await query;
 
@@ -118,4 +105,23 @@ export async function getProductsByCollection(
     products: data ?? [],
     total: count ?? 0,
   };
+}
+
+/* ======================================================
+   SINGLE PRODUCT BY SLUG
+   ====================================================== */
+export async function getProductBySlug(slug: string) {
+  const { data, error } = await supabase
+    .from("products")
+    .select("*")
+    .eq("slug", slug)
+    .eq("status", "published")
+    .single();
+
+  if (error) {
+    console.error("getProductBySlug error:", error);
+    return null;
+  }
+
+  return data;
 }

@@ -2,13 +2,20 @@ import ProductCard from "@/app/components/ProductCard";
 import SortSelect from "@/app/components/SortSelect";
 import { getProductsPaginated } from "@/lib/products";
 
+type SearchParams = {
+  page?: string;
+  sort?: string;
+};
+
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: { page?: string; sort?: string };
+  searchParams: Promise<SearchParams>;
 }) {
-  const page = Number(searchParams.page) || 1;
-  const sort = searchParams.sort || "newest";
+  const resolvedSearchParams = await searchParams;
+
+  const page = Number(resolvedSearchParams.page) || 1;
+  const sort = resolvedSearchParams.sort || "newest";
   const PAGE_SIZE = 12;
 
   const { products, total } = await getProductsPaginated(

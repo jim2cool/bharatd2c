@@ -3,20 +3,29 @@ import ProductCard from "@/app/components/ProductCard";
 import SortSelect from "@/app/components/SortSelect";
 import { getProductsByCollection } from "@/lib/products";
 
+type SearchParams = {
+  page?: string;
+  sort?: string;
+};
+
 export default async function CollectionPage({
   params,
   searchParams,
 }: {
   params: Promise<{ slug?: string }>;
-  searchParams: { page?: string; sort?: string };
+  searchParams: Promise<SearchParams>;
 }) {
   const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
+
   const slug = (resolvedParams.slug ?? "").toLowerCase().trim();
 
-  const safeSlug = slug ?? "";
+  if (!slug) {
+    notFound();
+  }
 
-  const page = Number(searchParams.page) || 1;
-  const sort = searchParams.sort || "newest";
+  const page = Number(resolvedSearchParams.page) || 1;
+  const sort = resolvedSearchParams.sort || "newest";
   const PAGE_SIZE = 12;
 
   const { products, total } = await getProductsByCollection(
@@ -27,7 +36,7 @@ export default async function CollectionPage({
   );
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
-  const title = (slug ?? "").replace(/-/g, " ");
+  const title = slug.replace(/-/g, " ");
 
   return (
     <main className="bg-white">
