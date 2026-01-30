@@ -2,9 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "@/app/theme/bharat-base/theme.config";
-import Header from "@/app/theme/bharat-base/layout/Header";
-import Footer from "@/app/theme/bharat-base/layout/Footer";
-import AnnouncementBar from "@/app/theme/bharat-base/layout/AnnouncementBar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,34 +27,14 @@ export default function RootLayout({
     <html lang="en-IN">
       <body
         className={`
-          ${geistSans.variable} 
-          ${geistMono.variable} 
-          antialiased 
-          bg-white 
+          ${geistSans.variable}
+          ${geistMono.variable}
+          antialiased
+          bg-white
           text-gray-900
         `}
       >
-        {/* ===== Announcement Bar (always top) ===== */}
-        <div className="relative z-50">
-          <AnnouncementBar />
-        </div>
-
-        {/* ===== Header / Navigation ===== */}
-       
-  <Header />
-
-
-        {/* ===== Page Content ===== */}
-        {/* Hero sections can be full-bleed inside pages */}
-        {/* All body sections should use .container */}
-        <main className="pt-[0px]">
-  {children}
-</main>
-
-        {/* ===== Footer ===== */}
-        <footer className="bg-white border-t border-gray-200">
-          <Footer />
-        </footer>
+        {children}
       </body>
     </html>
   );

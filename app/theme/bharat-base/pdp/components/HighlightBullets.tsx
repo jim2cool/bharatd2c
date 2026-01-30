@@ -6,13 +6,13 @@ export default function HighlightBullets({
   if (!items.length) return null;
 
   return (
-    <ul className="mt-4 space-y-2">
+    <ul className="mt-4 space-y-3">
       {items.map((item, i) => (
         <li
           key={i}
-          className="text-sm font-medium flex gap-2 items-start"
+          className="flex gap-3 text-sm text-gray-800"
         >
-          <span className="text-green-600">✔</span>
+          <span className="text-green-700 mt-[2px]">✔</span>
           <span>{item}</span>
         </li>
       ))}

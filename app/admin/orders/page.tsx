@@ -1,191 +1,255 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabaseBrowser } from '../../../lib/supabase-browser'
+import Link from 'next/link'
+import { supabaseBrowser } from '@/lib/supabase-browser'
 
-type Order = {
-  id: string
-  created_at: string
-  payment_mode: string
-  total_amount: number
-  status: string
-  risk_level: string | null
-  meta: {
-    name?: string
-    phone?: string
-    address?: string
-    pincode?: string
-  } | null
-  customers?: {
-    phone?: string
-  } | null
-}
+const PAGE_SIZE = 25
 
-const TABS = [
-  { key: 'pending', label: 'Pending', statuses: ['new', 'pending_approval'] },
-  { key: 'approved', label: 'Approved', statuses: ['approved'] },
-  { key: 'cancelled', label: 'Cancelled', statuses: ['cancelled'] },
-  { key: 'all', label: 'All', statuses: [] },
+const STATUS_FILTERS = [
+  { label: 'All', value: 'all', color: 'gray' },
+  { label: 'New', value: 'new', color: 'blue' },
+  { label: 'Confirmed', value: 'confirmed', color: 'indigo' },
+  { label: 'Shipped', value: 'shipped', color: 'purple' },
+  { label: 'Cancelled', value: 'cancelled', color: 'red' },
 ]
 
+const STATUS_PILL: Record<string, string> = {
+  new: 'bg-blue-100 text-blue-800',
+  confirmed: 'bg-indigo-100 text-indigo-800',
+  shipped: 'bg-purple-100 text-purple-800',
+  delivered: 'bg-green-100 text-green-800',
+  cancelled: 'bg-red-100 text-red-800',
+  rto: 'bg-orange-100 text-orange-800',
+}
+
 export default function OrdersPage() {
-  const [orders, setOrders] = useState<Order[]>([])
-  const [activeTab, setActiveTab] = useState('pending')
-  const [search, setSearch] = useState('')
-  const [selected, setSelected] = useState<Record<string, boolean>>({})
+  const [orders, setOrders] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+
+  const [status, setStatus] = useState('all')
+  const [search, setSearch] = useState('')
+
+  const [cursor, setCursor] = useState<string | null>(null)
+  const [prevCursors, setPrevCursors] = useState<string[]>([])
+  const [hasNext, setHasNext] = useState(false)
+
+  /* ---------------- LOAD ORDERS ---------------- */
 
   const loadOrders = async () => {
     setLoading(true)
 
     let query = supabaseBrowser
       .from('orders')
-      .select(`
+      .select(
+        `
         id,
-        created_at,
+        order_number,
+        status,
         payment_mode,
         total_amount,
-        status,
-        risk_level,
-        meta,
-        customers ( phone )
-      `)
+        created_at,
+        meta
+      `
+      )
       .order('created_at', { ascending: false })
+      .limit(PAGE_SIZE + 1)
 
-    const tab = TABS.find((t) => t.key === activeTab)
-    if (tab && tab.statuses.length > 0) {
-      query = query.in('status', tab.statuses)
+    if (status !== 'all') {
+      query = query.eq('status', status)
     }
 
-    if (search.trim()) {
-      const term = `%${search.trim()}%`
-      query = query.or(
-        `id.ilike.${term},customers.phone.ilike.${term},meta->>phone.ilike.${term}`
-      )
+    if (cursor) {
+      query = query.lt('created_at', cursor)
     }
 
     const { data } = await query
-    setOrders(data || [])
-    setSelected({})
+
+    const rows = data || []
+    setHasNext(rows.length > PAGE_SIZE)
+    setOrders(rows.slice(0, PAGE_SIZE))
     setLoading(false)
   }
 
+  /* ---------------- EFFECTS ---------------- */
+
   useEffect(() => {
+    setCursor(null)
+    setPrevCursors([])
     loadOrders()
-  }, [activeTab, search])
+  }, [status])
 
-  const toggleSelect = (id: string) => {
-    setSelected((prev) => ({ ...prev, [id]: !prev[id] }))
-  }
+  /* ---------------- HELPERS ---------------- */
 
-  if (loading) return <p className="p-6">Loading orders…</p>
+  const formatIST = (ts: string) =>
+    new Date(ts).toLocaleString('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    })
+
+  const filteredOrders = orders.filter(o => {
+    if (!search) return true
+    const q = search.toLowerCase()
+    return (
+      o.order_number?.toLowerCase().includes(q) ||
+      o.meta?.phone?.includes(q)
+    )
+  })
+
+  /* ---------------- UI ---------------- */
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Orders</h1>
+      {/* HEADER */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold mb-4">Orders</h1>
 
-      {/* Tabs */}
-      <div className="flex gap-2 mb-4 sticky top-0 bg-black z-10">
-        {TABS.map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setActiveTab(t.key)}
-            className={`px-4 py-2 border rounded ${
-              activeTab === t.key
-                ? 'bg-white text-black'
-                : 'border-gray-600 text-gray-300 hover:border-white'
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
+        <input
+          className="w-[320px] border rounded px-3 py-2 text-sm"
+          placeholder="Search by order # or phone"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
       </div>
 
-      {/* Search */}
-      <input
-        placeholder="Search by Order ID or Phone"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="border border-gray-600 bg-black text-white p-2 mb-4 w-full rounded"
-      />
+      {/* STATUS FILTERS */}
+      <div className="flex gap-2 mb-4">
+        {STATUS_FILTERS.map(f => {
+          const active = status === f.value
+          const activeClass = {
+            gray: 'bg-gray-100 text-gray-900',
+            blue: 'bg-blue-100 text-blue-900',
+            indigo: 'bg-indigo-100 text-indigo-900',
+            purple: 'bg-purple-100 text-purple-900',
+            red: 'bg-red-100 text-red-900',
+          }[f.color]
 
-      <table className="w-full border border-gray-700 rounded overflow-hidden">
-        <thead className="bg-gray-900 text-gray-300">
-          <tr>
-            <th className="p-2 border"></th>
-            <th className="p-2 border">Order</th>
-            <th className="p-2 border">Customer</th>
-            <th className="p-2 border">Payment</th>
-            <th className="p-2 border">Amount</th>
-            <th className="p-2 border">Risk</th>
-            <th className="p-2 border">Status</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {orders.map((o) => (
-            <tr
-              key={o.id}
-              className="odd:bg-black even:bg-gray-900 hover:bg-gray-800 align-top"
+          return (
+            <button
+              key={f.value}
+              onClick={() => setStatus(f.value)}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition
+                ${active ? activeClass : 'text-gray-500 hover:bg-gray-100'}
+              `}
             >
-              <td className="p-2 border text-center">
-                <input
-                  type="checkbox"
-                  checked={!!selected[o.id]}
-                  onChange={() => toggleSelect(o.id)}
-                />
-              </td>
+              {f.label}
+            </button>
+          )
+        })}
+      </div>
 
-              <td className="p-2 border text-blue-600 underline">
-                <a href={`/admin/orders/${o.id}`}>
-                  {o.id.slice(0, 8)}
-                </a>
-              </td>
-
-              {/* CUSTOMER DETAILS */}
-              <td className="p-2 border text-sm text-gray-300">
-                <div><b>{o.meta?.name || '—'}</b></div>
-                <div>{o.meta?.phone || o.customers?.phone || '—'}</div>
-                <div className="text-xs text-gray-400">
-                  {o.meta?.address}
-                  {o.meta?.pincode ? `, ${o.meta.pincode}` : ''}
-                </div>
-              </td>
-
-              <td className="p-2 border">{o.payment_mode}</td>
-              <td className="p-2 border">₹{o.total_amount}</td>
-
-              <td className="p-2 border">
-                <span
-                  className={`px-2 py-1 rounded text-sm ${
-                    o.risk_level === 'high'
-                      ? 'bg-red-900 text-red-300'
-                      : o.risk_level === 'medium'
-                      ? 'bg-orange-900 text-orange-300'
-                      : 'bg-green-900 text-green-300'
-                  }`}
-                >
-                  {o.risk_level || 'low'}
-                </span>
-              </td>
-
-              <td className="p-2 border">
-                <span
-                  className={`px-2 py-1 rounded text-sm ${
-                    o.status === 'approved'
-                      ? 'bg-green-900 text-green-300'
-                      : o.status === 'cancelled'
-                      ? 'bg-red-900 text-red-300'
-                      : 'bg-orange-900 text-orange-300'
-                  }`}
-                >
-                  {o.status}
-                </span>
-              </td>
+      {/* TABLE */}
+      <div className="bg-white border rounded overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-gray-50 border-b text-gray-600">
+            <tr>
+              <th className="w-10 px-4 py-2"></th>
+              <th className="text-left px-4 py-2">Order</th>
+              <th className="text-left px-4 py-2">Customer</th>
+              <th className="text-right px-4 py-2">Total</th>
+              <th className="text-left px-4 py-2">Payment</th>
+              <th className="text-left px-4 py-2">Status</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+
+          <tbody>
+            {loading && (
+              <tr>
+                <td colSpan={6} className="px-4 py-6 text-center">
+                  Loading orders…
+                </td>
+              </tr>
+            )}
+
+            {!loading && filteredOrders.length === 0 && (
+              <tr>
+                <td colSpan={6} className="px-4 py-6 text-center">
+                  No orders found
+                </td>
+              </tr>
+            )}
+
+            {filteredOrders.map(order => (
+              <tr
+                key={order.id}
+                className="border-b hover:bg-gray-50"
+              >
+                <td className="px-4 py-1.5">
+                  <input type="checkbox" disabled />
+                </td>
+
+                <td className="px-4 py-1.5">
+                  <Link
+                    href={`/admin/orders/${order.id}`}
+                    className="text-blue-600 font-medium"
+                  >
+                    #{order.order_number}
+                  </Link>
+                  <div className="text-xs text-gray-500">
+                    {formatIST(order.created_at)} IST
+                  </div>
+                </td>
+
+                <td className="px-4 py-1.5">
+                  <div className="font-medium">
+                    {order.meta?.name || '—'}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {order.meta?.phone}
+                  </div>
+                </td>
+
+                <td className="px-4 py-1.5 text-right">
+                  ₹{order.total_amount}
+                </td>
+
+                <td className="px-4 py-1.5">
+                  {order.payment_mode?.toUpperCase()}
+                </td>
+
+                <td className="px-4 py-1.5">
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      STATUS_PILL[order.status] || 'bg-gray-100'
+                    }`}
+                  >
+                    {order.status}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* PAGINATION */}
+      <div className="flex justify-between items-center mt-4">
+        <button
+          disabled={prevCursors.length === 0}
+          onClick={() => {
+            const prev = prevCursors[prevCursors.length - 1]
+            setPrevCursors(prevCursors.slice(0, -1))
+            setCursor(prev || null)
+          }}
+          className="px-3 py-1.5 border rounded text-sm disabled:opacity-50"
+        >
+          Previous
+        </button>
+
+        <button
+          disabled={!hasNext}
+          onClick={() => {
+            const last = orders[orders.length - 1]?.created_at
+            if (!last) return
+            setPrevCursors([...prevCursors, cursor || ''])
+            setCursor(last)
+          }}
+          className="px-3 py-1.5 border rounded text-sm disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
     </div>
   )
 }

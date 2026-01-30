@@ -79,11 +79,21 @@ export default function CheckoutPage() {
         city: prev.city || po.District || "",
         state: prev.state || po.State || "",
         _pincodeMeta: {
-          fetched_city: po.District,
-          fetched_state: po.State,
-          country: po.Country,
-          source: "indiapost",
-        },
+  source: "indiapost",
+  pincode: po.Pincode,
+  post_office_count: data[0].PostOffice.length,
+  post_offices: data[0].PostOffice.map((po: any) => ({
+    name: po.Name,
+    branch_type: po.BranchType,
+    delivery_status: po.DeliveryStatus,
+    district: po.District,
+    state: po.State,
+    region: po.Region,
+    circle: po.Circle,
+    country: po.Country,
+  })),
+},
+
       }));
 
       setPincodeStatus("success");

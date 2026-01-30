@@ -5,23 +5,20 @@ export default function StarRating({
   rating: number;
   count: number;
 }) {
-  const fullStars = Math.floor(rating);
-  const partial = rating - fullStars;
+  const full = Math.floor(rating);
+  const partial = rating - full;
 
   return (
-    <div className="flex items-center gap-1 text-sm text-gray-600">
+    <div className="flex items-center gap-2 text-sm text-gray-600">
       <div className="flex">
         {[0, 1, 2, 3, 4].map((i) => {
-          if (i < fullStars) {
-            return <Star key={i} fill={1} />;
-          }
-          if (i === fullStars && partial > 0) {
+          if (i < full) return <Star key={i} fill={1} />;
+          if (i === full && partial > 0)
             return <Star key={i} fill={partial} />;
-          }
           return <Star key={i} fill={0} />;
         })}
       </div>
-      <span className="ml-1">
+      <span className="text-gray-500">
         {rating} ({count} reviews)
       </span>
     </div>

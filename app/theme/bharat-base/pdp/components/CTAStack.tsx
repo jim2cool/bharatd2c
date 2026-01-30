@@ -4,23 +4,12 @@ import { addToCart } from "@/lib/cart";
 import { STORE_CONFIG } from "@/lib/storeConfig";
 import { useRouter } from "next/navigation";
 
-export default function CTAStack({
-  product,
-}: {
-  product: {
-    id: string;
-    title: string;
-    images: string[];
-    price: number;
-    enable_cart?: boolean;
-  };
-}) {
+export default function CTAStack({ product }: { product: any }) {
   const router = useRouter();
-
   const cartEnabled =
     product.enable_cart ?? STORE_CONFIG.enableCart;
 
-  const handleAddToCart = () => {
+  const add = () => {
     addToCart({
       product_id: product.id,
       title: product.title,
@@ -28,47 +17,35 @@ export default function CTAStack({
       price: product.price,
       qty: 1,
     });
-    router.push("/cart");
-  };
-
-  const handleDirectCheckout = () => {
-    addToCart({
-      product_id: product.id,
-      title: product.title,
-      image: product.images[0],
-      price: product.price,
-      qty: 1,
-    });
-    router.push("/checkout");
   };
 
   return (
-    <div className="mt-6 space-y-2">
-
-      {/* PRIMARY CTA — COD DIRECT */}
+    <div className="space-y-3 pt-2">
       <button
-        onClick={handleDirectCheckout}
-        className="w-full bg-black active:scale-[0.98] transition text-white py-3 text-lg font-semibold rounded"
+        onClick={() => {
+          add();
+          router.push("/checkout");
+        }}
+        className="w-full bg-black text-white py-4 text-lg font-semibold rounded-xl transition-all hover:shadow-md active:scale-[0.97]"
       >
-        Order Now – Cash on Delivery
+        Order Now — Cash on Delivery
       </button>
 
-      {/* SECONDARY CTA — ADD TO CART (OPTIONAL) */}
       {cartEnabled && (
         <button
-          onClick={handleAddToCart}
-          className="w-full border py-3 text-sm rounded"
+          onClick={() => {
+            add();
+            router.push("/cart");
+          }}
+          className="w-full border border-gray-300 py-3 text-sm rounded-xl hover:bg-gray-50 transition"
         >
           Add to Cart
         </button>
       )}
 
-      <button
-        disabled
-        className="w-full border py-3 text-sm opacity-60 rounded"
-      >
+      <div className="text-[11px] text-gray-400 text-center">
         Pay Online & Get Extra Discount (Coming Soon)
-      </button>
+      </div>
     </div>
   );
 }

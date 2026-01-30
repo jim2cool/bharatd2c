@@ -2,8 +2,17 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { supabaseBrowser } from '../../../../lib/supabase-browser'
-import { evaluateCODRisk } from '../../../../lib/cod-risk'
+import { supabaseBrowser } from '@/lib/supabase-browser'
+import { evaluateCODRisk } from '@/lib/cod-risk'
+
+const STATUS_OPTIONS = [
+  'new',
+  'confirmed',
+  'shipped',
+  'delivered',
+  'cancelled',
+  'rto',
+]
 
 export default function OrderDetailPage() {
   const { id } = useParams()
@@ -11,8 +20,13 @@ export default function OrderDetailPage() {
 
   const [order, setOrder] = useState<any>(null)
   const [items, setItems] = useState<any[]>([])
-  const [customer, setCustomer] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+
+  const [editMode, setEditMode] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [showIntel, setShowIntel] = useState(false)
+
+  /* ---------------- LOAD ORDER ---------------- */
 
   const loadOrder = async () => {
     setLoading(true)
@@ -24,35 +38,17 @@ export default function OrderDetailPage() {
       .single()
 
     const { data: itemData } = await supabaseBrowser
-  .from('order_items')
-  .select(`
-    qty,
-    price,
-    product_id,
-    variant_id,
-    products (
-      title
-    ),
-    variants (
-      title
-    )
-  `)
-  .eq('order_id', id)
-
-
-    let customerData = null
-    if (orderData?.customer_id) {
-      const { data } = await supabaseBrowser
-        .from('customers')
-        .select('*')
-        .eq('id', orderData.customer_id)
-        .single()
-      customerData = data
-    }
+      .from('order_items')
+      .select(`
+        qty,
+        price,
+        products ( title ),
+        variants ( title )
+      `)
+      .eq('order_id', id)
 
     setOrder(orderData)
     setItems(itemData || [])
-    setCustomer(customerData)
     setLoading(false)
   }
 
@@ -60,35 +56,55 @@ export default function OrderDetailPage() {
     loadOrder()
   }, [])
 
+  if (loading) {
+    return <div className="p-6">Loading order…</div>
+  }
+
+  if (!order) {
+    return <div className="p-6">Order not found</div>
+  }
+
+  const meta = order.meta || {}
+  const pincodeMeta = meta.pincode_meta
+
+  const formatIST = (ts: string) =>
+    new Date(ts).toLocaleString('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    })
+
+  /* ---------------- SAVE CUSTOMER ---------------- */
+
+  const saveCustomer = async () => {
+    setSaving(true)
+    await supabaseBrowser
+      .from('orders')
+      .update({ meta })
+      .eq('id', order.id)
+    setEditMode(false)
+    setSaving(false)
+    loadOrder()
+  }
+
+  /* ---------------- STATUS UPDATE ---------------- */
+
   const updateStatus = async (status: string) => {
     await supabaseBrowser
       .from('orders')
       .update({ status })
-      .eq('id', id)
-
-    router.push('/admin/orders')
+      .eq('id', order.id)
+    loadOrder()
   }
 
-  const runRiskCheck = async () => {
-    if (!order) return
+  /* ---------------- COD RISK ---------------- */
 
-    let previousOrdersCount = 0
-
-    if (customer?.phone) {
-      const { count } = await supabaseBrowser
-        .from('orders')
-        .select('*', { count: 'exact', head: true })
-        .eq('payment_mode', 'COD')
-        .eq('customer_id', order.customer_id)
-
-      previousOrdersCount = count || 0
-    }
-
+  const runRisk = async () => {
     const result = evaluateCODRisk({
       paymentMode: order.payment_mode,
       totalAmount: order.total_amount,
-      previousOrdersCount,
-      phone: customer?.phone,
+      previousOrdersCount: 0,
+      phone: meta.phone,
     })
 
     await supabaseBrowser
@@ -100,131 +116,243 @@ export default function OrderDetailPage() {
       .eq('id', order.id)
 
     alert(
-      `Risk Level: ${result.level.toUpperCase()}\n\nReasons:\n${
-        result.reasons.length ? result.reasons.join('\n') : 'None'
+      `Risk: ${result.level.toUpperCase()}\n${
+        result.reasons.join('\n') || 'No reasons'
       }`
     )
 
-    await loadOrder()
+    loadOrder()
   }
 
-  if (loading) return <p className="p-6">Loading order…</p>
-  if (!order) return <p className="p-6">Order not found</p>
+  /* ---------------- DERIVED TOTALS ---------------- */
 
-  const meta = order.meta || {}
+  const itemsSubtotal = items.reduce(
+    (sum, i) => sum + i.qty * i.price,
+    0
+  )
+
+  const taxAmount = meta.tax_amount || 0
+  const shippingAmount = meta.shipping_amount || 0
+  const grandTotal = itemsSubtotal + taxAmount + shippingAmount
+
+  /* ---------------- UI ---------------- */
 
   return (
-    <div className="p-6 max-w-3xl">
-      <h1 className="text-2xl font-bold mb-4">
-        Order {order.id.slice(0, 8)}
-      </h1>
-
-      {/* ORDER SUMMARY */}
-      <div className="border p-4 mb-4">
-        <p><strong>Status:</strong> {order.status}</p>
-        <p><strong>Payment:</strong> {order.payment_mode}</p>
-        <p><strong>Total:</strong> ₹{order.total_amount}</p>
-        <p>
-          <strong>Created:</strong>{' '}
-          {new Date(order.created_at).toLocaleString()}
-        </p>
-
-        <p>
-          <strong>Risk Level:</strong>{' '}
-          <span
-            className={
-              order.risk_level === 'high'
-                ? 'text-red-600'
-                : order.risk_level === 'medium'
-                ? 'text-orange-600'
-                : 'text-green-600'
-            }
-          >
-            {order.risk_level || 'low'}
-          </span>
-        </p>
-
-        {order.tags && order.tags.length > 0 && (
-          <p className="text-red-600 mt-2">
-            <strong>Risk Reasons:</strong> {order.tags.join(', ')}
-          </p>
-        )}
-      </div>
-
-      {/* CUSTOMER */}
-      <div className="border p-4 mb-4">
-        <h2 className="font-bold mb-2">Customer</h2>
-        <p><strong>Name:</strong> {meta.name || '—'}</p>
-        <p><strong>Phone:</strong> {meta.phone || customer?.phone}</p>
-
-        <p className="mt-2">
-          <strong>Address:</strong><br />
-          {meta.address}<br />
-          {meta.pincode}
-        </p>
-      </div>
-
-      {/* ITEMS */}
-      <div className="border p-4 mb-4">
-        <h2 className="font-bold mb-2">Items</h2>
-        {items.length === 0 && <p>No items (Buy Now order)</p>}
-        {items.map((i, idx) => (
-  <div
-    key={idx}
-    className="flex justify-between border-b py-2 text-sm"
-  >
     <div>
-      <div className="font-semibold">
-        {i.products?.title || 'Unknown Product'}
-      </div>
-
-      {i.variants?.title && (
-        <div className="text-gray-500 text-xs">
-          Variant: {i.variants.title}
+      {/* HEADER */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold">
+          Order #{order.order_number}
+        </h1>
+        <div className="text-sm text-gray-600 mt-1">
+          Placed {formatIST(order.created_at)} IST ·{' '}
+          {order.payment_mode?.toUpperCase()}
         </div>
-      )}
-    </div>
-
-    <div className="text-right">
-      <div>{i.qty} × ₹{i.price}</div>
-      <div className="text-xs text-gray-400">
-        = ₹{i.qty * i.price}
-      </div>
-    </div>
-  </div>
-))}
-
       </div>
 
-      {/* ACTIONS */}
-      <div className="space-x-3">
-        <button
-          onClick={() => updateStatus('approved')}
-          className="bg-green-600 text-white px-4 py-2"
-        >
-          Approve
-        </button>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* LEFT / MAIN */}
+        <div className="lg:col-span-2 space-y-6">
 
-        <button
-          onClick={() => updateStatus('cancelled')}
-          className="bg-red-600 text-white px-4 py-2"
-        >
-          Cancel
-        </button>
+          {/* ITEMS — PRIMARY FOCUS */}
+          <div className="bg-white border rounded">
+            <div className="px-4 py-3 border-b font-semibold">
+              Items to ship
+            </div>
 
-        <button
-          onClick={runRiskCheck}
-          className="bg-yellow-600 text-white px-4 py-2"
-        >
-          Run COD Risk Check
-        </button>
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 text-gray-600 border-b">
+                <tr>
+                  <th className="text-left px-4 py-2">Item</th>
+                  <th className="text-right px-4 py-2">Qty</th>
+                  <th className="text-right px-4 py-2">Price</th>
+                  <th className="text-right px-4 py-2">Total</th>
+                </tr>
+              </thead>
 
-        <button
-          onClick={() => router.back()}
-          className="border px-4 py-2"
-        >
-          Back
-        </button>
+              <tbody>
+                {items.map((i, idx) => (
+                  <tr key={idx} className="border-b">
+                    <td className="px-4 py-2">
+                      <div className="font-medium">
+                        {i.products?.title}
+                      </div>
+                      {i.variants?.title && (
+                        <div className="text-xs text-gray-500">
+                          Variant: {i.variants.title}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-4 py-2 text-right">
+                      {i.qty}
+                    </td>
+                    <td className="px-4 py-2 text-right">
+                      ₹{i.price}
+                    </td>
+                    <td className="px-4 py-2 text-right font-medium">
+                      ₹{i.qty * i.price}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* CUSTOMER & ADDRESS */}
+          <div className="bg-white border rounded p-4">
+            <div className="flex justify-between mb-3">
+              <h2 className="font-semibold">Customer & Address</h2>
+              <button
+                onClick={() => setEditMode(!editMode)}
+                className="text-sm text-blue-600"
+              >
+                {editMode ? 'Cancel' : 'Edit'}
+              </button>
+            </div>
+
+            {['name', 'phone', 'address', 'city', 'state', 'pincode'].map(f => (
+              <div key={f} className="mb-2">
+                <div className="text-xs text-gray-500 uppercase">
+                  {f}
+                </div>
+                {editMode ? (
+                  <input
+                    className="w-full border rounded px-2 py-1 text-sm"
+                    value={meta[f] || ''}
+                    onChange={e =>
+                      setOrder({
+                        ...order,
+                        meta: { ...meta, [f]: e.target.value },
+                      })
+                    }
+                  />
+                ) : (
+                  <div className="text-sm">{meta[f] || '—'}</div>
+                )}
+              </div>
+            ))}
+
+            {editMode && (
+              <button
+                onClick={saveCustomer}
+                disabled={saving}
+                className="mt-2 px-4 py-2 bg-black text-white rounded"
+              >
+                {saving ? 'Saving…' : 'Save changes'}
+              </button>
+            )}
+          </div>
+
+          {/* ADDRESS INTELLIGENCE */}
+          {pincodeMeta && (
+            <div className="bg-white border rounded p-4">
+              <button
+                onClick={() => setShowIntel(!showIntel)}
+                className="text-sm font-medium"
+              >
+                Address intelligence · India Post{' '}
+                {showIntel ? '▲' : '▼'}
+              </button>
+
+              {showIntel && (
+                <div className="mt-3 space-y-2 text-sm">
+                  {pincodeMeta.post_offices?.map((po: any, i: number) => (
+                    <div
+                      key={i}
+                      className="flex justify-between"
+                    >
+                      <div>
+                        <div className="font-medium">
+                          {po.name}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {po.district}, {po.region}
+                        </div>
+                      </div>
+                      <div
+                        className={
+                          po.delivery_status === 'Delivery'
+                            ? 'text-green-600'
+                            : 'text-orange-600'
+                        }
+                      >
+                        {po.delivery_status}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* RIGHT / ACTION RAIL */}
+        <div className="space-y-6">
+
+          {/* ORDER SUMMARY */}
+          <div className="bg-white border rounded p-4">
+            <h2 className="font-semibold mb-3">Order summary</h2>
+
+            <div className="flex justify-between text-sm mb-1">
+              <span>Items subtotal</span>
+              <span>₹{itemsSubtotal}</span>
+            </div>
+
+            <div className="flex justify-between text-sm mb-1">
+              <span>Tax</span>
+              <span>₹{taxAmount}</span>
+            </div>
+
+            <div className="flex justify-between text-sm mb-1">
+              <span>Shipping</span>
+              <span>₹{shippingAmount}</span>
+            </div>
+
+            <div className="flex justify-between font-semibold border-t pt-2 mt-2">
+              <span>Total</span>
+              <span>₹{grandTotal}</span>
+            </div>
+          </div>
+
+          {/* STATUS */}
+          <div className="bg-white border rounded p-4">
+            <h2 className="font-semibold mb-2">Order status</h2>
+            <select
+              className="w-full border rounded px-2 py-2"
+              value={order.status}
+              onChange={e => updateStatus(e.target.value)}
+            >
+              {STATUS_OPTIONS.map(s => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-gray-500 mt-2">
+              Changing status affects fulfillment & reporting.
+            </p>
+          </div>
+
+          {/* COD RISK */}
+          <div className="bg-yellow-50 border border-yellow-200 rounded p-4">
+            <h2 className="font-semibold mb-2">
+              COD Risk (Experimental)
+            </h2>
+            <button
+              onClick={runRisk}
+              className="w-full bg-yellow-600 text-white py-2 rounded"
+            >
+              Run risk check
+            </button>
+          </div>
+
+          <button
+            onClick={() => router.back()}
+            className="w-full border rounded py-2 bg-white"
+          >
+            Back to orders
+          </button>
+        </div>
       </div>
     </div>
   )

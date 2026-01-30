@@ -1,9 +1,9 @@
-import Carousel from "./components/Carousel";
-import ProductCard from "./components/ProductCard";
-import TestimonialCard from "./components/TestimonialCard";
-import TrustBar from "./components/TrustBar";
+import Carousel from "@/app/components/Carousel";
+import HeroCarousel from "@/app/components/HeroCarousel";
+import ProductCard from "@/app/components/ProductCard";
+import TestimonialCard from "@/app/components/TestimonialCard";
+import TrustBar from "@/app/components/TrustBar";
 import { getProducts } from "@/lib/products";
-import HeroCarousel from "./components/HeroCarousel";
 
 export default async function HomePage() {
   const products = await getProducts();
