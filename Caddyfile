@@ -1,0 +1,13 @@
+{
+    on_demand_tls {
+        ask http://localhost:3000/api/caddy/check
+    }
+}
+
+:443, :80 {
+    tls {
+        on_demand
+    }
+    reverse_proxy localhost:3000
+    encode zstd gzip
+}
