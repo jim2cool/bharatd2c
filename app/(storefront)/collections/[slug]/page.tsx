@@ -8,6 +8,8 @@ type SearchParams = {
   sort?: string;
 };
 
+import { getActiveStoreId } from "@/lib/getActiveStore";
+
 export default async function CollectionPage({
   params,
   searchParams,
@@ -17,6 +19,9 @@ export default async function CollectionPage({
 }) {
   const resolvedParams = await params;
   const resolvedSearchParams = await searchParams;
+  const storeId = await getActiveStoreId();
+
+  if (!storeId) return notFound();
 
   const slug = (resolvedParams.slug ?? "").toLowerCase().trim();
 
@@ -29,6 +34,7 @@ export default async function CollectionPage({
   const PAGE_SIZE = 12;
 
   const { products, total } = await getProductsByCollection(
+    storeId,
     slug,
     page,
     PAGE_SIZE,
@@ -39,18 +45,18 @@ export default async function CollectionPage({
   const title = slug.replace(/-/g, " ");
 
   return (
-    <main className="bg-white">
-      <section className="py-12 min-h-[60vh]">
-        <div className="max-w-[1280px] mx-auto px-5">
+    <main>
+      <section className="section">
+        <div className="container">
           {/* HEADER */}
-          <div className="mb-8 text-center">
-            <h1 className="text-2xl md:text-3xl font-semibold capitalize">
+          <header className="section-header">
+            <h1 className="section-title capitalize">
               {title}
             </h1>
-            <p className="mt-2 text-sm text-gray-500">
+            <p className="section-subtitle">
               Showing {products.length} products
             </p>
-          </div>
+          </header>
 
           {/* SORT BAR */}
           <div className="mb-6 flex items-center justify-between">
@@ -85,11 +91,10 @@ export default async function CollectionPage({
                   <a
                     key={pageNum}
                     href={`/collections/${slug}?page=${pageNum}&sort=${sort}`}
-                    className={`px-3 py-1.5 rounded-md text-sm ${
-                      isActive
-                        ? "bg-[#1E2A5E] text-white"
-                        : "border border-gray-300 text-gray-700 hover:bg-gray-50"
-                    }`}
+                    className={`px-3 py-1.5 rounded-md text-sm transition-colors ${isActive
+                      ? "bg-primary text-white"
+                      : "border border-gray-300 text-gray-700 hover:bg-gray-100"
+                      }`}
                   >
                     {pageNum}
                   </a>

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { supabaseBrowser } from '../../../../../lib/supabase-browser'
+import { supabaseBrowser } from '@/lib/supabase-browser'
 import { useParams, useRouter } from 'next/navigation'
 
 export default function NewVariantPage() {

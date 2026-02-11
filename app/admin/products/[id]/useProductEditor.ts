@@ -26,6 +26,16 @@ export function useProductEditor(id: string) {
   const [contentMarkup, setContentMarkup] = useState('')
   const [testimonials, setTestimonials] = useState<Testimonial[]>([])
 
+  // conversion settings
+  const [bundleSettings, setBundleSettings] = useState<any>({ enabled: true })
+  const [urgencySettings, setUrgencySettings] = useState<any>({ enabled: false, type: 'text', text: '' })
+  const [codEnabled, setCodEnabled] = useState(true)
+
+  // prepaid discount parity
+  const [prepaidDiscountType, setPrepaidDiscountType] = useState<'flat' | 'percentage'>('flat')
+  const [prepaidDiscountValue, setPrepaidDiscountValue] = useState<number | ''>('')
+  const [prepaidOfferText, setPrepaidOfferText] = useState('')
+
   /* ---------- LOAD ---------- */
   useEffect(() => {
     const load = async () => {
@@ -49,6 +59,15 @@ export function useProductEditor(id: string) {
       setImages(data?.images || [])
       setContentMarkup(data?.content_markup || '')
       setTestimonials(data?.testimonials || [])
+
+      setBundleSettings(data?.bundle_settings || { enabled: true })
+      setUrgencySettings(data?.urgency_settings || { enabled: false, type: 'text', text: '' })
+      setCodEnabled(data?.cod_enabled ?? true)
+
+      setPrepaidDiscountType(data?.prepaid_discount_type || 'flat')
+      setPrepaidDiscountValue(data?.prepaid_discount_value ?? '')
+      setPrepaidOfferText(data?.prepaid_offer_text || '')
+
       setLoading(false)
     }
 
@@ -113,6 +132,14 @@ export function useProductEditor(id: string) {
       images,
       testimonials,
       content_markup: contentMarkup || null,
+
+      bundle_settings: bundleSettings,
+      urgency_settings: urgencySettings,
+      cod_enabled: codEnabled,
+
+      prepaid_discount_type: prepaidDiscountType,
+      prepaid_discount_value: prepaidDiscountValue === '' ? null : Number(prepaidDiscountValue),
+      prepaid_offer_text: prepaidOfferText || null,
     }
 
     const { error } = await supabaseBrowser
@@ -155,6 +182,20 @@ export function useProductEditor(id: string) {
 
     testimonials,
     setTestimonials,
+
+    bundleSettings,
+    setBundleSettings,
+    urgencySettings,
+    setUrgencySettings,
+    codEnabled,
+    setCodEnabled,
+
+    prepaidDiscountType,
+    setPrepaidDiscountType,
+    prepaidDiscountValue,
+    setPrepaidDiscountValue,
+    prepaidOfferText,
+    setPrepaidOfferText,
 
     save,
   }

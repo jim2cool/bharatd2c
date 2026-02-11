@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { supabaseBrowser } from '@/lib/supabase-browser'
+import { getActiveStoreIdClient } from '@/lib/getActiveStore.client'
+import { ProductListSkeleton } from '../components/AdminSkeletons'
 
 type Product = {
   id: string
@@ -17,6 +20,10 @@ type Product = {
 const PAGE_SIZE = 10
 
 export default function ProductsPage() {
+  const router = useRouter()
+
+  const [storeId, setStoreId] = useState<string | null>(null)
+
   const [allProducts, setAllProducts] = useState<Product[]>([])
   const [products, setProducts] = useState<Product[]>([])
   const [selected, setSelected] = useState<string[]>([])
@@ -28,12 +35,28 @@ export default function ProductsPage() {
   const [locationFilter, setLocationFilter] = useState<'all' | string>('all')
   const [page, setPage] = useState(1)
 
-  const loadProducts = async () => {
+  /* ----------------------------------------
+     STORE CONTEXT GUARD (CLIENT SAFE)
+  ---------------------------------------- */
+  useEffect(() => {
+    const id = getActiveStoreIdClient()
+    if (!id) {
+      router.replace('/admin/stores')
+      return
+    }
+    setStoreId(id)
+  }, [router])
+
+  /* ----------------------------------------
+     LOAD PRODUCTS (STORE SCOPED)
+  ---------------------------------------- */
+  const loadProducts = async (activeStoreId: string) => {
     setLoading(true)
 
     const { data, error } = await supabaseBrowser
       .from('products')
       .select('*')
+      .eq('store_id', activeStoreId)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -47,10 +70,13 @@ export default function ProductsPage() {
   }
 
   useEffect(() => {
-    loadProducts()
-  }, [])
+    if (!storeId) return
+    loadProducts(storeId)
+  }, [storeId])
 
-  // Apply filters + pagination locally (SAFE + FAST for V1)
+  /* ----------------------------------------
+     FILTERS + PAGINATION (UNCHANGED)
+  ---------------------------------------- */
   useEffect(() => {
     let filtered = [...allProducts]
 
@@ -75,6 +101,9 @@ export default function ProductsPage() {
     setSelected([])
   }, [allProducts, search, statusFilter, locationFilter, page])
 
+  /* ----------------------------------------
+     BULK ACTIONS (UNCHANGED, SAFE)
+  ---------------------------------------- */
   const toggleSelect = (id: string) => {
     setSelected(prev =>
       prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
@@ -90,20 +119,29 @@ export default function ProductsPage() {
   }
 
   const bulkUpdateStatus = async (status: 'published' | 'draft') => {
-    if (!selected.length) return
+    if (!selected.length || !storeId) return
 
     await supabaseBrowser
       .from('products')
       .update({ status })
       .in('id', selected)
+      .eq('store_id', storeId)
 
-    loadProducts()
+    loadProducts(storeId)
   }
 
   const totalPages = Math.ceil(allProducts.length / PAGE_SIZE)
 
-  if (loading) {
-    return <div className="p-6">Loading products…</div>
+  /* ----------------------------------------
+     GUARD RENDER
+  ---------------------------------------- */
+  if (!storeId || loading) {
+    return (
+      <div className="p-6 space-y-4">
+        <div className="h-8 w-48 bg-gray-200 rounded animate-pulse mb-6" />
+        <ProductListSkeleton />
+      </div>
+    )
   }
 
   return (
@@ -114,6 +152,12 @@ export default function ProductsPage() {
           Products <span className="text-gray-400">({allProducts.length})</span>
         </h1>
 
+        <Link
+          href="/admin/products/import"
+          className="px-4 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50 mr-2"
+        >
+          Import
+        </Link>
         <Link
           href="/admin/products/new"
           className="px-4 py-2 bg-black text-white rounded text-sm"
@@ -242,8 +286,8 @@ export default function ProductsPage() {
                         margin >= 40
                           ? 'text-green-600'
                           : margin >= 20
-                          ? 'text-orange-600'
-                          : 'text-red-600'
+                            ? 'text-orange-600'
+                            : 'text-red-600'
                       }
                     >
                       {margin}%
@@ -255,11 +299,10 @@ export default function ProductsPage() {
 
                   <td className="p-3 text-center">
                     <span
-                      className={`px-2 py-0.5 rounded-full text-xs ${
-                        p.status === 'published'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-gray-100 text-gray-600'
-                      }`}
+                      className={`px-2 py-0.5 rounded-full text-xs ${p.status === 'published'
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-gray-100 text-gray-600'
+                        }`}
                     >
                       {p.status}
                     </span>

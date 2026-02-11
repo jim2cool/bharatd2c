@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { supabaseBrowser } from '@/lib/supabase-browser'
+import { getActiveStoreIdClient } from '@/lib/getActiveStore.client'
+import { OrderListSkeleton } from '../components/AdminSkeletons'
 
 const PAGE_SIZE = 25
 
@@ -24,6 +27,10 @@ const STATUS_PILL: Record<string, string> = {
 }
 
 export default function OrdersPage() {
+  const router = useRouter()
+
+  const [storeId, setStoreId] = useState<string | null>(null)
+
   const [orders, setOrders] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -34,9 +41,21 @@ export default function OrdersPage() {
   const [prevCursors, setPrevCursors] = useState<string[]>([])
   const [hasNext, setHasNext] = useState(false)
 
+  /* ----------------------------------------
+     STORE CONTEXT GUARD (CLIENT SAFE)
+  ---------------------------------------- */
+  useEffect(() => {
+    const id = getActiveStoreIdClient()
+    if (!id) {
+      router.replace('/admin/stores')
+      return
+    }
+    setStoreId(id)
+  }, [router])
+
   /* ---------------- LOAD ORDERS ---------------- */
 
-  const loadOrders = async () => {
+  const loadOrders = async (activeStoreId: string) => {
     setLoading(true)
 
     let query = supabaseBrowser
@@ -52,6 +71,7 @@ export default function OrdersPage() {
         meta
       `
       )
+      .eq('store_id', activeStoreId)
       .order('created_at', { ascending: false })
       .limit(PAGE_SIZE + 1)
 
@@ -74,10 +94,11 @@ export default function OrdersPage() {
   /* ---------------- EFFECTS ---------------- */
 
   useEffect(() => {
+    if (!storeId) return
     setCursor(null)
     setPrevCursors([])
-    loadOrders()
-  }, [status])
+    loadOrders(storeId)
+  }, [status, storeId])
 
   /* ---------------- HELPERS ---------------- */
 
@@ -96,6 +117,17 @@ export default function OrdersPage() {
       o.meta?.phone?.includes(q)
     )
   })
+
+  /* ---------------- GUARD RENDER ---------------- */
+
+  if (!storeId || loading) {
+    return (
+      <div className="px-6 py-6 space-y-4">
+        <div className="h-8 w-48 bg-gray-200 rounded animate-pulse mb-6" />
+        <OrderListSkeleton />
+      </div>
+    )
+  }
 
   /* ---------------- UI ---------------- */
 
@@ -149,20 +181,13 @@ export default function OrdersPage() {
               <th className="text-left px-4 py-2">Customer</th>
               <th className="text-right px-4 py-2">Total</th>
               <th className="text-left px-4 py-2">Payment</th>
+              <th className="text-left px-4 py-2">Verified</th>
               <th className="text-left px-4 py-2">Status</th>
             </tr>
           </thead>
 
           <tbody>
-            {loading && (
-              <tr>
-                <td colSpan={6} className="px-4 py-6 text-center">
-                  Loading orders…
-                </td>
-              </tr>
-            )}
-
-            {!loading && filteredOrders.length === 0 && (
+            {filteredOrders.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-4 py-6 text-center">
                   No orders found
@@ -209,10 +234,24 @@ export default function OrdersPage() {
                 </td>
 
                 <td className="px-4 py-1.5">
+                  {order.payment_mode === 'cod' ? (
+                    order.meta?.otp_verified ? (
+                      <span className="text-green-600 text-xs font-semibold flex items-center gap-1">
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
+                        OTP Verified
+                      </span>
+                    ) : (
+                      <span className="text-red-500 text-xs font-medium">PENDING</span>
+                    )
+                  ) : (
+                    <span className="text-gray-400 text-xs italic">Prepaid</span>
+                  )}
+                </td>
+
+                <td className="px-4 py-1.5">
                   <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      STATUS_PILL[order.status] || 'bg-gray-100'
-                    }`}
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${STATUS_PILL[order.status] || 'bg-gray-100'
+                      }`}
                   >
                     {order.status}
                   </span>

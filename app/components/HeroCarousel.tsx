@@ -1,83 +1,127 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  type CarouselApi
+} from "@/components/ui/carousel";
+import { Button } from "@/components/ui/button";
 
 const slides = [
-  "/hero.jpg",
-  "/hero2.jpg",
-  "/hero3.jpg",
+  {
+    image: "/hero.jpg",
+    title: "Everyday Care, Done Right",
+    subtitle: "Clean formulations. Honest pricing. No noise.",
+    cta: "Shop Now",
+    link: "/products"
+  },
+  {
+    image: "/hero2.jpg",
+    title: "Pure & Potent",
+    subtitle: "Ingredients that actually work for your skin.",
+    cta: "Explore Serums",
+    link: "/products"
+  },
+  {
+    image: "/hero3.jpg",
+    title: "Simple Routines",
+    subtitle: "Less steps, more glow.",
+    cta: "View Bundles",
+    link: "/products"
+  }
 ];
 
 export default function HeroCarousel() {
+  const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
+    if (!api) return;
+
     const interval = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % slides.length);
+      api.scrollNext();
     }, 5000);
 
     return () => clearInterval(interval);
-  }, []);
-
-  const goTo = (index: number) => setCurrent(index);
-  const prev = () =>
-    setCurrent((prev) => (prev - 1 + slides.length) % slides.length);
-  const next = () =>
-    setCurrent((prev) => (prev + 1) % slides.length);
+  }, [api]);
 
   return (
-    <section className="section hero">
-      <div className="hero-carousel relative overflow-hidden">
-        {slides.map((src, i) => (
-          <div
-            key={i}
-            className={`hero-slide ${i === current ? "is-active" : ""}`}
-          >
-            <img
-              src={src}
-              alt={`Slide ${i + 1}`}
-              className="hero-image img-cover"
-            />
+    <section className="relative w-full overflow-hidden bg-background">
+      <Carousel
+        setApi={setApi}
+        opts={{
+          loop: true,
+          align: "start",
+        }}
+        className="w-full"
+      >
+        <CarouselContent className="-ml-0">
+          {slides.map((slide, index) => (
+            <CarouselItem key={index} className="pl-0 relative min-h-[500px] md:min-h-[650px] w-full">
+              {/* Image Background */}
+              <div className="absolute inset-0 w-full h-full">
+                <Image
+                  src={slide.image}
+                  alt={slide.title}
+                  fill
+                  priority={index === 0}
+                  className="object-cover"
+                />
+                {/* Gradient Overlay for Contrast (P2-1) */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/40 z-[5]" />
+              </div>
 
-            <div className="hero-content">
-              <h1 className="hero-title">Everyday Care, Done Right</h1>
-              <p className="hero-subtitle">
-                Clean formulations. Honest pricing. No noise.
-              </p>
-              <button className="btn btn-accent">
-                Explore Collection
-              </button>
-            </div>
-          </div>
-        ))}
-
-        {/* Navigation */}
-        <button
-          className="hero-nav hero-nav-prev"
-          onClick={prev}
-          aria-label="Previous slide"
-        >
-          ‹
-        </button>
-        <button
-          className="hero-nav hero-nav-next"
-          onClick={next}
-          aria-label="Next slide"
-        >
-          ›
-        </button>
-
-        {/* Indicators */}
-        <div className="hero-indicators">
-          {slides.map((_, i) => (
-            <button
-              key={i}
-              className={`hero-dot ${i === current ? "is-active" : ""}`}
-              onClick={() => goTo(i)}
-              aria-label={`Go to slide ${i + 1}`}
-            />
+              {/* Content Overlay - Dawn Style (Bottom Left or Center) */}
+              <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-6 md:p-12 z-10 text-white">
+                <div className="max-w-2xl space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                  <h1 className="text-4xl md:text-6xl font-medium tracking-tight leading-[1.1] drop-shadow-md">
+                    {slide.title}
+                  </h1>
+                  <p className="text-lg md:text-xl font-light text-white/95 max-w-lg mx-auto leading-relaxed drop-shadow-sm">
+                    {slide.subtitle}
+                  </p>
+                  <div className="pt-4">
+                    <Button
+                      asChild
+                      size="lg"
+                      className="bg-white text-black hover:bg-white/90 border-none rounded-none h-12 px-8 uppercase tracking-widest text-sm font-bold"
+                    >
+                      <Link href={slide.link}>
+                        {slide.cta}
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CarouselItem>
           ))}
-        </div>
+        </CarouselContent>
+
+        {/* Minimal Navigation Arrows - Dawn Style */}
+        <CarouselPrevious className="left-4 bg-transparent border-white/30 text-white hover:bg-white/20 hover:text-white h-10 w-10 md:h-12 md:w-12" />
+        <CarouselNext className="right-4 bg-transparent border-white/30 text-white hover:bg-white/20 hover:text-white h-10 w-10 md:h-12 md:w-12" />
+
+      </Carousel>
+
+      {/* Dots Indicator */}
+      <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-2 z-20">
+        {slides.map((_, i) => (
+          <button
+            key={i}
+            className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${i === (api?.selectedScrollSnap() || 0)
+              ? "bg-white w-8"
+              : "bg-white/40 hover:bg-white/60"
+              }`}
+            onClick={() => api?.scrollTo(i)}
+            aria-label={`Go to slide ${i + 1}`}
+          />
+        ))}
       </div>
     </section>
   );

@@ -86,13 +86,14 @@ export async function POST(req: Request) {
     }
 
     /* ---------- STORE ---------- */
-    const { data: store } = await supabase
+    const { data: store, error: storeError } = await supabase
       .from('stores')
-      .select('id')
+      .select('id, store_code')
       .limit(1)
       .single()
 
-    if (!store) {
+    if (!store || storeError) {
+      console.error('Store lookup failed:', storeError)
       return NextResponse.json(
         { success: false, error: 'Store not found' },
         { status: 500 }
@@ -109,13 +110,42 @@ export async function POST(req: Request) {
     let customerId = existingCustomer?.id
 
     if (!customerId) {
-      const { data: newCustomer } = await supabase
+      const { data: newCustomer, error: customerError } = await supabase
         .from('customers')
-        .insert([{ phone, name }])
+        .insert([{ phone }])
         .select()
         .single()
 
+      if (!newCustomer || customerError) {
+        console.error('Customer creation failed:', customerError)
+        return NextResponse.json(
+          { success: false, error: 'Customer creation failed' },
+          { status: 500 }
+        )
+      }
+
       customerId = newCustomer.id
+    }
+
+    /* ---------- COD RATE LIMIT (P1-2) ---------- */
+    if (body.payment_method === 'cod') {
+      const { count: pendingCodOrders } = await supabase
+        .from('orders')
+        .select('*', { count: 'exact', head: true })
+        .eq('customer_id', customerId)
+        .eq('payment_mode', 'cod')
+        .eq('status', 'new')
+
+      if (pendingCodOrders && pendingCodOrders >= 2) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'RATE_LIMIT_EXCEEDED',
+            message: 'You have multiple pending COD orders. Please complete those or pay online for new orders.'
+          },
+          { status: 400 }
+        )
+      }
     }
 
     /* ---------- PRICE ANCHORING ---------- */
@@ -178,6 +208,7 @@ export async function POST(req: Request) {
             city,
             state,
             pincode_meta: _pincodeMeta || null,
+            otp_verified: body.otp_verified || false, // NEW
           },
         },
       ])
@@ -210,6 +241,7 @@ export async function POST(req: Request) {
       { status: 200 }
     )
   } catch (err: any) {
+    console.error('Order creation error:', err)
     return NextResponse.json(
       {
         success: false,

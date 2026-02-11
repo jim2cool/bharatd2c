@@ -116,12 +116,64 @@ export default function OrderDetailPage() {
       .eq('id', order.id)
 
     alert(
-      `Risk: ${result.level.toUpperCase()}\n${
-        result.reasons.join('\n') || 'No reasons'
+      `Risk: ${result.level.toUpperCase()}\n${result.reasons.join('\n') || 'No reasons'
       }`
     )
 
     loadOrder()
+  }
+
+
+  /* ---------------- VALIDATE PINCODE ---------------- */
+
+  const validatePincode = async () => {
+    const pin = meta.pincode
+    if (!pin || pin.length !== 6) {
+      alert('Invalid pincode length')
+      return
+    }
+
+    setSaving(true)
+    try {
+      const res = await fetch(`https://api.postalpincode.in/pincode/${pin}`)
+      const data = await res.json()
+
+      if (Array.isArray(data) && data[0]?.Status === 'Success') {
+        const newMeta = {
+          ...meta,
+          pincode_meta: {
+            post_offices: data[0].PostOffice,
+            updated_at: new Date().toISOString(),
+          },
+        }
+
+        await supabaseBrowser
+          .from('orders')
+          .update({ meta: newMeta })
+          .eq('id', order.id)
+
+        loadOrder()
+        alert('Address data fetched and saved.')
+      } else {
+        alert('Failed to fetch data from IndiaPost API')
+      }
+    } catch (e) {
+      alert('Error connecting to IndiaPost API')
+    }
+    setSaving(false)
+  }
+
+  /* ---------------- MANUAL VERIFY (P0-3) ---------------- */
+  const manualVerify = async () => {
+    if (!confirm('Mark this COD order as verified?')) return
+    setSaving(true)
+    const newMeta = { ...meta, otp_verified: true }
+    await supabaseBrowser
+      .from('orders')
+      .update({ meta: newMeta })
+      .eq('id', order.id)
+    loadOrder()
+    setSaving(false)
   }
 
   /* ---------------- DERIVED TOTALS ---------------- */
@@ -147,6 +199,11 @@ export default function OrderDetailPage() {
         <div className="text-sm text-gray-600 mt-1">
           Placed {formatIST(order.created_at)} IST ·{' '}
           {order.payment_mode?.toUpperCase()}
+          {order.payment_mode === 'cod' && (
+            <span className={`ml-3 px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider ${order.meta?.otp_verified ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+              {order.meta?.otp_verified ? '✓ Verified' : '⚠ Action Required'}
+            </span>
+          )}
         </div>
       </div>
 
@@ -244,8 +301,9 @@ export default function OrderDetailPage() {
           </div>
 
           {/* ADDRESS INTELLIGENCE */}
-          {pincodeMeta && (
-            <div className="bg-white border rounded p-4">
+
+          <div className="bg-white border rounded p-4">
+            <div className="flex justify-between items-center mb-3">
               <button
                 onClick={() => setShowIntel(!showIntel)}
                 className="text-sm font-medium"
@@ -253,106 +311,144 @@ export default function OrderDetailPage() {
                 Address intelligence · India Post{' '}
                 {showIntel ? '▲' : '▼'}
               </button>
+              <button
+                onClick={validatePincode}
+                disabled={saving}
+                className="text-xs bg-gray-100 hover:bg-gray-200 border px-2 py-1.5 rounded"
+              >
+                {saving ? 'Fetching...' : 'Validate Pincode'}
+              </button>
+            </div>
 
-              {showIntel && (
-                <div className="mt-3 space-y-2 text-sm">
-                  {pincodeMeta.post_offices?.map((po: any, i: number) => (
-                    <div
-                      key={i}
-                      className="flex justify-between"
-                    >
-                      <div>
-                        <div className="font-medium">
-                          {po.name}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {po.district}, {po.region}
-                        </div>
+            {showIntel && pincodeMeta && (
+              <div className="mt-3 space-y-2 text-sm">
+                {pincodeMeta.post_offices?.map((po: any, i: number) => (
+                  <div
+                    key={i}
+                    className="flex justify-between"
+                  >
+                    <div>
+                      <div className="font-medium">
+                        {po.name}
                       </div>
-                      <div
-                        className={
-                          po.delivery_status === 'Delivery'
-                            ? 'text-green-600'
-                            : 'text-orange-600'
-                        }
-                      >
-                        {po.delivery_status}
+                      <div className="text-xs text-gray-500">
+                        {po.district}, {po.region}
                       </div>
                     </div>
-                  ))}
+                    <div
+                      className={
+                        po.delivery_status === 'Delivery'
+                          ? 'text-green-600'
+                          : 'text-orange-600'
+                      }
+                    >
+                      {po.delivery_status}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {showIntel && !pincodeMeta && (
+              <div className="text-sm text-gray-500 mt-2">
+                No data available. Click "Validate Pincode" to fetch.
+              </div>
+            )}
+          </div>
+
+        </div>
+      </div>
+
+      {/* RIGHT / ACTION RAIL */}
+      <div className="space-y-6">
+
+        {/* ORDER SUMMARY */}
+        <div className="bg-white border rounded p-4">
+          <h2 className="font-semibold mb-3">Order summary</h2>
+
+          <div className="flex justify-between text-sm mb-1">
+            <span>Items subtotal</span>
+            <span>₹{itemsSubtotal}</span>
+          </div>
+
+          <div className="flex justify-between text-sm mb-1">
+            <span>Tax</span>
+            <span>₹{taxAmount}</span>
+          </div>
+
+          <div className="flex justify-between text-sm mb-1">
+            <span>Shipping</span>
+            <span>₹{shippingAmount}</span>
+          </div>
+
+          <div className="flex justify-between font-semibold border-t pt-2 mt-2">
+            <span>Total</span>
+            <div className="text-right">
+              <div>₹{order.total_amount}</div>
+              {order.total_amount < grandTotal && (
+                <div className="text-[10px] text-green-600 font-normal">
+                  Prepaid Savings: -₹{grandTotal - order.total_amount} applied
                 </div>
               )}
             </div>
-          )}
+          </div>
         </div>
 
-        {/* RIGHT / ACTION RAIL */}
-        <div className="space-y-6">
-
-          {/* ORDER SUMMARY */}
-          <div className="bg-white border rounded p-4">
-            <h2 className="font-semibold mb-3">Order summary</h2>
-
-            <div className="flex justify-between text-sm mb-1">
-              <span>Items subtotal</span>
-              <span>₹{itemsSubtotal}</span>
-            </div>
-
-            <div className="flex justify-between text-sm mb-1">
-              <span>Tax</span>
-              <span>₹{taxAmount}</span>
-            </div>
-
-            <div className="flex justify-between text-sm mb-1">
-              <span>Shipping</span>
-              <span>₹{shippingAmount}</span>
-            </div>
-
-            <div className="flex justify-between font-semibold border-t pt-2 mt-2">
-              <span>Total</span>
-              <span>₹{grandTotal}</span>
-            </div>
-          </div>
-
-          {/* STATUS */}
-          <div className="bg-white border rounded p-4">
-            <h2 className="font-semibold mb-2">Order status</h2>
-            <select
-              className="w-full border rounded px-2 py-2"
-              value={order.status}
-              onChange={e => updateStatus(e.target.value)}
-            >
-              {STATUS_OPTIONS.map(s => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-            <p className="text-xs text-gray-500 mt-2">
-              Changing status affects fulfillment & reporting.
-            </p>
-          </div>
-
-          {/* COD RISK */}
-          <div className="bg-yellow-50 border border-yellow-200 rounded p-4">
-            <h2 className="font-semibold mb-2">
-              COD Risk (Experimental)
-            </h2>
-            <button
-              onClick={runRisk}
-              className="w-full bg-yellow-600 text-white py-2 rounded"
-            >
-              Run risk check
-            </button>
-          </div>
-
-          <button
-            onClick={() => router.back()}
-            className="w-full border rounded py-2 bg-white"
+        {/* STATUS */}
+        <div className="bg-white border rounded p-4">
+          <h2 className="font-semibold mb-2">Order status</h2>
+          <select
+            className="w-full border rounded px-2 py-2"
+            value={order.status}
+            onChange={e => updateStatus(e.target.value)}
           >
-            Back to orders
+            {STATUS_OPTIONS.map(s => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-gray-500 mt-2">
+            Changing status affects fulfillment & reporting.
+          </p>
+        </div>
+
+        {/* COD RISK */}
+        <div className="bg-yellow-50 border border-yellow-200 rounded p-4">
+          <h2 className="font-semibold mb-2">
+            COD Risk (Experimental)
+          </h2>
+          <button
+            onClick={runRisk}
+            className="w-full bg-yellow-600 text-white py-2 rounded"
+          >
+            Run risk check
           </button>
         </div>
+
+        {/* MANUAL VERIFY ACTION (P0-3) */}
+        {order.payment_mode === 'cod' && !order.meta?.otp_verified && (
+          <div className="bg-blue-50 border border-blue-200 rounded p-4">
+            <h2 className="font-semibold mb-2">Manual Verification</h2>
+            <p className="text-xs text-gray-600 mb-3">
+              If you verified this order via call/WhatsApp, mark it here.
+            </p>
+            <button
+              onClick={manualVerify}
+              disabled={saving}
+              className="w-full bg-blue-600 text-white py-2 rounded text-sm font-medium"
+            >
+              Mark as OTP Verified
+            </button>
+          </div>
+        )}
+
+        <button
+          onClick={() => router.back()}
+          className="w-full border rounded py-2 bg-white"
+        >
+          Back to orders
+        </button>
       </div>
     </div>
   )

@@ -1,82 +1,108 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { supabaseBrowser } from '../../../../lib/supabase-browser'
-
-function slugify(text: string) {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)+/g, '')
-}
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { getActiveStoreIdClient } from '@/lib/getActiveStore.client';
 
 export default function NewProductPage() {
-  const router = useRouter()
+  const router = useRouter();
 
-  const [title, setTitle] = useState('')
-  const [price, setPrice] = useState<number | ''>('')
+  const [storeId, setStoreId] = useState<string | null>(null);
+  const [title, setTitle] = useState('');
+  const [cogs, setCogs] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const createProduct = async () => {
-    if (!title || !price) {
-      alert('Title and price are required')
-      return
+  // Client-side store guard
+  useEffect(() => {
+    const id = getActiveStoreIdClient();
+    if (!id) {
+      router.replace('/admin/stores');
+    } else {
+      setStoreId(id);
+    }
+  }, [router]);
+
+  async function handleCreate() {
+    if (!storeId) {
+      setError('No active store selected');
+      return;
     }
 
-    const slug = slugify(title)
+    if (!title.trim()) {
+      setError('Product title is required');
+      return;
+    }
 
-    const { data, error } = await supabaseBrowser
-      .from('products')
-      .insert({
+    if (!cogs || Number(cogs) <= 0) {
+      setError('Valid COGS is required');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    const res = await fetch('/api/admin/products/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
         title,
-        price,
-        slug,
-        status: 'draft',
-        store_id: 'b3589f69-28a2-4831-b20c-06512f483ce4', // required
-      })
-      .select('id')
-      .single()
+        cogs: Number(cogs),
+        store_id: storeId,
+      }),
+    });
 
-    if (error || !data) {
-      console.error(error)
-      alert(error?.message || 'Failed to create product')
-      return
+    const json = await res.json();
+    setLoading(false);
+
+    if (!res.ok || !json.id) {
+      setError(json?.error || 'Failed to create product');
+      return;
     }
 
-    router.push(`/admin/products/${data.id}`)
+    router.push(`/admin/products/${json.id}`);
   }
 
+  // Prevent flash while redirecting
+  if (!storeId) return null;
+
   return (
-    <div className="max-w-xl space-y-4">
-      <h1 className="text-2xl font-bold">New Product</h1>
+    <div className="max-w-xl space-y-6">
+      <h1 className="text-2xl font-semibold">New Product</h1>
 
-      <input
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        placeholder="Product title"
-        className="w-full p-2 bg-black border border-gray-600 rounded"
-      />
+      <div className="space-y-4">
+        <input
+          type="text"
+          placeholder="Product title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="w-full rounded border px-3 py-2"
+        />
 
-      <input
-        type="number"
-        value={price}
-        onChange={(e) => setPrice(Number(e.target.value))}
-        placeholder="Base price"
-        className="w-full p-2 bg-black border border-gray-600 rounded"
-      />
+        <input
+          type="number"
+          placeholder="COGS (Cost of Goods)"
+          value={cogs}
+          onChange={(e) => setCogs(e.target.value)}
+          className="w-full rounded border px-3 py-2"
+        />
 
-      <button
-        onClick={createProduct}
-        className="bg-white text-black px-4 py-2 rounded"
-      >
-        Create Product
-      </button>
+        {error && <p className="text-sm text-red-600">{error}</p>}
 
-      <p className="text-xs text-gray-500">
-        Product will be created as <strong>draft</strong>.  
-        Add details on the next screen.
-      </p>
+        <button
+          onClick={handleCreate}
+          disabled={loading}
+          className="rounded bg-black px-4 py-2 text-white disabled:opacity-50"
+        >
+          {loading ? 'Creating…' : 'Create Product'}
+        </button>
+
+        <p className="text-sm text-gray-500">
+          Product will be created as <strong>draft</strong>.
+          <br />
+          Add price, images, and details on the next screen.
+        </p>
+      </div>
     </div>
-  )
+  );
 }

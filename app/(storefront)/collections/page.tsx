@@ -3,41 +3,44 @@ import { collections } from "@/lib/collections";
 
 export default function CollectionsPage() {
   return (
-    <main className="bg-white">
-      <section className="container py-12">
+    <main className="min-h-screen bg-background">
+      <section className="container px-4 md:px-6 py-16 mx-auto max-w-[1400px]">
         {/* Header */}
-        <div className="mb-10 text-center">
-          <h1 className="text-2xl md:text-3xl font-semibold">
+        <header className="mb-12 text-center space-y-2">
+          <h1 className="text-3xl md:text-4xl font-normal tracking-tight text-foreground">
             Collections
           </h1>
-          <p className="mt-2 text-sm text-gray-500">
+          <p className="text-muted-foreground text-sm md:text-base">
             Curated groups for different needs and routines
           </p>
-        </div>
+        </header>
 
         {/* Grid */}
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {collections.map((c) => (
             <Link
               key={c.slug}
               href={`/collections/${c.slug}`}
-              className="block rounded-lg overflow-hidden border border-gray-200 hover:shadow-sm transition"
+              className="group block relative overflow-hidden"
             >
-              <div className="aspect-square bg-gray-100">
+              <div className="aspect-square bg-muted/20 overflow-hidden rounded-sm">
                 <img
                   src={c.image}
                   alt={c.title}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105"
                 />
               </div>
 
-              <div className="p-4">
-                <h3 className="text-sm font-semibold text-gray-900">
+              <div className="mt-4 text-center">
+                <h3 className="text-lg font-medium text-foreground flex items-center justify-center gap-2">
                   {c.title}
+                  <span className="inline-block transform transition-transform group-hover:translate-x-1">→</span>
                 </h3>
-                <p className="mt-1 text-xs text-gray-500">
-                  {c.description}
-                </p>
+                {c.description && (
+                  <p className="mt-1 text-sm text-muted-foreground line-clamp-2 max-w-xs mx-auto">
+                    {c.description}
+                  </p>
+                )}
               </div>
             </Link>
           ))}

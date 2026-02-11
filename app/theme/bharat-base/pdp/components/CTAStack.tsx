@@ -26,7 +26,7 @@ export default function CTAStack({ product }: { product: any }) {
           add();
           router.push("/checkout");
         }}
-        className="w-full bg-black text-white py-4 text-lg font-semibold rounded-xl transition-all hover:shadow-md active:scale-[0.97]"
+        className="w-full btn btn-primary py-4 text-lg transition-all hover:shadow-md active:scale-[0.97]"
       >
         Order Now — Cash on Delivery
       </button>

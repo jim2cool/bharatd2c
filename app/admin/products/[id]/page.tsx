@@ -28,9 +28,21 @@ export default function EditProductPage() {
     setImages,
     contentMarkup,
     setContentMarkup,
+    bundleSettings,
+    setBundleSettings,
+    urgencySettings,
+    setUrgencySettings,
+    codEnabled,
+    setCodEnabled,
     error,
     save,
     saving,
+    prepaidDiscountType,
+    setPrepaidDiscountType,
+    prepaidDiscountValue,
+    setPrepaidDiscountValue,
+    prepaidOfferText,
+    setPrepaidOfferText,
   } = editor
 
   const profit = product.price - product.cogs
@@ -50,11 +62,10 @@ export default function EditProductPage() {
         </div>
 
         <span
-          className={`text-xs px-2 py-1 rounded-full border ${
-            product.status === 'published'
-              ? 'bg-green-50 text-green-700 border-green-200'
-              : 'bg-gray-50 text-gray-600 border-gray-200'
-          }`}
+          className={`text-xs px-2 py-1 rounded-full border ${product.status === 'published'
+            ? 'bg-green-50 text-green-700 border-green-200'
+            : 'bg-gray-50 text-gray-600 border-gray-200'
+            }`}
         >
           {product.status}
         </span>
@@ -105,7 +116,7 @@ export default function EditProductPage() {
               </Field>
             </div>
           </Card>
-		  
+
 
           {/* PRICING */}
           <Card
@@ -222,10 +233,10 @@ export default function EditProductPage() {
               />
             </div>
           </Card>
-		  <TestimonialsBlock
-  testimonials={editor.testimonials}
-  setTestimonials={editor.setTestimonials}
-/>
+          <TestimonialsBlock
+            testimonials={editor.testimonials}
+            setTestimonials={editor.setTestimonials}
+          />
 
         </div>
 
@@ -234,11 +245,11 @@ export default function EditProductPage() {
 
           {/* IMAGES */}
           <ProductImagesBlock
-  images={images}
-  setImages={setImages}
-  productId={product.id}
-  productTitle={product.title}
-/>
+            images={images}
+            setImages={setImages}
+            productId={product.id}
+            productTitle={product.title}
+          />
 
 
           {/* SEO */}
@@ -263,6 +274,173 @@ export default function EditProductPage() {
                 setProduct({ ...product, seo_description: e.target.value })
               }
             />
+          </Card>
+
+          {/* CONVERSION SETTINGS */}
+          <Card
+            title="Conversion settings"
+            subtitle="Manage scarcity, urgency and bundles"
+          >
+            <div className="space-y-6">
+
+              {/* BUNDLES */}
+              <div>
+                <Label>Bundle Offer</Label>
+                <p className="text-sm text-gray-500 mb-3">
+                  If enabled, shows "Pack of 1, 2, 3" selector. If disabled, shows standard Quantity selector.
+                </p>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="bundles-toggle"
+                    className="h-4 w-4 rounded border-gray-300"
+                    checked={bundleSettings.enabled}
+                    onChange={(e) =>
+                      setBundleSettings({ ...bundleSettings, enabled: e.target.checked })
+                    }
+                  />
+                  <label htmlFor="bundles-toggle" className="text-sm font-medium">
+                    Enable Bundles
+                  </label>
+                </div>
+              </div>
+
+              <div className="h-px bg-gray-100" />
+
+              {/* COD TOGGLE */}
+              <div>
+                <Label>Cash on Delivery (COD)</Label>
+                <p className="text-sm text-gray-500 mb-3">
+                  Allow customers to pay cash when the product is delivered.
+                </p>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="cod-toggle"
+                    className="h-4 w-4 rounded border-gray-300"
+                    checked={codEnabled}
+                    onChange={(e) => setCodEnabled(e.target.checked)}
+                  />
+                  <label htmlFor="cod-toggle" className="text-sm font-medium">
+                    Enable COD for this product
+                  </label>
+                </div>
+              </div>
+
+              <div className="h-px bg-gray-100" />
+
+              {/* URGENCY */}
+              <div>
+                <Label>Urgency Bar</Label>
+                <div className="flex items-center gap-2 mb-4">
+                  <input
+                    type="checkbox"
+                    id="urgency-toggle"
+                    className="h-4 w-4 rounded border-gray-300"
+                    checked={urgencySettings.enabled}
+                    onChange={(e) =>
+                      setUrgencySettings({ ...urgencySettings, enabled: e.target.checked })
+                    }
+                  />
+                  <label htmlFor="urgency-toggle" className="text-sm font-medium">
+                    Show Urgency Bar
+                  </label>
+                </div>
+
+                {urgencySettings.enabled && (
+                  <div className="space-y-4 pl-6 border-l-2 border-gray-100">
+                    <Field label="Type">
+                      <select
+                        className="border rounded px-3 py-2 w-full"
+                        value={urgencySettings.type}
+                        onChange={(e) =>
+                          setUrgencySettings({ ...urgencySettings, type: e.target.value })
+                        }
+                      >
+                        <option value="text">Custom Text</option>
+                        <option value="timer">Countdown Timer</option>
+                        <option value="stock">Low Stock Count</option>
+                      </select>
+                    </Field>
+
+                    {urgencySettings.type === 'text' && (
+                      <Field label="Message text">
+                        <input
+                          className="border rounded px-3 py-2 w-full"
+                          placeholder="e.g. Selling Fast!"
+                          value={urgencySettings.text || ''}
+                          onChange={(e) =>
+                            setUrgencySettings({ ...urgencySettings, text: e.target.value })
+                          }
+                        />
+                      </Field>
+                    )}
+
+                    {urgencySettings.type === 'timer' && (
+                      <Field label="Timer duration (minutes)">
+                        <NumberInput
+                          value={urgencySettings.timer}
+                          onChange={(v) =>
+                            setUrgencySettings({ ...urgencySettings, timer: v })
+                          }
+                        />
+                      </Field>
+                    )}
+
+                    {urgencySettings.type === 'stock' && (
+                      <Field label="Stock units left">
+                        <NumberInput
+                          value={urgencySettings.stock}
+                          onChange={(v) =>
+                            setUrgencySettings({ ...urgencySettings, stock: v })
+                          }
+                        />
+                      </Field>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </Card>
+
+          {/* PREPAID DISCOUNT SETTINGS (NEW) */}
+          <Card
+            title="Prepaid Discount (CRO)"
+            subtitle="Incentivize online payments to reduce RTO"
+          >
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <Field label="Discount Type">
+                  <select
+                    className="border rounded px-3 py-2 w-full"
+                    value={prepaidDiscountType}
+                    onChange={(e: any) => setPrepaidDiscountType(e.target.value)}
+                  >
+                    <option value="flat">Flat Amount (₹)</option>
+                    <option value="percentage">Percentage (%)</option>
+                  </select>
+                </Field>
+
+                <Field label="Discount Value">
+                  <NumberInput
+                    value={prepaidDiscountValue}
+                    onChange={setPrepaidDiscountValue}
+                  />
+                </Field>
+              </div>
+
+              <Field label="Offer Display Text">
+                <input
+                  className="border rounded px-3 py-2 w-full"
+                  placeholder="e.g. Pay Online & Get ₹50 OFF"
+                  value={prepaidOfferText}
+                  onChange={(e) => setPrepaidOfferText(e.target.value)}
+                />
+                <p className="text-[10px] text-gray-500 mt-1 uppercase tracking-tight font-medium">
+                  This text appears on the PDP and checkout summary.
+                </p>
+              </Field>
+            </div>
           </Card>
         </div>
       </div>
@@ -332,9 +510,9 @@ function NumberInput({
     <input
       type="number"
       className="border rounded px-3 py-2 w-full"
-      value={value}
-      onChange={e =>
-        onChange(e.target.value === '' ? '' : Number(e.target.value))
+      value={value ?? ''}
+      onChange={(e) =>
+        onChange(e.target.value === '' ? null : Number(e.target.value))
       }
     />
   )

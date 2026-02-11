@@ -3,10 +3,14 @@ import { supabase } from "@/lib/supabase";
 /* ======================================================
    PRODUCTS (HOMEPAGE)
    ====================================================== */
-export async function getProducts(limit = 8) {
+/* ======================================================
+   PRODUCTS (HOMEPAGE)
+   ====================================================== */
+export async function getProducts(storeId: string, limit = 8) {
   const { data, error } = await supabase
     .from("products")
     .select("*")
+    .eq("store_id", storeId)
     .eq("status", "published")
     .order("created_at", { ascending: false })
     .limit(limit);
@@ -23,6 +27,7 @@ export async function getProducts(limit = 8) {
    PRODUCTS (ALL) — PAGINATED
    ====================================================== */
 export async function getProductsPaginated(
+  storeId: string,
   page: number,
   pageSize: number,
   sort: string
@@ -33,6 +38,7 @@ export async function getProductsPaginated(
   let query = supabase
     .from("products")
     .select("*", { count: "exact" })
+    .eq("store_id", storeId)
     .eq("status", "published");
 
   if (sort === "price_asc") {
@@ -65,7 +71,11 @@ export async function getProductsPaginated(
 /* ======================================================
    PRODUCTS BY COLLECTION — PAGINATED
    ====================================================== */
+/* ======================================================
+   PRODUCTS BY COLLECTION — PAGINATED
+   ====================================================== */
 export async function getProductsByCollection(
+  storeId: string,
   slug: string,
   page: number,
   pageSize: number,
@@ -77,6 +87,7 @@ export async function getProductsByCollection(
   let query = supabase
     .from("products")
     .select("*", { count: "exact" })
+    .eq("store_id", storeId)
     .eq("status", "published")
     .contains("collection_slug", [slug]);
 
@@ -110,18 +121,30 @@ export async function getProductsByCollection(
 /* ======================================================
    SINGLE PRODUCT BY SLUG
    ====================================================== */
-export async function getProductBySlug(slug: string) {
+export async function getProductBySlug(slug: string, storeId: string) {
   const { data, error } = await supabase
     .from("products")
-    .select("*")
+    .select(`
+      *,
+      product_variants (
+        id,
+        title,
+        price,
+        mrp,
+        inventory,
+        is_default,
+        status
+      )
+    `)
     .eq("slug", slug)
+    .eq("store_id", storeId)
     .eq("status", "published")
-    .single();
+    .single()
 
-  if (error) {
-    console.error("getProductBySlug error:", error);
-    return null;
+  if (error || !data) {
+    return null
   }
 
-  return data;
+  return data
 }
+

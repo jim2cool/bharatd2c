@@ -4,9 +4,11 @@ export type CartItem = {
   image: string;
   price: number;
   qty: number;
+  prepaid_discount?: number;
 };
 
 const CART_KEY = "d2c_cart";
+const DIRECT_CHECKOUT_KEY = "d2c_direct_checkout";
 
 function notifyCartUpdate() {
   if (typeof window !== "undefined") {
@@ -81,4 +83,25 @@ export function removeFromCart(product_id: string) {
 
 export function clearCart() {
   saveCart([]);
+}
+
+// Direct checkout (Buy Now) - bypasses cart
+export function setDirectCheckoutItem(item: CartItem) {
+  if (typeof window === "undefined") return;
+  sessionStorage.setItem(DIRECT_CHECKOUT_KEY, JSON.stringify(item));
+}
+
+export function getDirectCheckoutItem(): CartItem | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = sessionStorage.getItem(DIRECT_CHECKOUT_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function clearDirectCheckout() {
+  if (typeof window === "undefined") return;
+  sessionStorage.removeItem(DIRECT_CHECKOUT_KEY);
 }

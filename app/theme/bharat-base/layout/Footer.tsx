@@ -21,23 +21,23 @@ export default function Footer() {
 
           {/* Quick Links */}
           <FooterCol title="Quick Links">
-            <Link href="/">Home</Link>
-            <Link href="/products">Shop</Link>
-            <Link href="/cart">Cart</Link>
+            <Link href="/" className="hover:text-primary transition-colors">Home</Link>
+            <Link href="/products" className="hover:text-primary transition-colors">Shop</Link>
+            <Link href="/cart" className="hover:text-primary transition-colors">Cart</Link>
           </FooterCol>
 
           {/* Support */}
           <FooterCol title="Support">
-            <Link href="/contact">Contact Us</Link>
-            <Link href="/shipping">Shipping Policy</Link>
-            <Link href="/returns">Returns & Refunds</Link>
+            <Link href="/contact" className="hover:text-primary transition-colors">Contact Us</Link>
+            <Link href="/shipping" className="hover:text-primary transition-colors">Shipping Policy</Link>
+            <Link href="/returns" className="hover:text-primary transition-colors">Returns & Refunds</Link>
           </FooterCol>
 
           {/* Legal */}
           <FooterCol title="Legal">
-            <Link href="/privacy">Privacy Policy</Link>
-            <Link href="/terms">Terms & Conditions</Link>
-            <span className="text-xs text-gray-500">
+            <Link href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
+            <Link href="/terms" className="hover:text-primary transition-colors">Terms & Conditions</Link>
+            <span className="text-xs text-gray-500 mt-2 block">
               Cash on Delivery available
             </span>
           </FooterCol>
@@ -71,11 +71,11 @@ function FooterCol({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-2">
-      <h4 className="text-sm font-semibold text-gray-900">
+    <div className="flex flex-col gap-3">
+      <h4 className="text-sm font-semibold text-gray-900 tracking-wide uppercase">
         {title}
       </h4>
-      <div className="flex flex-col gap-1 text-sm text-gray-600">
+      <div className="flex flex-col gap-2 text-sm text-gray-600">
         {children}
       </div>
     </div>

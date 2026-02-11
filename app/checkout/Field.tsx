@@ -1,26 +1,29 @@
 type FieldProps = {
+  name: string;
+  autoComplete?: string;
+  inputMode?: "text" | "numeric" | "tel" | "email";
   placeholder: string;
   value: string;
   onChange: (v: string) => void;
   error?: string;
   textarea?: boolean;
-  name?: string;
-  autoComplete?: string;
-  inputMode?: "text" | "numeric";
 };
 
 export default function Field({
-  placeholder,
-  value,
-  onChange,
-  error = "",
-  textarea = false,
   name,
   autoComplete,
   inputMode,
+  placeholder,
+  value,
+  onChange,
+  error,
+  textarea,
 }: FieldProps) {
-  const baseClass =
-    "w-full border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-black";
+  const baseClass = `
+    w-full px-3 py-2.5 border rounded text-sm
+    focus:outline-none focus:ring-1 focus:ring-black
+    ${error ? "border-red-500" : "border-gray-300"}
+  `;
 
   return (
     <div>
@@ -28,32 +31,25 @@ export default function Field({
         <textarea
           name={name}
           autoComplete={autoComplete}
-          rows={1}
-          style={{ height: "40px" }}
-          className={`${baseClass} resize-none leading-[1.25] ${
-            error ? "border-red-500" : ""
-          }`}
-          value={value}
-          onChange={e => onChange(e.target.value)}
           placeholder={placeholder}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          rows={3}
+          className={baseClass}
         />
       ) : (
         <input
+          type="text"
           name={name}
           autoComplete={autoComplete}
           inputMode={inputMode}
-          className={`${baseClass} ${
-            error ? "border-red-500" : ""
-          }`}
-          value={value}
-          onChange={e => onChange(e.target.value)}
           placeholder={placeholder}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className={baseClass}
         />
       )}
-
-      {error && (
-        <div className="mt-1 text-xs text-red-600">{error}</div>
-      )}
+      {error && <div className="text-xs text-red-600 mt-1">{error}</div>}
     </div>
   );
 }

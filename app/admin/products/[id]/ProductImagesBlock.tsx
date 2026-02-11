@@ -35,7 +35,7 @@ export default function ProductImagesBlock({
     form.append('productTitle', productTitle)
     form.append('index', String(images.length))
 
-    const res = await fetch('/api/admin/upload-product-image', {
+    const res = await fetch('/api/upload', {
       method: 'POST',
       body: form,
     })

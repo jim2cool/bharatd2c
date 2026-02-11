@@ -1,5 +1,5 @@
-import PDPLoading from "@/app/theme/bharat-base/pdp/PDPLoading";
+import PDPSkeleton from "./components/PDPSkeleton";
 
 export default function Loading() {
-  return <PDPLoading />;
+  return <PDPSkeleton />;
 }
