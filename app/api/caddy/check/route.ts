@@ -16,6 +16,12 @@ export async function GET(req: NextRequest) {
         return new NextResponse("Domain missing", { status: 400 });
     }
 
+    // Allow Root Domain (Platform)
+    if (domain === process.env.NEXT_PUBLIC_ROOT_DOMAIN || domain === "easy-d2c.com") {
+        console.log(`[Caddy] Authorized Root Domain: ${domain}`);
+        return new NextResponse("OK", { status: 200 });
+    }
+
     // Check if the domain is registered in our stores table
     // custom_domain should be indexed in production
     const { data, error } = await supabaseAdmin

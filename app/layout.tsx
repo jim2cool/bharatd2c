@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "@/app/theme/bharat-base/theme.config";
 import ThemeProvider from "@/components/ThemeProvider";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,7 +37,7 @@ export default async function RootLayout({
   let themeConfig = null;
 
   if (storeId) {
-    const { data } = await supabase
+    const { data } = await supabaseAdmin
       .from("stores")
       .select("theme_config")
       .eq("id", storeId)

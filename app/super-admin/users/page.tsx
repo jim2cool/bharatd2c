@@ -1,6 +1,13 @@
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase-server'
+import { redirect } from 'next/navigation'
 
 export default async function UsersPage() {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    // Basic Role Check (Safety)
+    if (!user) redirect('/login')
+
     const { data: users } = await supabase
         .from('profiles')
         .select('*')
@@ -32,8 +39,8 @@ export default async function UsersPage() {
                                 <td className="px-6 py-4 font-medium">{user.email}</td>
                                 <td className="px-6 py-4">
                                     <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium capitalize ${user.role === 'super_admin' ? 'bg-purple-100 text-purple-700' :
-                                            user.role === 'store_owner' ? 'bg-blue-50 text-blue-700' :
-                                                'bg-gray-100 text-gray-700'
+                                        user.role === 'store_owner' ? 'bg-blue-50 text-blue-700' :
+                                            'bg-gray-100 text-gray-700'
                                         }`}>
                                         {user.role}
                                     </span>

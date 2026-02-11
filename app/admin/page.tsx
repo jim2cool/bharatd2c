@@ -43,6 +43,7 @@ const STATUS_COLORS: Record<string, string> = {
 }
 
 import { ArrowRight, CheckCircle2, Circle, Plus, Settings, ShoppingBag, Truck } from 'lucide-react'
+import { OnboardingChecklist } from './components/OnboardingChecklist'
 // ... existing imports
 
 export default function AdminDashboard() {
@@ -193,61 +194,9 @@ export default function AdminDashboard() {
   if (!storeId || loading) return <div className="p-6">Loading...</div>
 
   // ---------------- NEW STORE CHECKLIST VIEW ----------------
+  // ---------------- NEW STORE CHECKLIST VIEW ----------------
   if (isNewStore) {
-    return (
-      <div className="p-8 max-w-4xl mx-auto space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Setup Guide</h1>
-          <p className="text-gray-600">Use this personalized guide to get your store up and running.</p>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-          <div className="p-6 border-b bg-gray-50">
-            <h2 className="font-semibold text-lg">Just a few steps to launch</h2>
-          </div>
-
-          <div className="divide-y">
-            {/* Step 1: Add Product */}
-            <div className="p-6 flex gap-4 items-start hover:bg-gray-50 transition-colors">
-              {checklist.hasProducts ? <CheckCircle2 className="text-green-600 w-6 h-6 mt-1" /> : <Circle className="text-gray-300 w-6 h-6 mt-1" />}
-              <div className="flex-1">
-                <h3 className={`font-medium text-lg ${checklist.hasProducts ? 'text-gray-500 line-through' : 'text-black'}`}>Add your first product</h3>
-                <p className="text-gray-600 text-sm mt-1 mb-3">Write a description, add photos, and set pricing for the products you plan to sell.</p>
-                {!checklist.hasProducts && (
-                  <button onClick={() => router.push('/admin/products/new')} className="text-sm bg-black text-white px-4 py-2 rounded font-medium inline-flex items-center">
-                    Add product <ArrowRight className="w-4 h-4 ml-2" />
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Step 2: Custom Domain */}
-            <div className="p-6 flex gap-4 items-start hover:bg-gray-50 transition-colors">
-              {checklist.hasDomain ? <CheckCircle2 className="text-green-600 w-6 h-6 mt-1" /> : <Circle className="text-gray-300 w-6 h-6 mt-1" />}
-              <div className="flex-1">
-                <h3 className={`font-medium text-lg ${checklist.hasDomain ? 'text-gray-500 line-through' : 'text-black'}`}>Add a custom domain</h3>
-                <p className="text-gray-600 text-sm mt-1 mb-3">Your customers will use this to find your online store.</p>
-                {!checklist.hasDomain && (
-                  <button onClick={() => router.push('/admin/settings/domains')} className="text-sm border border-gray-300 px-4 py-2 rounded font-medium">Add domain</button>
-                )}
-              </div>
-            </div>
-
-            {/* Step 3: Customize Theme */}
-            <div className="p-6 flex gap-4 items-start hover:bg-gray-50 transition-colors">
-              {checklist.hasTheme ? <CheckCircle2 className="text-green-600 w-6 h-6 mt-1" /> : <Circle className="text-gray-300 w-6 h-6 mt-1" />}
-              <div className="flex-1">
-                <h3 className={`font-medium text-lg ${checklist.hasTheme ? 'text-gray-500 line-through' : 'text-black'}`}>Customize your online store</h3>
-                <p className="text-gray-600 text-sm mt-1 mb-3">Choose a theme and add your logo, colors, and images to reflect your brand.</p>
-                {!checklist.hasTheme && (
-                  <button onClick={() => router.push('/admin/settings/theme')} className="text-sm border border-gray-300 px-4 py-2 rounded font-medium">Customize theme</button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
+    return <OnboardingChecklist checklist={checklist} />
   }
 
   // ---------------- EXISTING DASHBOARD VIEW ----------------
