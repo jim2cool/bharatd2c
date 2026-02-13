@@ -19,14 +19,30 @@ export async function GET(req: NextRequest) {
     // Allow Root Domain (Platform)
     const normalizedDomain = domain.toLowerCase();
     const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN?.toLowerCase();
-    
+
     if (
-        normalizedDomain === rootDomain || 
-        normalizedDomain === "easy-d2c.com" || 
+        normalizedDomain === rootDomain ||
+        normalizedDomain === "easy-d2c.com" ||
         normalizedDomain === "www.easy-d2c.com"
     ) {
         console.log(`[Caddy] Authorized Root Domain: ${domain}`);
         return new NextResponse("OK", { status: 200 });
+    }
+
+    // Allow subdomains of easy-d2c.com (store slugs)
+    if (normalizedDomain.endsWith(".easy-d2c.com")) {
+        const slug = normalizedDomain.split(".")[0];
+
+        const { data: storeData, error: storeError } = await supabaseAdmin
+            .from("stores")
+            .select("id")
+            .eq("slug", slug)
+            .single();
+
+        if (storeData && !storeError) {
+            console.log(`[Caddy] Authorized Subdomain: ${domain}`);
+            return new NextResponse("OK", { status: 200 });
+        }
     }
 
     // Check if the domain is registered in our stores table
