@@ -2,21 +2,20 @@
 
 import { supabaseAdmin } from '@/lib/supabase-admin'
 
-export async function confirmUser(email: string) {
-    // 1. Get user by email to find ID
-    const { data: { users }, error: findError } = await supabaseAdmin.auth.admin.listUsers()
+export async function signUpDirect(email: string, password: string) {
+    try {
+        const { data, error } = await supabaseAdmin.auth.admin.createUser({
+            email,
+            password,
+            email_confirm: true
+        })
 
-    // Note: listUsers isn't efficient for lookup by email but it's what we have in admin API usually 
-    // or we can just try to sign in? No. 
-    // Actually, listUsers might be paginated. Use start/end? 
-    // Better: supabaseAdmin.rpc? No.
-    // Wait, we can't get user by email directly in admin api easily without listUsers?
-    // Let's check if we can get it from the client side `signUp` response? 
-    // client `signUp` returns `user` object even if session is null? 
-    // YES. `data.user` is present in `signUp` response even if `session` is null.
-
-    // So we should pass userId to this action, not email.
-    return { error: 'Pass userId instead' }
+        if (error) throw error
+        return { success: true, user: data.user }
+    } catch (error: any) {
+        console.error('Sign up direct failed:', error)
+        return { success: false, error: error.message }
+    }
 }
 
 export async function autoConfirmUser(userId: string) {

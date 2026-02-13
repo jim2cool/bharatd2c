@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { supabaseBrowser } from '@/lib/supabase-browser'
 import { useRouter } from 'next/navigation'
-import { autoConfirmUser } from '@/app/actions/auth'
+import { autoConfirmUser, signUpDirect } from '@/app/actions/auth'
 import { Button } from '@/components/ui/button'
 import { Chrome } from 'lucide-react'
 
@@ -29,39 +29,26 @@ export default function SignupPage() {
         setLoading(true)
         setError(null)
 
-        // 1. Sign Up
-        const { data, error: signUpError } = await supabaseBrowser.auth.signUp({
+
+        // 1. Sign Up Direct (Server Side Admin Creation)
+        const { success, user, error: signUpError } = await signUpDirect(email, password)
+
+        if (!success) {
+            setLoading(false)
+            setError(signUpError || 'Failed to create account')
+            return
+        }
+
+        // 2. Sign In (since we now have a confirmed account but no session yet)
+        const { error: signInError } = await supabaseBrowser.auth.signInWithPassword({
             email,
             password,
         })
 
-        if (signUpError) {
+        if (signInError) {
             setLoading(false)
-            setError(signUpError.message)
+            setError(signInError.message)
             return
-        }
-
-        // 2. Auto Confirm if needed
-        if (!data?.session && data?.user) {
-            const { success, error: confirmError } = await autoConfirmUser(data.user.id)
-
-            if (!success) {
-                setLoading(false)
-                setError('Failed to auto-confirm account: ' + confirmError)
-                return
-            }
-
-            // 3. Sign In (since we now have a confirmed account but no session yet)
-            const { error: signInError } = await supabaseBrowser.auth.signInWithPassword({
-                email,
-                password,
-            })
-
-            if (signInError) {
-                setLoading(false)
-                setError(signInError.message)
-                return
-            }
         }
 
         router.push('/onboarding')
