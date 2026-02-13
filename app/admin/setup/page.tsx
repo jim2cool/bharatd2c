@@ -7,6 +7,27 @@ import { getActiveStoreIdClient } from '@/lib/getActiveStore.client'
 import { getStoreBaseUrl } from '@/lib/getStoreUrl'
 import { Sparkles, Check, Loader2, Globe, ArrowRight, LayoutDashboard } from 'lucide-react'
 
+const CATEGORY_PRESETS: Record<string, any> = {
+    'fashion': {
+        category: 'fashion',
+        font: 'font-serif',
+        radius: 'rounded-none',
+        cardStyle: 'minimal'
+    },
+    'electronics': {
+        category: 'electronics',
+        font: 'font-sans',
+        radius: 'rounded-xl',
+        cardStyle: 'bordered'
+    },
+    'other': {
+        category: 'other',
+        font: 'font-sans',
+        radius: 'rounded-lg',
+        cardStyle: 'default'
+    }
+}
+
 export default function SetupPage() {
     const router = useRouter()
     const [status, setStatus] = useState<'loading' | 'seeding' | 'finishing'>('loading')

@@ -1,11 +1,12 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { getActiveStoreIdClient } from '@/lib/getActiveStore.client'
 import { getStoreBaseUrl } from '@/lib/getStoreUrl'
 import { supabaseBrowser } from '@/lib/supabase-browser'
-import { Globe, ExternalLink } from 'lucide-react'
+import { Globe, ExternalLink, CheckCircle2, Sparkles, Circle, ArrowRight } from 'lucide-react'
 
 export type ChecklistState = {
     hasProducts: boolean

@@ -9,7 +9,7 @@ import { getActiveStoreIdClient } from '@/lib/getActiveStore.client';
 
 const createProductSchema = z.object({
   title: z.string().min(1, 'Product title is required'),
-  cogs: z.number({ invalid_type_error: 'COGS must be a number' }).min(0.01, 'COGS must be greater than 0'),
+  cogs: z.number().min(0.01, 'COGS must be greater than 0'),
 });
 
 type CreateProductForm = z.infer<typeof createProductSchema>;

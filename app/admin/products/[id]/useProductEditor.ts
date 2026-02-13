@@ -3,6 +3,14 @@
 import { useEffect, useState } from 'react'
 import { supabaseBrowser } from '@/lib/supabase-browser'
 
+export type Testimonial = {
+  quote: string
+  name: string
+  rating: number
+  location?: string
+  hidden?: boolean
+}
+
 // Types for the form data
 export type ProductFormData = {
   title: string
@@ -17,7 +25,7 @@ export type ProductFormData = {
   highlights: string[]
   content_markup?: string | null
   images: string[]
-  testimonials: any[]
+  testimonials: Testimonial[]
   seo_title?: string | null
   seo_description?: string | null
   bundle_settings: { enabled: boolean }
