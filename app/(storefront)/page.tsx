@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { getProducts } from "@/lib/products";
-import HeroCarousel from "@/app/components/HeroCarousel";
-import ProductCard from "@/app/components/ProductCard";
-import Marquee from "@/app/components/Marquee";
-import TestimonialSlider from "@/app/components/TestimonialSlider";
-import { TrustBar } from "@/app/components/ui/trust-bar";
+import HeroCarousel from "@/components/ui/hero-carousel";
+import ProductCard from "@/components/ui/product-card";
+import Marquee from "@/components/ui/marquee";
+import TestimonialSlider from "@/components/ui/testimonial-slider";
+import TrustBar from "@/components/ui/trust-bar";
 import {
   Carousel,
   CarouselContent,
@@ -16,8 +16,8 @@ import {
 
 import { getActiveStoreId } from "@/lib/getActiveStore";
 import LandingPage from "@/components/platform/LandingPage";
-import ImageWithText from "@/app/components/ImageWithText";
-import CollectionGrid from "@/app/components/CollectionGrid";
+import ImageWithText from "@/components/ui/image-with-text";
+import CollectionGrid from "@/components/ui/collection-grid";
 
 export default async function HomePage() {
   const storeId = await getActiveStoreId();
@@ -114,3 +114,4 @@ export default async function HomePage() {
     </main>
   );
 }
+

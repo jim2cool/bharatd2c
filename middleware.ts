@@ -129,7 +129,8 @@ export default async function middleware(request: NextRequest) {
     if (url.pathname.startsWith("/admin") || url.pathname.startsWith("/super-admin")) {
         if (!user) {
             const redirectUrl = request.nextUrl.clone();
-            redirectUrl.pathname = "/login";
+            const isSuper = url.pathname.startsWith("/super-admin");
+            redirectUrl.pathname = isSuper ? "/super-admin/login" : "/login";
             redirectUrl.searchParams.set("next", request.nextUrl.pathname);
             return NextResponse.redirect(redirectUrl);
         }

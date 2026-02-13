@@ -1,4 +1,4 @@
-import TrustBar from "@/app/components/TrustBar"
+import TrustBar from "@/components/ui/trust-bar"
 
 type Props = {
   variant?: "icon-strip" | "bullet-list"
@@ -9,3 +9,4 @@ export default function PdpTrustSection({
 }: Props) {
   return <TrustBar />
 }
+

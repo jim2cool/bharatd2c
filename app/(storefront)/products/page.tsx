@@ -1,5 +1,5 @@
-import ProductCard from "@/app/components/ProductCard";
-import SortSelect from "@/app/components/SortSelect";
+import ProductCard from "@/components/ui/product-card";
+import SortSelect from "@/components/ui/sort-select";
 import { getProductsPaginated } from "@/lib/products";
 
 type SearchParams = {
@@ -110,3 +110,4 @@ export default async function ProductsPage({
     </main>
   );
 }
+

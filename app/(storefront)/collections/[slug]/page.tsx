@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
-import ProductCard from "@/app/components/ProductCard";
-import SortSelect from "@/app/components/SortSelect";
+import ProductCard from "@/components/ui/product-card";
+import SortSelect from "@/components/ui/sort-select";
 import { getProductsByCollection } from "@/lib/products";
 
 type SearchParams = {

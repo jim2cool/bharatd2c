@@ -77,103 +77,124 @@ export function OnboardingChecklist({ checklist }: { checklist: ChecklistState }
     if (completedCount === steps.length) return null
 
     return (
-        <div className="max-w-5xl mx-auto py-12 px-6">
-            <div className="bg-white rounded-[3rem] border border-slate-100 shadow-2xl shadow-slate-200/50 overflow-hidden">
-                <div className="p-10 md:p-14 border-b border-slate-50 bg-gradient-to-br from-white to-slate-50/50">
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-                        <div>
-                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest mb-4">
-                                <span className="relative flex h-2 w-2">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-                                </span>
-                                Store Launchpad
-                            </div>
-                            <h1 className="text-4xl font-black text-slate-900 tracking-tighter mb-2">Build your empire.</h1>
-                            <p className="text-slate-500 font-medium">Complete these {steps.length} steps to launch your boutique.</p>
-
-                            {storeUrl && (
-                                <div className="mt-6 flex items-center gap-3 p-3 bg-slate-50 border border-slate-100 rounded-2xl w-fit group">
-                                    <div className="h-8 w-8 bg-white rounded-xl flex items-center justify-center shadow-sm">
-                                        <Globe className="w-4 h-4 text-blue-500" />
-                                    </div>
-                                    <div className="pr-4">
-                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Your Live Storefront</p>
-                                        <a
-                                            href={storeUrl}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-xs font-bold text-slate-900 hover:text-blue-600 flex items-center gap-1.5 transition-colors"
-                                        >
-                                            {storeUrl.replace(/^https?:\/\//, '')}
-                                            <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                        </a>
-                                    </div>
-                                </div>
-                            )}
+        <div className="max-w-6xl mx-auto py-16 px-6 lg:px-12 bg-[#FAFAF9] rounded-[4rem] border border-neutral-200/60 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.05)] mt-8">
+            <div className="flex flex-col xl:flex-row gap-16">
+                {/* LEFT SIDE: GOAL & PROGRESS */}
+                <div className="xl:w-1/3 space-y-12">
+                    <div className="space-y-6">
+                        <div className="inline-flex items-center gap-2.5 px-4 py-1.5 bg-black text-white rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-black/10">
+                            <Sparkles className="w-3 h-3 text-blue-400" />
+                            Fast-Track Launch
                         </div>
-                        <div className="text-right">
-                            <div className="text-4xl font-black text-slate-900 mb-2">{progress}%</div>
-                            <div className="w-48 h-2 bg-slate-100 rounded-full overflow-hidden">
-                                <div
-                                    className="h-full bg-slate-900 transition-all duration-1000 ease-out"
-                                    style={{ width: `${progress}%` }}
-                                />
+                        <h1 className="text-5xl font-black text-neutral-900 tracking-tighter leading-[0.9]">
+                            Your shop is nearly <span className="text-blue-600">alive.</span>
+                        </h1>
+                        <p className="text-neutral-500 font-medium text-lg leading-relaxed">
+                            We've automated the heavy lifting. Complete these final nodes to activate your global commerce instance.
+                        </p>
+                    </div>
+
+                    <div className="p-8 bg-white border border-neutral-100 rounded-[2.5rem] shadow-sm space-y-6 relative overflow-hidden group hover:shadow-xl transition-all duration-500">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-3xl -mr-16 -mt-16 group-hover:bg-blue-500/10 transition-colors" />
+                        <div className="flex items-end justify-between">
+                            <div className="text-6xl font-black text-neutral-900 tracking-tighter">{progress}%</div>
+                            <div className="text-[10px] font-black text-neutral-400 uppercase tracking-widest pb-2">Launch Readiness</div>
+                        </div>
+                        <div className="w-full h-3 bg-neutral-100 rounded-full overflow-hidden shadow-inner">
+                            <div
+                                className="h-full bg-black transition-all duration-1000 ease-in-out relative"
+                                style={{ width: `${progress}%` }}
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
                             </div>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-3">{completedCount} of {steps.length} Tasks Finished</p>
+                        </div>
+                        <div className="flex items-center justify-between pt-2">
+                            <p className="text-[11px] font-black text-neutral-900 uppercase tracking-widest leading-none">
+                                {completedCount} <span className="text-neutral-300">of</span> {steps.length} <span className="text-neutral-400 ml-1">Nodes Active</span>
+                            </p>
+                            {progress === 100 && <CheckCircle2 className="w-5 h-5 text-green-500" />}
                         </div>
                     </div>
+
+                    {storeUrl && (
+                        <div className="p-6 bg-neutral-900 rounded-[2rem] text-white shadow-2xl relative group overflow-hidden">
+                            <div className="absolute bottom-0 right-0 w-24 h-24 bg-blue-500/20 blur-2xl -mb-12 -mr-12" />
+                            <p className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em] mb-3">Staging Link</p>
+                            <a
+                                href={storeUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm font-bold flex items-center gap-2 group-hover:text-blue-400 transition-colors"
+                            >
+                                < Globe className="w-4 h-4 text-blue-500" />
+                                {storeUrl.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+                                <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
+                            </a>
+                        </div>
+                    )}
                 </div>
 
-                <div className="divide-y divide-slate-50">
-                    {steps.map((step) => (
-                        <div
-                            key={step.id}
-                            className={`flex flex-col md:flex-row items-center gap-8 p-10 md:p-14 transition-all ${step.completed ? 'bg-slate-50/30 opacity-60' : 'bg-white hover:bg-slate-50/50'}`}
-                        >
-                            <div className="flex-shrink-0">
-                                {step.completed ? (
-                                    <div className="h-16 w-16 bg-green-500 rounded-2xl flex items-center justify-center shadow-lg shadow-green-100">
-                                        <CheckCircle2 className="w-8 h-8 text-white" />
-                                    </div>
-                                ) : (
-                                    <div className={`h-16 w-16 bg-white border-2 rounded-2xl flex items-center justify-center font-black text-2xl relative ${step.isMagic ? 'border-blue-200 text-blue-600 shadow-xl shadow-blue-50/50 group-hover:scale-110 transition-transform duration-500' : 'border-slate-100 text-slate-200'}`}>
-                                        {step.isMagic ? (
-                                            <>
-                                                <Sparkles className="w-8 h-8" />
-                                                <div className="absolute -top-2 -right-2 px-2 py-0.5 bg-blue-600 text-[8px] text-white rounded-full uppercase tracking-tighter">AI</div>
-                                            </>
+                {/* RIGHT SIDE: STEPS */}
+                <div className="xl:w-2/3">
+                    <div className="grid grid-cols-1 gap-6">
+                        {steps.map((step, i) => (
+                            <div
+                                key={step.id}
+                                onClick={() => !step.completed && router.push(step.href)}
+                                className={`group relative p-8 rounded-[2.5rem] border transition-all duration-500 cursor-pointer overflow-hidden ${step.completed
+                                    ? 'bg-neutral-50/50 border-neutral-100 grayscale opacity-60'
+                                    : 'bg-white border-neutral-200 hover:border-black hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.08)] hover:-translate-y-1'
+                                    }`}
+                            >
+                                <div className="flex items-start gap-8">
+                                    <div className="relative flex-shrink-0 pt-1">
+                                        {step.completed ? (
+                                            <div className="h-14 w-14 bg-black rounded-2xl flex items-center justify-center shadow-lg">
+                                                <CheckCircle2 className="w-7 h-7 text-white" />
+                                            </div>
                                         ) : (
-                                            <Circle className="w-8 h-8" />
+                                            <div className={`h-14 w-14 rounded-2xl border-2 flex items-center justify-center transition-all duration-500 group-hover:scale-110 shadow-sm ${step.isMagic
+                                                ? 'border-blue-500 bg-blue-50 text-blue-600'
+                                                : 'border-neutral-200 bg-neutral-50 text-neutral-400 group-hover:border-black group-hover:text-black'
+                                                }`}>
+                                                {step.isMagic ? <Sparkles className="w-7 h-7 animate-pulse" /> : <div className="text-lg font-black">{i + 1}</div>}
+                                            </div>
                                         )}
+                                        {step.isMagic && !step.completed && (
+                                            <div className="absolute -top-3 -right-3 px-2 py-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-[8px] font-black text-white rounded-full uppercase tracking-tighter shadow-lg">AI MAGIC</div>
+                                        )}
+                                    </div>
+
+                                    <div className="flex-1 space-y-2">
+                                        <div className="flex items-center gap-3">
+                                            <h3 className={`text-2xl font-black tracking-tight ${step.completed ? 'text-neutral-400' : 'text-neutral-900 group-hover:text-black'}`}>
+                                                {step.title}
+                                            </h3>
+                                            {!step.completed && (
+                                                <div className="px-2.5 py-1 bg-neutral-50 border border-neutral-100 rounded-lg text-[9px] font-black uppercase tracking-widest text-neutral-400 group-hover:text-neutral-900 group-hover:border-neutral-300 transition-colors">
+                                                    {step.time}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <p className={`text-sm font-medium leading-relaxed max-w-lg ${step.completed ? 'text-neutral-300' : 'text-neutral-500 group-hover:text-neutral-600'}`}>
+                                            {step.description}
+                                        </p>
+                                    </div>
+
+                                    <div className="hidden md:flex flex-shrink-0 items-center justify-center self-center transition-all duration-500 opacity-0 group-hover:opacity-100 group-hover:translate-x-2">
+                                        <ArrowRight className={`w-6 h-6 ${step.isMagic ? 'text-blue-600' : 'text-black'}`} />
+                                    </div>
+                                </div>
+
+                                {/* PROGRESS INDICATOR ON CARD */}
+                                {step.isMagic && !step.completed && (
+                                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-500/10 overflow-hidden">
+                                        <div className="h-full bg-blue-500 w-1/3 animate-[shimmer_2s_infinite]" />
                                     </div>
                                 )}
                             </div>
-                            <div className="flex-1 text-center md:text-left">
-                                <div className="flex flex-col md:flex-row md:items-center gap-2 mb-1">
-                                    <h3 className={`text-xl font-black ${step.completed ? 'text-slate-400 line-through' : 'text-slate-900'} ${step.isMagic && !step.completed ? 'text-blue-600' : ''}`}>
-                                        {step.title}
-                                    </h3>
-                                    {!step.completed && (
-                                        <span className={`inline-flex px-2 py-0.5 text-[10px] font-bold rounded-md w-fit mx-auto md:mx-0 ${step.isMagic ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'}`}>
-                                            {step.time}
-                                        </span>
-                                    )}
-                                </div>
-                                <p className="text-slate-500 font-medium leading-relaxed max-w-xl">
-                                    {step.description}
-                                </p>
-                            </div>
-                            {!step.completed && (
-                                <Link
-                                    href={step.href}
-                                    className={`flex-shrink-0 px-8 py-4 rounded-2xl text-sm font-black transition-all shadow-xl flex items-center gap-3 hover:translate-x-1 ${step.isMagic ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-100' : 'bg-slate-900 text-white hover:bg-slate-800 shadow-slate-200'}`}
-                                >
-                                    {step.action} <ArrowRight className="w-4 h-4" />
-                                </Link>
-                            )}
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
             </div>
         </div>
