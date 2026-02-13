@@ -257,7 +257,7 @@ function CheckoutContent() {
     <main className="min-h-screen bg-[#fafafa] pb-12">
       <header className="border-b border-neutral-100 py-6 bg-white sticky top-0 z-50 shadow-sm">
         <div className="container max-w-5xl px-6 flex items-center justify-between mx-auto">
-          <div className="text-2xl font-black text-neutral-900 tracking-tighter italic">Bharat D2C.</div>
+          <div className="text-2xl font-black text-neutral-900 tracking-tighter italic">Easy D2C.</div>
           <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
             <Lock className="w-3.5 h-3.5 text-neutral-900" />
             <span>Secure 256-bit SSL Checkout</span>

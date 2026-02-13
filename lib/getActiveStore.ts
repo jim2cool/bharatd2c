@@ -31,5 +31,5 @@ export async function getActiveStoreId(): Promise<string | null> {
 
   // Fallback to cookie (mostly for local dev without middleware doing subdomain logic)
   const cookieStore = await cookies()
-  return cookieStore.get('bharat_active_store_id')?.value || null
+  return cookieStore.get('easy_active_store_id')?.value || null
 }

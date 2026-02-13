@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { AdminLayoutClient } from "./AdminLayoutClient";
 
 export const metadata = {
-    title: "Admin | Bharat D2C",
+    title: "Admin | Easy D2C",
 };
 
 export default async function AdminLayout({

@@ -15,7 +15,7 @@ export default function MaintenancePage() {
                 <div className="space-y-4">
                     <h1 className="text-4xl font-black text-neutral-900 tracking-tight italic">Be Right Back.</h1>
                     <p className="text-neutral-500 font-medium leading-relaxed">
-                        Bharat D2C is currently undergoing scheduled maintenance to improve our infrastructure. We'll be back online shortly.
+                        Easy D2C is currently undergoing scheduled maintenance to improve our infrastructure. We'll be back online shortly.
                     </p>
                 </div>
 

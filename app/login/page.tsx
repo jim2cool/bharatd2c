@@ -49,10 +49,10 @@ export default function LoginPage() {
 
       if (stores && stores.length > 0) {
         // User already has a store, go to admin
-        const activeStoreId = localStorage.getItem('bharat_active_store_id')
+        const activeStoreId = localStorage.getItem('easy_active_store_id')
         if (!activeStoreId) {
-          localStorage.setItem('bharat_active_store_id', stores[0].id)
-          document.cookie = `bharat_active_store_id=${stores[0].id}; path=/; SameSite=Lax`
+          localStorage.setItem('easy_active_store_id', stores[0].id)
+          document.cookie = `easy_active_store_id=${stores[0].id}; path=/; SameSite=Lax`
         }
         router.push('/admin')
       } else {

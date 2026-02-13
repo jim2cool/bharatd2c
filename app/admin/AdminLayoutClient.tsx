@@ -65,7 +65,7 @@ export function AdminLayoutClient({
       {/* LEFT NAV */}
       <aside className="w-[240px] bg-white border-r">
         <div className="px-4 py-4 border-b">
-          <div className="text-lg font-semibold">Bharat D2C</div>
+          <div className="text-lg font-semibold">Easy D2C</div>
           <div className="text-xs text-gray-500">Admin</div>
         </div>
 

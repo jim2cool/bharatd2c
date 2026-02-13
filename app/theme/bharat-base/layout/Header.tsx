@@ -27,7 +27,7 @@ export default function Header() {
       {/* ================= DESKTOP ================= */}
       <div className="site-header-inner desktop">
         <Link href="/" className="site-logo font-bold tracking-tight text-xl uppercase">
-          Bharat D2C
+          Easy D2C
         </Link>
 
         <nav className="site-nav flex items-center gap-8">
@@ -61,7 +61,7 @@ export default function Header() {
         </button>
 
         <Link href="/" className="site-logo font-bold uppercase text-sm tracking-tighter">
-          Bharat D2C
+          Easy D2C
         </Link>
 
         <button

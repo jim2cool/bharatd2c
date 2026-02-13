@@ -35,7 +35,7 @@ export default async function SuperAdminLayout({
             {/* SIDEBAR */}
             <aside className="w-64 bg-black text-white p-6">
                 <div className="mb-8">
-                    <h1 className="text-xl font-bold">Bharat D2C</h1>
+                    <h1 className="text-xl font-bold">Easy D2C</h1>
                     <p className="text-xs text-gray-400 uppercase tracking-widest mt-1">Super Admin</p>
                 </div>
 

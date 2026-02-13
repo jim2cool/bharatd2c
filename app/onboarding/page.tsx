@@ -114,7 +114,11 @@ export default function OnboardingPage() {
                 .update({ store_id: store.id })
                 .eq('id', user.id)
 
-            // 4. Redirect to Setup for Seeding
+            // 4. Set Active Store Context for Client
+            localStorage.setItem('easy_active_store_id', store.id)
+            document.cookie = `easy_active_store_id=${store.id}; path=/; SameSite=Lax`
+
+            // 5. Redirect to Setup for Seeding
             router.push('/admin/setup')
 
         } catch (err: any) {
@@ -148,7 +152,7 @@ export default function OnboardingPage() {
         <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 px-6">
             <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
                 <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white font-black text-xl mb-6 shadow-xl">
-                    B
+                    E
                 </div>
                 <h2 className="text-3xl font-black text-slate-900 tracking-tight">
                     {step === 1 ? "Name your empire" : "Select your industry"}
@@ -205,7 +209,7 @@ export default function OnboardingPage() {
                                         className="flex-1 px-5 py-4 bg-transparent border-none text-sm font-bold outline-none"
                                     />
                                     <span className="px-4 py-4 bg-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center">
-                                        .bharatd2c.com
+                                        .easy-d2c.com
                                     </span>
                                 </div>
                             </div>

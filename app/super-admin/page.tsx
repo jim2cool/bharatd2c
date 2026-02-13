@@ -92,7 +92,7 @@ export default async function SuperAdminDashboard() {
                             <span className="text-[10px] font-black bg-black/5 px-2.5 py-1 rounded-full uppercase tracking-[0.2em] text-black">Console v2.4</span>
                         </div>
                         <h1 className="text-5xl font-black text-neutral-900 tracking-tighter pt-4">Nexus Hub</h1>
-                        <p className="text-neutral-500 font-medium text-lg max-w-md">Orchestrating the Bharat D2C ecosystem with precision intelligence.</p>
+                        <p className="text-neutral-500 font-medium text-lg max-w-md">Orchestrating the Easy D2C ecosystem with precision intelligence.</p>
                     </div>
                     <div className="flex items-center gap-4">
                         <div className="flex -space-x-3 overflow-hidden">

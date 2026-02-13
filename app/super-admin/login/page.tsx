@@ -115,7 +115,7 @@ export default function SuperLoginPage() {
 
                 <div className="mt-8 pt-6 border-t border-gray-800 text-center">
                     <p className="text-gray-600 text-[11px] font-medium uppercase tracking-tighter">
-                        Powered by Bharat D2C Engine v2.0
+                        Powered by Easy D2C Engine v2.0
                     </p>
                 </div>
             </div>

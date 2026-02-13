@@ -41,7 +41,7 @@ export default function StoreSwitcher() {
       // 🔑 AUTO-HEAL: if no active store or existing one is not in the list, pick first
       const isValid = existing && list.some(s => s.id === existing)
       if (!isValid) {
-        localStorage.setItem('bharat_active_store_id', list[0].id)
+        localStorage.setItem('easy_active_store_id', list[0].id)
         setActive(list[0].id)
       } else {
         setActive(existing)
@@ -54,7 +54,7 @@ export default function StoreSwitcher() {
   if (stores.length === 0) return null
 
   const switchStore = (storeId: string) => {
-    localStorage.setItem('bharat_active_store_id', storeId)
+    localStorage.setItem('easy_active_store_id', storeId)
     setActive(storeId)
 
     // Hard reload context

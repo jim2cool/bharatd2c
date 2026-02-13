@@ -21,7 +21,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Your Brand Name",
+  title: "Easy D2C Platform",
   description: "Thoughtfully crafted products for everyday India.",
 };
 

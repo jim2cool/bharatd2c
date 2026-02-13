@@ -29,5 +29,5 @@ export async function getStoreBaseUrl(supabase: any): Promise<string> {
 
     // 3. Fallback to platform subdomain (v2 production)
     // Adjust this to your actual production domain
-    return `https://${store.slug}.bharatd2c.com`
+    return `https://${store.slug}.easy-d2c.com`
 }
