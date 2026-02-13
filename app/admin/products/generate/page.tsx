@@ -17,7 +17,7 @@ export default function GenerateProductPage() {
         <div className="flex flex-col h-[calc(100vh-80px)] space-y-4 p-6">
             <div className="flex items-center justify-between mb-2">
                 <div>
-                    <h1 className="text-2xl font-black italic tracking-tighter uppercase flex items-center gap-2">
+                    <h1 className="text-2xl font-black tracking-tighter uppercase flex items-center gap-2">
                         <Sparkles className="w-6 h-6 text-blue-600" />
                         Generate Product Content
                     </h1>

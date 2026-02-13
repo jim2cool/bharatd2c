@@ -78,6 +78,11 @@ export default function SetupPage() {
                 setProgress(100)
                 setStatus('finishing')
                 setMessage('Your empire is ready.')
+
+                // 🚀 AUTO-OPEN STORE PREVIEW
+                if (url) {
+                    window.open(url, '_blank')
+                }
             } catch (err) {
                 console.error('Setup failed', err)
                 router.push('/admin') // Fallback to dashboard
