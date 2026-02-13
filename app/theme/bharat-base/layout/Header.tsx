@@ -26,7 +26,7 @@ export default function Header() {
     <header className="site-header">
       {/* ================= DESKTOP ================= */}
       <div className="site-header-inner desktop">
-        <Link href="/" className="site-logo font-bold tracking-tight text-xl uppercase italic">
+        <Link href="/" className="site-logo font-bold tracking-tight text-xl uppercase">
           Bharat D2C
         </Link>
 
@@ -60,7 +60,7 @@ export default function Header() {
           {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
 
-        <Link href="/" className="site-logo font-bold uppercase italic text-sm tracking-tighter">
+        <Link href="/" className="site-logo font-bold uppercase text-sm tracking-tighter">
           Bharat D2C
         </Link>
 

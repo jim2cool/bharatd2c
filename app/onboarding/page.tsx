@@ -49,6 +49,17 @@ export default function OnboardingPage() {
         checkAuth()
     }, [router])
 
+
+    const [category, setCategory] = useState('')
+
+    const CATEGORIES = [
+        { id: 'fashion', label: 'Fashion & Apparel', icon: '👕' },
+        { id: 'beauty', label: 'Beauty & Wellness', icon: '✨' },
+        { id: 'tech', label: 'Electronics & Tech', icon: '💻' },
+        { id: 'home', label: 'Home & Decor', icon: '🏠' },
+        { id: 'other', label: 'Other / General', icon: '📦' },
+    ]
+
     const handleCreateStore = async () => {
         setLoading(true)
         setError(null)
@@ -76,7 +87,7 @@ export default function OnboardingPage() {
 
             if (profileError) throw profileError
 
-            // 2. Create Store
+            // 2. Create Store with Category metadata
             const { data: store, error: storeError } = await supabaseBrowser
                 .from('stores')
                 .insert({
@@ -84,7 +95,7 @@ export default function OnboardingPage() {
                     slug: storeSlug,
                     owner_id: user.id,
                     subscription_plan: 'free',
-                    theme_config: {},
+                    theme_config: { category }, // Store category in theme_config for now
                     is_active: true
                 })
                 .select()
@@ -103,8 +114,8 @@ export default function OnboardingPage() {
                 .update({ store_id: store.id })
                 .eq('id', user.id)
 
-            // 4. Redirect
-            router.push('/admin')
+            // 4. Redirect to Setup for Seeding
+            router.push('/admin/setup')
 
         } catch (err: any) {
             console.error(err)
@@ -116,13 +127,13 @@ export default function OnboardingPage() {
 
     if (isAuthenticated === false) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-                <div className="bg-white p-8 rounded-lg shadow-md max-w-sm w-full text-center">
-                    <h2 className="text-xl font-bold mb-4">You're not logged in</h2>
-                    <p className="text-gray-600 mb-6">Please sign in to your account to continue setting up your store.</p>
+            <div className="min-h-screen bg-white flex items-center justify-center p-4">
+                <div className="p-8 max-w-sm w-full text-center">
+                    <h2 className="text-2xl font-black mb-4 tracking-tight">Access Denied</h2>
+                    <p className="text-slate-500 mb-6 font-medium">Please sign in to your founder account to continue.</p>
                     <button
                         onClick={() => router.push('/login')}
-                        className="w-full bg-black text-white py-2 rounded-md font-medium"
+                        className="w-full bg-slate-900 text-white py-3 rounded-xl font-bold hover:bg-slate-800 transition-all shadow-lg"
                     >
                         Go to Login
                     </button>
@@ -134,33 +145,41 @@ export default function OnboardingPage() {
     if (isAuthenticated === null) return null
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-            <div className="sm:mx-auto sm:w-full sm:max-w-md">
-                <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                    Welcome to Bharat D2C
+        <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 px-6">
+            <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
+                <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white font-black text-xl mb-6 shadow-xl">
+                    B
+                </div>
+                <h2 className="text-3xl font-black text-slate-900 tracking-tight">
+                    {step === 1 ? "Name your empire" : "Select your industry"}
                 </h2>
-                <p className="mt-2 text-center text-sm text-gray-600">
-                    Let's verify your details and set up your store.
+                <p className="mt-3 text-sm text-slate-500 font-medium">
+                    {step === 1
+                        ? "Every great brand starts with a name."
+                        : "We'll tailor your dashboard based on what you sell."}
                 </p>
+
+                <div className="mt-8 flex justify-center gap-2">
+                    <div className={`h-1.5 w-12 rounded-full transition-all ${step === 1 ? 'bg-slate-900' : 'bg-slate-200'}`} />
+                    <div className={`h-1.5 w-12 rounded-full transition-all ${step === 2 ? 'bg-slate-900' : 'bg-slate-200'}`} />
+                </div>
             </div>
 
-            <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-                <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-md">
+                <div className="bg-white py-10 px-8 shadow-2xl shadow-slate-200/50 rounded-[2.5rem] border border-slate-100">
                     {error && (
-                        <div className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded text-sm">
+                        <div className="mb-6 bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-xl text-sm font-bold animate-in fade-in slide-in-from-top-1">
                             {error}
                         </div>
                     )}
 
-                    <div className="space-y-6">
-                        <div>
-                            <label htmlFor="storeName" className="block text-sm font-medium text-gray-700">
-                                Store Name
-                            </label>
-                            <div className="mt-1">
+                    {step === 1 ? (
+                        <div className="space-y-6">
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">
+                                    Store Name
+                                </label>
                                 <input
-                                    id="storeName"
-                                    name="storeName"
                                     type="text"
                                     required
                                     value={storeName}
@@ -168,45 +187,74 @@ export default function OnboardingPage() {
                                         setStoreName(e.target.value)
                                         setStoreSlug(slugify(e.target.value))
                                     }}
-                                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-black focus:border-black sm:text-sm"
-                                    placeholder="e.g. My Awesome Brand"
+                                    className="block w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-slate-900 outline-none transition-all placeholder:text-slate-300"
+                                    placeholder="e.g. Lumina Fashion"
                                 />
                             </div>
-                        </div>
 
-                        <div>
-                            <label htmlFor="storeSlug" className="block text-sm font-medium text-gray-700">
-                                Store URL
-                            </label>
-                            <div className="mt-1 flex rounded-md shadow-sm">
-                                <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
-                                    https://
-                                </span>
-                                <input
-                                    id="storeSlug"
-                                    name="storeSlug"
-                                    type="text"
-                                    required
-                                    value={storeSlug}
-                                    onChange={(e) => setStoreSlug(slugify(e.target.value))}
-                                    className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border border-gray-300 focus:ring-black focus:border-black sm:text-sm"
-                                />
-                                <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
-                                    .platform.com
-                                </span>
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">
+                                    Store URL
+                                </label>
+                                <div className="flex bg-slate-50 rounded-2xl overflow-hidden group focus-within:ring-2 focus-within:ring-slate-900 transition-all">
+                                    <input
+                                        type="text"
+                                        required
+                                        value={storeSlug}
+                                        onChange={(e) => setStoreSlug(slugify(e.target.value))}
+                                        className="flex-1 px-5 py-4 bg-transparent border-none text-sm font-bold outline-none"
+                                    />
+                                    <span className="px-4 py-4 bg-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center">
+                                        .bharatd2c.com
+                                    </span>
+                                </div>
                             </div>
-                        </div>
 
-                        <div>
                             <button
-                                onClick={handleCreateStore}
-                                disabled={loading || !storeName || !storeSlug}
-                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50 disabled:cursor-not-allowed"
+                                onClick={() => setStep(2)}
+                                disabled={!storeName || !storeSlug}
+                                className="w-full flex justify-center py-4 px-4 bg-slate-900 text-white rounded-2xl shadow-xl shadow-slate-200 text-sm font-black hover:bg-slate-800 focus:outline-none transition-all disabled:opacity-50 disabled:translate-y-0 hover:-translate-y-0.5 active:translate-y-0"
                             >
-                                {loading ? 'Creating Store...' : 'Create My Store'}
+                                Continue To Next Step
                             </button>
                         </div>
-                    </div>
+                    ) : (
+                        <div className="space-y-6">
+                            <div className="grid grid-cols-1 gap-3">
+                                {CATEGORIES.map((cat) => (
+                                    <button
+                                        key={cat.id}
+                                        onClick={() => setCategory(cat.id)}
+                                        className={`flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-all ${category === cat.id ? 'border-slate-900 bg-slate-50 shadow-md' : 'border-slate-50 hover:border-slate-200 bg-white'}`}
+                                    >
+                                        <span className="text-2xl">{cat.icon}</span>
+                                        <span className="text-sm font-bold text-slate-900">{cat.label}</span>
+                                        {category === cat.id && (
+                                            <div className="ml-auto w-5 h-5 bg-slate-900 rounded-full flex items-center justify-center">
+                                                <div className="w-2 h-2 bg-white rounded-full" />
+                                            </div>
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="flex gap-4">
+                                <button
+                                    onClick={() => setStep(1)}
+                                    className="flex-1 py-4 px-4 bg-white border border-slate-200 text-slate-900 rounded-2xl text-sm font-bold hover:bg-slate-50 transition-all"
+                                >
+                                    Back
+                                </button>
+                                <button
+                                    onClick={handleCreateStore}
+                                    disabled={loading || !category}
+                                    className="flex-[2] flex justify-center py-4 px-4 bg-slate-900 text-white rounded-2xl shadow-xl shadow-slate-200 text-sm font-black hover:bg-slate-800 transition-all disabled:opacity-50"
+                                >
+                                    {loading ? 'Launching Empire...' : 'Create My Store'}
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

@@ -6,6 +6,9 @@ import { useEffect, useState } from 'react'
 import StoreSwitcher from '@/components/admin/StoreSwitcher'
 import { getActiveStoreIdClient } from '@/lib/getActiveStore.client'
 import { supabaseBrowser } from '@/lib/supabase-browser'
+import { Toaster } from 'sonner'
+import { Globe } from 'lucide-react'
+import { getStoreBaseUrl } from '@/lib/getStoreUrl'
 
 type NavItem =
   | { label: string; href: string }
@@ -19,10 +22,16 @@ export function AdminLayoutClient({
   const pathname = usePathname()
   const router = useRouter()
   const [storeId, setStoreId] = useState<string | null>(null)
+  const [storeUrl, setStoreUrl] = useState<string>('/')
 
   // ✅ hydrate client-only storeId AFTER mount
   useEffect(() => {
-    setStoreId(getActiveStoreIdClient())
+    const sid = getActiveStoreIdClient()
+    setStoreId(sid)
+
+    if (sid) {
+      getStoreBaseUrl(supabaseBrowser).then(url => setStoreUrl(url))
+    }
   }, [])
 
   const NAV: NavItem[] = [
@@ -90,6 +99,7 @@ export function AdminLayoutClient({
 
       {/* RIGHT SIDE */}
       <div className="flex-1 flex flex-col">
+        <Toaster position="top-right" richColors />
         {/* TOP BAR */}
         <header className="h-[56px] bg-white border-b flex items-center justify-between px-6">
           <div className="text-sm font-medium text-gray-700">
@@ -97,6 +107,17 @@ export function AdminLayoutClient({
           </div>
 
           <div className="flex items-center gap-4 text-sm">
+            {storeId && (
+              <a
+                href={storeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-1.5 bg-neutral-900 text-white rounded-xl text-xs font-black hover:bg-neutral-800 transition-all shadow-lg shadow-neutral-100"
+              >
+                <Globe className="w-3.5 h-3.5" />
+                View Store
+              </a>
+            )}
             <StoreSwitcher />
 
             <Link href="/admin/stores" className="text-gray-600 hover:text-black">

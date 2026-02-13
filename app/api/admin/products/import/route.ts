@@ -65,9 +65,12 @@ export async function POST(req: NextRequest) {
                     .select()
                     .single();
 
-                if (insertError) throw new Error(insertError.message);
+                if (insertError) {
+                    throw new Error(`DB Insert Failed: ${insertError.message}`);
+                }
 
-                stats.logs.push(`✅ Created product: ${p.title}`);
+                stats.success++;
+                stats.logs.push(`[ROW ${products.indexOf(p) + 1}] ✅ Created: ${p.title}`);
 
                 // 2. Process Images
                 const finalImages = [];
@@ -78,7 +81,7 @@ export async function POST(req: NextRequest) {
 
                         try {
                             const response = await fetch(url);
-                            if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText}`);
+                            if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
 
                             const buffer = await response.arrayBuffer();
 
@@ -88,8 +91,6 @@ export async function POST(req: NextRequest) {
                                 .webp({ quality: 80 })
                                 .toBuffer();
 
-                            // Rename Rule: [slug]/[slug]-[index].webp
-                            // or [slug]/[slug]-hero.webp for first
                             const filename = i === 0 ? `${slug}-hero.webp` : `${slug}-${i}.webp`;
                             const key = `${slug}/${filename}`;
 
@@ -103,35 +104,25 @@ export async function POST(req: NextRequest) {
                             }));
 
                             finalImages.push(`${PUBLIC_BASE}/${key}`);
-                            stats.logs.push(`  - Processed image ${i + 1}`);
+                            stats.logs.push(`  - Image ${i + 1} processed & optimized`);
 
                             // DELETE ORIGINAL if it matches our bucket
                             if (url.startsWith(PUBLIC_BASE)) {
                                 try {
-                                    // Extract key from URL
-                                    // URL: https://fsn1.your-objectstorage.com/bucket/folder/file.jpg
-                                    // We need 'folder/file.jpg'
-                                    // BUT PUBLIC_BASE might optionally include bucket or not depending on config.
-                                    // Let's assume PUBLIC_BASE is the prefix.
                                     const sourceKey = url.replace(`${PUBLIC_BASE}/`, "");
-
                                     await s3.send(new DeleteObjectCommand({
                                         Bucket: BUCKET,
                                         Key: sourceKey
                                     }));
-                                    stats.logs.push(`  - Deleted source file to save space.`);
+                                    stats.logs.push(`  - Redundant source file purged`);
                                 } catch (delErr) {
-                                    console.warn("Failed to delete source image:", delErr);
+                                    console.warn("Source cleanup failed:", delErr);
                                 }
                             }
 
                         } catch (imgErr: any) {
-                            console.error(`  ❌ Image failed (${url}):`, imgErr);
-                            stats.logs.push(`  ❌ Image failed: ${url}`);
-                            // Keep original URL as fallback? Or just skip? 
-                            // User wants strict rule, so maybe skip or use original if crucial.
-                            // Let's fallback to original URL to avoid empty images, but warn.
-                            finalImages.push(url);
+                            stats.logs.push(`  ❌ Image ${i + 1} failed (${url.substring(0, 30)}...): ${imgErr.message}`);
+                            finalImages.push(url); // Fallback to original
                         }
                     }
 
@@ -142,12 +133,9 @@ export async function POST(req: NextRequest) {
                         .eq("id", product.id);
                 }
 
-                stats.success++;
-
             } catch (err: any) {
-                console.error("Product Import Error:", err);
                 stats.failed++;
-                stats.logs.push(`❌ Failed "${p.title}": ${err.message}`);
+                stats.logs.push(`[ROW ${products.indexOf(p) + 1}] ❌ FAILED "${p.title}": ${err.message}`);
             }
         }
 

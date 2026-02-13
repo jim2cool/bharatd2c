@@ -9,33 +9,29 @@
    ========================================================= */
 :root {
   /* =======================================================
-     CORE NEUTRALS (Dawn/Prestige Inspired)
+     CORE NEUTRALS (Editorial/Luxury Inspired)
      ======================================================= */
   --white: #ffffff;
-  --black: #0f172a;
-  /* slate-900 for better readability */
+  --black: #1A1A1A;
 
-  /* Slate scale for professional e-commerce */
-  --gray-900: #0f172a;
-  /* slate-900 - primary text */
-  --gray-800: #1e293b;
-  /* slate-800 */
-  --gray-700: #334155;
-  /* slate-700 */
-  --gray-600: #475569;
-  /* slate-600 - secondary text */
-  --gray-500: #64748b;
-  /* slate-500 - muted text */
-  --gray-400: #94a3b8;
-  /* slate-400 */
-  --gray-300: #cbd5e1;
-  /* slate-300 */
-  --gray-200: #e2e8f0;
-  /* slate-200 - borders */
-  --gray-100: #f1f5f9;
-  /* slate-100 */
-  --gray-50: #f8fafc;
-  /* slate-50 - surface */
+  /* Cool Neutral Palette (Re-engineered from reference) */
+  --beige-50: #FDFDFD;
+  /* Cool Bone - Page Background */
+  --beige-100: #F6F6F6;
+  /* Light Grey - Section Background */
+  --beige-200: #EAEAEA;
+  --beige-300: #A8A398;
+  /* Muted Sage/Taupe Accent */
+
+  /* Charcoal Scale */
+  --charcoal-900: #1A1A1A;
+  /* Primary Text */
+  --charcoal-700: #333333;
+  --charcoal-500: #666666;
+  /* Secondary Text */
+  --charcoal-300: #999999;
+  --charcoal-100: #E5E5E5;
+  /* Borders */
 
   /* =======================================================
      SAFFRON SYSTEM (PRIMARY ACCENT)
@@ -67,15 +63,16 @@
   /* =======================================================
      BACKGROUNDS
      ======================================================= */
-  --bg-page: var(--white);
-  --bg-section: var(--white);
-  --bg-surface: var(--gray-50);
-  --bg-muted: var(--gray-100);
+  --bg-page: var(--beige-50);
+  --bg-section: var(--beige-50);
+  --bg-surface: var(--white);
+  --bg-muted: var(--beige-100);
 
   /* =======================================================
      TYPOGRAPHY
      ======================================================= */
   --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: var(--font-serif), 'Playfair Display', serif;
 
   /* Refined type scale (8pt grid aligned) */
   --text-xs: 0.75rem;
@@ -171,16 +168,18 @@
   --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.08);
 
   /* =======================================================
-     SHADCN UI TOKENS
+     SHADCN UI TOKENS (Lifestyle Theme)
      ======================================================= */
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --background: oklch(0.99 0 0);
+  /* #FDFDFD approx */
+  --foreground: oklch(0.15 0 0);
+  /* #1A1A1A */
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.15 0 0);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.623 0.22 40.09);
-  /* Saffron #e26a00 approx */
+  --popover-foreground: oklch(0.15 0 0);
+  --primary: oklch(0.15 0 0);
+  /* Black as primary */
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -278,10 +277,12 @@ body {
 }
 
 .section-title {
-  font-size: var(--text-xl);
-  font-weight: 600;
+  font-family: var(--font-serif);
+  font-size: var(--text-2xl);
+  font-weight: 500;
   line-height: var(--lh-tight);
   color: var(--gray-900);
+  letter-spacing: -0.01em;
 }
 
 .section-subtitle {

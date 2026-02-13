@@ -7,6 +7,26 @@ import { supabase } from "@/lib/supabase-public";
    PRODUCTS (HOMEPAGE)
    ====================================================== */
 export async function getProducts(storeId: string, limit = 8) {
+  // Try to find the featured collection first
+  const { data: featuredCol } = await supabase
+    .from("collections")
+    .select("slug, source_type")
+    .eq("store_id", storeId)
+    .eq("is_featured", true)
+    .single();
+
+  if (featuredCol) {
+    const { products } = await getProductsByCollection(
+      storeId,
+      featuredCol.slug,
+      1,
+      limit,
+      "newest"
+    );
+    if (products && products.length > 0) return products;
+  }
+
+  // Fallback to latest products if no featured collection or it's empty
   const { data, error } = await supabase
     .from("products")
     .select("*")
@@ -81,6 +101,14 @@ export async function getProductsByCollection(
   pageSize: number,
   sort: string
 ) {
+  // 1. Fetch collection metadata to check source type
+  const { data: collectionContent, error: collectionError } = await supabase
+    .from("collections")
+    .select("*")
+    .eq("store_id", storeId)
+    .eq("slug", slug)
+    .single();
+
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
@@ -88,19 +116,31 @@ export async function getProductsByCollection(
     .from("products")
     .select("*", { count: "exact" })
     .eq("store_id", storeId)
-    .eq("status", "published")
-    .contains("collection_slug", [slug]);
+    .eq("status", "published");
 
-  if (sort === "price_asc") {
-    query = query
-      .not("price", "is", null)
-      .order("price", { ascending: true });
-  } else if (sort === "price_desc") {
-    query = query
-      .not("price", "is", null)
-      .order("price", { ascending: false });
-  } else {
+  // 2. Apply Dynamic Source Logic
+  if (collectionContent?.source_type === 'latest') {
     query = query.order("created_at", { ascending: false });
+  } else if (collectionContent?.source_type === 'best_selling') {
+    query = query.order("rating", { ascending: false, nullsFirst: false });
+  } else {
+    // Default or Manual: Use the slug array filter
+    query = query.contains("collection_slug", [slug]);
+  }
+
+  // 3. Apply Pagination Sort (if manual or not already sorted)
+  if (!collectionContent?.source_type || collectionContent.source_type === 'manual') {
+    if (sort === "price_asc") {
+      query = query
+        .not("price", "is", null)
+        .order("price", { ascending: true });
+    } else if (sort === "price_desc") {
+      query = query
+        .not("price", "is", null)
+        .order("price", { ascending: false });
+    } else if (sort === "newest") {
+      query = query.order("created_at", { ascending: false });
+    }
   }
 
   query = query.range(from, to);

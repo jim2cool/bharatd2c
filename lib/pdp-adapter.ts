@@ -1,9 +1,9 @@
-import { supabase } from './supabase-client'
+import { supabaseAdmin } from './supabase-admin'
 import { ProductData, MediaItem, ProductHighlight, BundleOption, Review, ContentSection } from '@/app/(storefront)/products/[slug]/types/pdp'
 
 export async function getProductDataForPDP(slug: string, storeId: string): Promise<ProductData | null> {
     // 1. Fetch Product with variants
-    const { data: product, error: productError } = await supabase
+    const { data: product, error: productError } = await supabaseAdmin
         .from('products')
         .select(`
             *,
@@ -105,7 +105,7 @@ export async function getProductDataForPDP(slug: string, storeId: string): Promi
     }
 
     // 7. Fetch Related Products
-    const { data: relatedData } = await supabase
+    const { data: relatedData } = await supabaseAdmin
         .from('products')
         .select('id, slug, title, images, price, mrp')
         .eq('store_id', storeId)

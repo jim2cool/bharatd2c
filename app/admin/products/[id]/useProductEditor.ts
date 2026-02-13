@@ -3,12 +3,29 @@
 import { useEffect, useState } from 'react'
 import { supabaseBrowser } from '@/lib/supabase-browser'
 
-export type Testimonial = {
-  quote: string
-  name: string
-  location?: string
-  rating: number
-  hidden?: boolean
+// Types for the form data
+export type ProductFormData = {
+  title: string
+  status: 'draft' | 'published'
+  price: number
+  mrp?: number | null
+  cogs: number
+  qty?: number | null
+  location?: string | null
+  rating?: number | null
+  review_count?: number | null
+  highlights: string[]
+  content_markup?: string | null
+  images: string[]
+  testimonials: any[]
+  seo_title?: string | null
+  seo_description?: string | null
+  bundle_settings: { enabled: boolean }
+  urgency_settings: { enabled: boolean; type: string; text?: string | null; timer?: number | null; stock?: number | null }
+  cod_enabled: boolean
+  prepaid_discount_type: 'flat' | 'percentage'
+  prepaid_discount_value?: number | null
+  prepaid_offer_text?: string | null
 }
 
 export function useProductEditor(id: string) {
@@ -16,25 +33,6 @@ export function useProductEditor(id: string) {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  const [rating, setRating] = useState<number | ''>('')
-  const [reviewCount, setReviewCount] = useState<number | ''>('')
-  const [mrp, setMrp] = useState<number | ''>('')
-
-  const [highlights, setHighlights] = useState<string[]>([])
-  const [images, setImages] = useState<string[]>([])
-  const [contentMarkup, setContentMarkup] = useState('')
-  const [testimonials, setTestimonials] = useState<Testimonial[]>([])
-
-  // conversion settings
-  const [bundleSettings, setBundleSettings] = useState<any>({ enabled: true })
-  const [urgencySettings, setUrgencySettings] = useState<any>({ enabled: false, type: 'text', text: '' })
-  const [codEnabled, setCodEnabled] = useState(true)
-
-  // prepaid discount parity
-  const [prepaidDiscountType, setPrepaidDiscountType] = useState<'flat' | 'percentage'>('flat')
-  const [prepaidDiscountValue, setPrepaidDiscountValue] = useState<number | ''>('')
-  const [prepaidOfferText, setPrepaidOfferText] = useState('')
 
   /* ---------- LOAD ---------- */
   useEffect(() => {
@@ -52,94 +50,27 @@ export function useProductEditor(id: string) {
       }
 
       setProduct(data)
-      setRating(data?.rating ?? '')
-      setReviewCount(data?.review_count ?? '')
-      setMrp(data?.mrp ?? '')
-      setHighlights(data?.highlights || [])
-      setImages(data?.images || [])
-      setContentMarkup(data?.content_markup || '')
-      setTestimonials(data?.testimonials || [])
-
-      setBundleSettings(data?.bundle_settings || { enabled: true })
-      setUrgencySettings(data?.urgency_settings || { enabled: false, type: 'text', text: '' })
-      setCodEnabled(data?.cod_enabled ?? true)
-
-      setPrepaidDiscountType(data?.prepaid_discount_type || 'flat')
-      setPrepaidDiscountValue(data?.prepaid_discount_value ?? '')
-      setPrepaidOfferText(data?.prepaid_offer_text || '')
-
       setLoading(false)
     }
 
     load()
   }, [id])
 
-  /* ---------- VALIDATION ---------- */
-  const validate = () => {
-    if (!product) return 'Product not loaded'
-
-    if (rating !== '' && (rating < 0 || rating > 5)) {
-      return 'Rating must be between 0 and 5'
-    }
-
-    if (reviewCount !== '' && reviewCount < 0) {
-      return 'Review count cannot be negative'
-    }
-
-    if (mrp !== '' && mrp < Number(product.price)) {
-      return 'MRP must be greater than or equal to selling price'
-    }
-
-    for (const t of testimonials) {
-      if (!t.quote?.trim()) return 'Testimonial quote is required'
-      if (!t.name?.trim()) return 'Testimonial name is required'
-      if (t.rating < 1 || t.rating > 5)
-        return 'Testimonial rating must be between 1 and 5'
-    }
-
-    return null
-  }
-
   /* ---------- SAVE ---------- */
-  const save = async () => {
-    if (!product) return false
-
-    const validationError = validate()
-    if (validationError) {
-      setError(validationError)
-      return false
-    }
-
+  const save = async (data: ProductFormData) => {
     setSaving(true)
     setError(null)
 
     const payload = {
-      title: product.title,
-      price: Number(product.price),
-      cogs: Number(product.cogs),
-      qty: product.qty ?? null,
-      location: product.location || null,
-      status: product.status,
-
-      seo_title: product.seo_title || null,
-      seo_description: product.seo_description || null,
-
-      rating: rating === '' ? null : rating,
-      review_count: reviewCount === '' ? null : reviewCount,
-      mrp: mrp === '' ? null : mrp,
-
-      highlights,
-      images,
-      testimonials,
-      content_markup: contentMarkup || null,
-
-      bundle_settings: bundleSettings,
-      urgency_settings: urgencySettings,
-      cod_enabled: codEnabled,
-
-      prepaid_discount_type: prepaidDiscountType,
-      prepaid_discount_value: prepaidDiscountValue === '' ? null : Number(prepaidDiscountValue),
-      prepaid_offer_text: prepaidOfferText || null,
+      ...data,
+      // Ensure numeric values are numbers or null
+      price: Number(data.price),
+      cogs: Number(data.cogs),
+      mrp: data.mrp ? Number(data.mrp) : null,
+      qty: data.qty ? Number(data.qty) : null,
+      rating: data.rating ? Number(data.rating) : null,
+      review_count: data.review_count ? Number(data.review_count) : null,
+      prepaid_discount_value: data.prepaid_discount_value ? Number(data.prepaid_discount_value) : null,
     }
 
     const { error } = await supabaseBrowser
@@ -159,44 +90,9 @@ export function useProductEditor(id: string) {
 
   return {
     product,
-    setProduct,
-
     loading,
     saving,
     error,
-    setError,
-
-    rating,
-    setRating,
-    reviewCount,
-    setReviewCount,
-    mrp,
-    setMrp,
-
-    highlights,
-    setHighlights,
-    images,
-    setImages,
-    contentMarkup,
-    setContentMarkup,
-
-    testimonials,
-    setTestimonials,
-
-    bundleSettings,
-    setBundleSettings,
-    urgencySettings,
-    setUrgencySettings,
-    codEnabled,
-    setCodEnabled,
-
-    prepaidDiscountType,
-    setPrepaidDiscountType,
-    prepaidDiscountValue,
-    setPrepaidDiscountValue,
-    prepaidOfferText,
-    setPrepaidOfferText,
-
     save,
   }
 }

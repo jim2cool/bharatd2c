@@ -1,5 +1,5 @@
 import { cookies, headers } from 'next/headers'
-import { supabase } from './supabase'
+import { supabaseAdmin } from './supabase-admin'
 
 export async function getActiveStoreId(): Promise<string | null> {
   const h = await headers()
@@ -15,7 +15,7 @@ export async function getActiveStoreId(): Promise<string | null> {
     console.log('Resolving store for slug:', storeSlug) // Debug log
 
     // Lookup store ID by slug/domain with robust query
-    const { data, error } = await supabase
+    const { data: store, error } = await supabaseAdmin
       .from('stores')
       .select('id')
       .or(`slug.eq.${storeSlug},domain.eq.${storeSlug},custom_domain.eq.${storeSlug}`)
@@ -26,7 +26,7 @@ export async function getActiveStoreId(): Promise<string | null> {
       return null
     }
 
-    if (data) return data.id
+    if (store) return store.id
   }
 
   // Fallback to cookie (mostly for local dev without middleware doing subdomain logic)

@@ -17,7 +17,14 @@ export async function GET(req: NextRequest) {
     }
 
     // Allow Root Domain (Platform)
-    if (domain === process.env.NEXT_PUBLIC_ROOT_DOMAIN || domain === "easy-d2c.com") {
+    const normalizedDomain = domain.toLowerCase();
+    const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN?.toLowerCase();
+    
+    if (
+        normalizedDomain === rootDomain || 
+        normalizedDomain === "easy-d2c.com" || 
+        normalizedDomain === "www.easy-d2c.com"
+    ) {
         console.log(`[Caddy] Authorized Root Domain: ${domain}`);
         return new NextResponse("OK", { status: 200 });
     }

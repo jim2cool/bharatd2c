@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { supabaseBrowser } from '@/lib/supabase-browser'
 import { evaluateCODRisk } from '@/lib/cod-risk'
+import { Layout, Sparkles } from 'lucide-react'
+import { toast } from 'sonner'
 
 const STATUS_OPTIONS = [
   'new',
@@ -395,32 +397,111 @@ export default function OrderDetailPage() {
         </div>
 
         {/* STATUS */}
-        <div className="bg-white border rounded p-4">
-          <h2 className="font-semibold mb-2">Order status</h2>
+        <div className="bg-white border border-neutral-200 rounded-xl p-6 shadow-sm">
+          <h2 className="text-sm font-bold text-neutral-800 mb-4 flex items-center gap-2">
+            <Layout className="w-4 h-4 text-blue-500" />
+            Order status
+          </h2>
           <select
-            className="w-full border rounded px-2 py-2"
+            className="w-full border border-neutral-100 bg-neutral-50 rounded-lg px-3 py-2.5 text-sm font-semibold focus:ring-2 focus:ring-black outline-none transition-all"
             value={order.status}
             onChange={e => updateStatus(e.target.value)}
           >
             {STATUS_OPTIONS.map(s => (
               <option key={s} value={s}>
-                {s}
+                {s.charAt(0).toUpperCase() + s.slice(1)}
               </option>
             ))}
           </select>
-          <p className="text-xs text-gray-500 mt-2">
-            Changing status affects fulfillment & reporting.
+          <p className="text-[10px] text-neutral-400 mt-2 font-medium">
+            Changing status affects platform-wide reporting.
           </p>
         </div>
 
+        {/* FULFILLMENT TRACKING */}
+        <div className="bg-white border border-neutral-200 rounded-xl p-6 shadow-sm overflow-hidden relative">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-bold text-neutral-800 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-purple-500" />
+              Fulfillment
+            </h2>
+            <div className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${meta.fulfillment_status === 'fulfilled' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
+              {meta.fulfillment_status === 'fulfilled' ? 'Fulfilled' : 'Unfulfilled'}
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-1.5 ml-1">Carrier</label>
+              <input
+                className="w-full border border-neutral-100 bg-neutral-50 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-black outline-none"
+                placeholder="e.g. Delhivery, BlueDart"
+                value={meta.carrier || ''}
+                onChange={e => setOrder({ ...order, meta: { ...meta, carrier: e.target.value } })}
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-1.5 ml-1">Tracking Number</label>
+              <input
+                className="w-full border border-neutral-100 bg-neutral-50 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-black outline-none"
+                placeholder="Tracking ID"
+                value={meta.tracking_number || ''}
+                onChange={e => setOrder({ ...order, meta: { ...meta, tracking_number: e.target.value } })}
+              />
+            </div>
+
+            <button
+              onClick={saveCustomer}
+              disabled={saving}
+              className={`w-full py-2.5 rounded-lg text-sm font-bold transition-all shadow-sm ${meta.fulfillment_status === 'fulfilled' ? 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200' : 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-100'}`}
+            >
+              {saving ? 'Processing...' : (meta.fulfillment_status === 'fulfilled' ? 'Update Details' : 'Mark as Fulfilled')}
+            </button>
+
+            {meta.fulfillment_status !== 'fulfilled' && (
+              <button
+                onClick={() => {
+                  const newMeta = { ...meta, fulfillment_status: 'fulfilled', fulfilled_at: new Date().toISOString() }
+                  setOrder({ ...order, meta: newMeta })
+                  // Trigger save directly for status toggle
+                  supabaseBrowser.from('orders').update({ meta: newMeta }).eq('id', order.id).then(() => {
+                    toast.success('Order marked as fulfilled')
+                    loadOrder()
+                  })
+                }}
+                className="w-full py-2 text-[11px] font-bold text-blue-600 hover:underline"
+              >
+                Quick Fulfill (No Tracking)
+              </button>
+            )}
+
+            {meta.fulfillment_status === 'fulfilled' && (
+              <button
+                onClick={() => {
+                  const newMeta = { ...meta, fulfillment_status: 'unfulfilled', fulfilled_at: null }
+                  setOrder({ ...order, meta: newMeta })
+                  supabaseBrowser.from('orders').update({ meta: newMeta }).eq('id', order.id).then(() => {
+                    toast.success('Order marked as unfulfilled')
+                    loadOrder()
+                  })
+                }}
+                className="w-full py-2 text-[11px] font-bold text-red-600 hover:underline"
+              >
+                Reset Fulfillment
+              </button>
+            )}
+          </div>
+        </div>
+
         {/* COD RISK */}
-        <div className="bg-yellow-50 border border-yellow-200 rounded p-4">
-          <h2 className="font-semibold mb-2">
-            COD Risk (Experimental)
+        <div className="bg-orange-50/50 border border-orange-200 rounded-xl p-6">
+          <h2 className="text-sm font-bold text-orange-900 mb-2 flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-orange-400" />
+            COD Risk Assessment
           </h2>
           <button
             onClick={runRisk}
-            className="w-full bg-yellow-600 text-white py-2 rounded"
+            className="w-full bg-white border border-orange-200 text-orange-600 py-2.5 rounded-lg text-sm font-bold hover:bg-orange-100 transition-colors shadow-sm"
           >
             Run risk check
           </button>
@@ -428,24 +509,24 @@ export default function OrderDetailPage() {
 
         {/* MANUAL VERIFY ACTION (P0-3) */}
         {order.payment_mode === 'cod' && !order.meta?.otp_verified && (
-          <div className="bg-blue-50 border border-blue-200 rounded p-4">
-            <h2 className="font-semibold mb-2">Manual Verification</h2>
-            <p className="text-xs text-gray-600 mb-3">
-              If you verified this order via call/WhatsApp, mark it here.
+          <div className="bg-blue-600 text-white rounded-xl p-6 shadow-xl shadow-blue-100 border border-blue-400">
+            <h2 className="text-sm font-bold mb-2">Manual Verification</h2>
+            <p className="text-xs opacity-90 mb-4 leading-relaxed font-medium">
+              If you verified this order via call/WhatsApp, mark it here to unlock fulfillment.
             </p>
             <button
               onClick={manualVerify}
               disabled={saving}
-              className="w-full bg-blue-600 text-white py-2 rounded text-sm font-medium"
+              className="w-full bg-white text-blue-600 py-2.5 rounded-lg text-sm font-bold hover:bg-neutral-50 transition-colors"
             >
-              Mark as OTP Verified
+              Mark as Verified
             </button>
           </div>
         )}
 
         <button
           onClick={() => router.back()}
-          className="w-full border rounded py-2 bg-white"
+          className="w-full border border-neutral-200 rounded-xl py-3 text-sm font-bold bg-white hover:bg-neutral-50 transition-colors text-neutral-600"
         >
           Back to orders
         </button>
@@ -453,3 +534,4 @@ export default function OrderDetailPage() {
     </div>
   )
 }
+

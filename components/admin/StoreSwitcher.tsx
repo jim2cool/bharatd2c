@@ -14,27 +14,41 @@ export default function StoreSwitcher() {
   const [active, setActive] = useState<string | null>(null)
 
   useEffect(() => {
-    // Load stores
-    supabaseBrowser
-      .from('stores')
-      .select('id, name')
-      .order('created_at')
-      .then(({ data }) => {
-        const list = data || []
-        setStores(list)
+    async function loadStores() {
+      // Get current user
+      const { data: { user } } = await supabaseBrowser.auth.getUser()
+      if (!user) return
 
-        if (list.length === 0) return
+      // Load stores owned by this user
+      const { data, error } = await supabaseBrowser
+        .from('stores')
+        .select('id, name')
+        .eq('owner_id', user.id)
+        .order('created_at')
 
-        const existing = getActiveStoreIdClient()
+      if (error) {
+        console.error('Failed to load stores:', error)
+        return
+      }
 
-        // 🔑 AUTO-HEAL: if no active store, pick first
-        if (!existing) {
-          localStorage.setItem('bharat_active_store_id', list[0].id)
-          setActive(list[0].id)
-        } else {
-          setActive(existing)
-        }
-      })
+      const list = data || []
+      setStores(list)
+
+      if (list.length === 0) return
+
+      const existing = getActiveStoreIdClient()
+
+      // 🔑 AUTO-HEAL: if no active store or existing one is not in the list, pick first
+      const isValid = existing && list.some(s => s.id === existing)
+      if (!isValid) {
+        localStorage.setItem('bharat_active_store_id', list[0].id)
+        setActive(list[0].id)
+      } else {
+        setActive(existing)
+      }
+    }
+
+    loadStores()
   }, [])
 
   if (stores.length === 0) return null

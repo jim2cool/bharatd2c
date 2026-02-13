@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import "@/app/theme/bharat-base/theme.config";
 import ThemeProvider from "@/components/ThemeProvider";
@@ -12,6 +12,11 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+const playfair = Playfair_Display({
+  variable: "--font-serif",
   subsets: ["latin"],
 });
 
@@ -48,7 +53,7 @@ export default async function RootLayout({
   return (
     <html lang="en-IN">
       <body
-        className="antialiased bg-white text-gray-900"
+        className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} antialiased bg-white text-gray-900`}
       >
         <ThemeProvider themeConfig={themeConfig}>
           {children}

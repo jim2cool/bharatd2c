@@ -4,10 +4,25 @@
     }
 }
 
-:443, :80 {
+# Local Development
+localhost {
+    tls internal
+    reverse_proxy localhost:3000
+}
+
+# Production (Catch-all for on-demand SSL)
+:443 {
     tls {
         on_demand
     }
     reverse_proxy localhost:3000
     encode zstd gzip
+}
+
+# Redirect HTTP->HTTPS
+:80 {
+    # Caddy does this automatically for specific domains, 
+    # but for :443 catch-all we need to be explicit or rely on auto-https logic.
+    # Simple reverse proxy is safest to avoid loops if upstream handles redirects.
+    reverse_proxy localhost:3000
 }
