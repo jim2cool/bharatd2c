@@ -23,14 +23,16 @@ export async function GET(req: NextRequest) {
     if (
         normalizedDomain === rootDomain ||
         normalizedDomain === "easy-d2c.com" ||
-        normalizedDomain === "www.easy-d2c.com"
+        normalizedDomain === "www.easy-d2c.com" ||
+        normalizedDomain === "bharat-d2c.com" ||
+        normalizedDomain === "www.bharat-d2c.com"
     ) {
         console.log(`[Caddy] Authorized Root Domain: ${domain}`);
         return new NextResponse("OK", { status: 200 });
     }
 
-    // Allow subdomains of easy-d2c.com (store slugs)
-    if (normalizedDomain.endsWith(".easy-d2c.com")) {
+    // Allow subdomains of easy-d2c.com or bharat-d2c.com (store slugs)
+    if (normalizedDomain.endsWith(".easy-d2c.com") || normalizedDomain.endsWith(".bharat-d2c.com")) {
         const slug = normalizedDomain.split(".")[0];
 
         const { data: storeData, error: storeError } = await supabaseAdmin

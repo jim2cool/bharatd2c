@@ -31,7 +31,12 @@ export default async function middleware(request: NextRequest) {
     if (cleanHostname.includes('localhost')) {
         if (parts.length === 1) isPlatformRoot = true
     } else {
-        if (cleanHostname === 'easy-d2c.com' || cleanHostname === 'www.easy-d2c.com') {
+        if (
+            cleanHostname === 'easy-d2c.com' ||
+            cleanHostname === 'www.easy-d2c.com' ||
+            cleanHostname === 'bharat-d2c.com' ||
+            cleanHostname === 'www.bharat-d2c.com'
+        ) {
             isPlatformRoot = true
         }
     }
