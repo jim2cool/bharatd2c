@@ -34,7 +34,7 @@ export default function Header({ store }: { store?: any }) {
           {logoUrl ? (
             <img src={logoUrl} alt={storeName} className="h-10 w-auto object-contain" />
           ) : (
-            <span className="font-extrabold tracking-tighter text-2xl uppercase bg-gradient-to-r from-neutral-900 to-neutral-600 bg-clip-text text-transparent">
+            <span className="font-black tracking-tighter text-2xl uppercase text-neutral-900">
               {storeName}
             </span>
           )}
@@ -74,7 +74,7 @@ export default function Header({ store }: { store?: any }) {
           {logoUrl ? (
             <img src={logoUrl} alt={storeName} className="h-8 w-auto object-contain mx-auto" />
           ) : (
-            <span className="font-extrabold tracking-tighter text-lg uppercase bg-gradient-to-r from-neutral-900 to-neutral-600 bg-clip-text text-transparent">
+            <span className="font-black tracking-tighter text-lg uppercase text-neutral-900">
               {storeName}
             </span>
           )}
