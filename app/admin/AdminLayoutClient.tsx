@@ -51,8 +51,9 @@ export function AdminLayoutClient({
     { label: 'Taxes', href: '#' },
 
     { section: 'Settings' },
+    { label: 'Store Info', href: '/admin/settings/general' },
     {
-      label: 'Store settings',
+      label: 'Store details',
       href: storeId ? `/admin/stores/${storeId}` : '/admin/stores',
     },
     { label: 'Domains', href: '/admin/settings/domains' },

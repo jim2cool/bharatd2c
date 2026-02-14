@@ -12,24 +12,35 @@ export async function getActiveStoreId(): Promise<string | null> {
   const storeSlug = h.get('x-store-slug')
 
   if (storeSlug) {
-    console.log('Resolving store for slug:', storeSlug) // Debug log
-
     // Lookup store ID by slug/domain with robust query
-    const { data: store, error } = await supabaseAdmin
+    const { data: store } = await supabaseAdmin
       .from('stores')
       .select('id')
       .or(`slug.eq.${storeSlug},domain.eq.${storeSlug},custom_domain.eq.${storeSlug}`)
       .single()
 
-    if (error) {
-      console.error('Error fetching store for slug:', storeSlug, error)
-      return null
-    }
-
     if (store) return store.id
   }
 
-  // Fallback to cookie (mostly for local dev without middleware doing subdomain logic)
+  // Fallback to cookie
   const cookieStore = await cookies()
   return cookieStore.get('easy_active_store_id')?.value || null
+}
+
+export async function getActiveStore() {
+  const storeId = await getActiveStoreId();
+  if (!storeId) return null;
+
+  const { data: store, error } = await supabaseAdmin
+    .from('stores')
+    .select('*')
+    .eq('id', storeId)
+    .single();
+
+  if (error) {
+    console.error('Error fetching full store data:', error);
+    return null;
+  }
+
+  return store;
 }

@@ -6,10 +6,14 @@ import { getCart } from "@/lib/cart";
 import { SlideOutCart } from "@/components/SlideOutCart";
 import { ShoppingBag, Menu, X } from "lucide-react";
 
-export default function Header() {
+export default function Header({ store }: { store?: any }) {
   const [count, setCount] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+
+  // Fallback to "Easy D2C" only if store name is somehow missing
+  const storeName = store?.name || "Easy D2C";
+  const logoUrl = store?.logo_url;
 
   useEffect(() => {
     const updateCartCount = () => {
@@ -26,8 +30,14 @@ export default function Header() {
     <header className="site-header">
       {/* ================= DESKTOP ================= */}
       <div className="site-header-inner desktop">
-        <Link href="/" className="site-logo font-bold tracking-tight text-xl uppercase">
-          Easy D2C
+        <Link href="/" className="site-logo flex items-center">
+          {logoUrl ? (
+            <img src={logoUrl} alt={storeName} className="h-10 w-auto object-contain" />
+          ) : (
+            <span className="font-extrabold tracking-tighter text-2xl uppercase bg-gradient-to-r from-neutral-900 to-neutral-600 bg-clip-text text-transparent">
+              {storeName}
+            </span>
+          )}
         </Link>
 
         <nav className="site-nav flex items-center gap-8">
@@ -60,8 +70,14 @@ export default function Header() {
           {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
 
-        <Link href="/" className="site-logo font-bold uppercase text-sm tracking-tighter">
-          Easy D2C
+        <Link href="/" className="site-logo">
+          {logoUrl ? (
+            <img src={logoUrl} alt={storeName} className="h-8 w-auto object-contain mx-auto" />
+          ) : (
+            <span className="font-extrabold tracking-tighter text-lg uppercase bg-gradient-to-r from-neutral-900 to-neutral-600 bg-clip-text text-transparent">
+              {storeName}
+            </span>
+          )}
         </Link>
 
         <button

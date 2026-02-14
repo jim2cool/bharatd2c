@@ -1,17 +1,17 @@
 import Header from "@/app/theme/easy-base/layout/Header";
 import Footer from "@/app/theme/easy-base/layout/Footer";
 import AnnouncementBar from "@/app/theme/easy-base/layout/AnnouncementBar";
-import { getActiveStoreId } from "@/lib/getActiveStore";
+import { getActiveStore } from "@/lib/getActiveStore";
 
 export default async function StorefrontLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const storeId = await getActiveStoreId();
+  const store = await getActiveStore();
 
   // If Landing Page (no store),
-  if (!storeId) {
+  if (!store) {
     return <>{children}</>;
   }
 
@@ -23,7 +23,7 @@ export default async function StorefrontLayout({
       </div>
 
       {/* Store Header */}
-      <Header />
+      <Header store={store} />
 
       {/* Page Content */}
       <main className="pt-0">
