@@ -398,7 +398,7 @@ app/
 │   └── upload-product-image/
 │
 ├── theme/
-│   └── bharat-base/
+│   └── easy-base/
 │       ├── pdp/
 │       │   ├── PDPBasic.tsx
 │       │   ├── PDPResolver.tsx

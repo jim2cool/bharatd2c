@@ -1,4 +1,4 @@
-BHARAT BASE — DESIGN SYSTEM
+EASY D2C BASE — DESIGN SYSTEM
 (Theme-Wide, Authoritative Reference)
 
 Audience: Designers, UI engineers, theme contributors
@@ -7,10 +7,10 @@ Status: LOCKED BASELINE
 
 0. Core Principle (Read First)
 
-Bharat Base is not expressive.
+Easy D2C Base is not expressive.
 It is predictable, calm, scalable, and conversion-safe.
 
-Creativity belongs in Bharat Premium, not here.
+Creativity belongs in Easy D2C Premium, not here.
 
 1. Header / Navigation — Visual Tokens
 Intent
@@ -94,7 +94,7 @@ No blur, no opacity layers
 
 2. PDP (Product Detail Page) — Design Extensions
 
-PDP is where Bharat Base earns money.
+PDP is where Easy D2C Base earns money.
 No experiments here.
 
 PDP Layout Zones (Fixed Order)
@@ -325,6 +325,6 @@ No per-page visual logic
 
 7. Status
 
-✅ Official Design System for Bharat Base
+✅ Official Design System for Easy D2C Base
 🔒 Applies across all pages, sections, and components
 🧠 Any deviation requires design review

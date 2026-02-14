@@ -1,6 +1,6 @@
-import Header from "@/app/theme/bharat-base/layout/Header";
-import Footer from "@/app/theme/bharat-base/layout/Footer";
-import AnnouncementBar from "@/app/theme/bharat-base/layout/AnnouncementBar";
+import Header from "@/app/theme/easy-base/layout/Header";
+import Footer from "@/app/theme/easy-base/layout/Footer";
+import AnnouncementBar from "@/app/theme/easy-base/layout/AnnouncementBar";
 import { getActiveStoreId } from "@/lib/getActiveStore";
 
 export default async function StorefrontLayout({
@@ -10,7 +10,7 @@ export default async function StorefrontLayout({
 }) {
   const storeId = await getActiveStoreId();
 
-  // If Landing Page (no store), render children without Store layout
+  // If Landing Page (no store),
   if (!storeId) {
     return <>{children}</>;
   }

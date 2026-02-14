@@ -49,8 +49,8 @@ export default function StoresPage() {
   }
 
   const selectStore = (storeId: string) => {
-    localStorage.setItem('bharat_active_store_id', storeId)
-    document.cookie = `bharat_active_store_id=${storeId}; path=/; SameSite=Lax`
+    localStorage.setItem('easy_active_store_id', storeId)
+    document.cookie = `easy_active_store_id=${storeId}; path=/; SameSite=Lax`
     router.push('/admin/products')
   }
 

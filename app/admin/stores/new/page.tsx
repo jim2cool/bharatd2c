@@ -37,7 +37,7 @@ export default function NewStorePage() {
     }
 
     // auto-select new store
-    document.cookie = `bharat_active_store_id=${data.id}; path=/; SameSite=Lax`
+    document.cookie = `easy_active_store_id=${data.id}; path=/; SameSite=Lax`
 
     router.push(`/admin/stores/${data.id}`)
   }
@@ -70,6 +70,7 @@ export default function NewStorePage() {
 
       <button
         onClick={createStore}
+        title="Create Easy Store"
         disabled={loading}
         className="px-4 py-2 bg-black text-white rounded"
       >

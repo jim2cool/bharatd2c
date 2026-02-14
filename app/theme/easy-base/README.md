@@ -1,4 +1,4 @@
-# Bharat Base Theme
+# Easy D2C Base Theme
 
 This theme is a **presentation-only layer**.
 

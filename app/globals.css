@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /* =========================================================
-   BHARAT BASE — GLOBAL DESIGN TOKENS
+   EASY D2C BASE — GLOBAL DESIGN TOKENS
    Applies to ALL pages, sections, components
    ========================================================= */
 :root {
@@ -222,8 +222,7 @@ body {
   font-family: var(--font-sans);
   background-color: var(--bg-page);
   color: var(--gray-900);
-  overflow-x: hidden;
-  /* Bharat safety */
+  /* Easy D2C safety */
 }
 
 /* =========================================================
@@ -354,7 +353,7 @@ body {
   background-color: var(--white);
   border: 1px solid var(--gray-200);
   border-radius: var(--radius-md);
-  overflow: hidden;
+  /* Easy D2C branding */
 }
 
 .card-body {

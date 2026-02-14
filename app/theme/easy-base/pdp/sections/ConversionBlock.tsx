@@ -159,7 +159,7 @@ export default function ConversionBlock({
 
       {/* SMALL FOOTER TRUST */}
       <div className="pt-4 border-t border-neutral-50 flex items-center justify-between opacity-40 grayscale group-hover:grayscale-0 transition-all">
-        <div className="text-[8px] font-black uppercase tracking-widest">Bharat Trusted</div>
+        <div className="text-[8px] font-black uppercase tracking-widest">Easy D2C Trusted</div>
         <div className="flex gap-2">
           <div className="w-4 h-4 bg-neutral-200 rounded-sm" />
           <div className="w-4 h-4 bg-neutral-200 rounded-sm" />

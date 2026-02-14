@@ -22,7 +22,7 @@ export default async function middleware(request: NextRequest) {
     const isAdminSubdomain = hostname.startsWith('admin.')
 
     // 2. Extract the store slug/domain
-    const cleanHostname = hostname.replace(/^www\./, '')
+    const cleanHostname = hostname.split(':')[0].replace(/^www\./, '')
     const parts = cleanHostname.split('.')
     let storeSlug = ''
 
@@ -31,7 +31,9 @@ export default async function middleware(request: NextRequest) {
     if (cleanHostname.includes('localhost')) {
         if (parts.length === 1) isPlatformRoot = true
     } else {
-        // Add production platform domain check here if known
+        if (cleanHostname === 'easy-d2c.com' || cleanHostname === 'www.easy-d2c.com') {
+            isPlatformRoot = true
+        }
     }
 
     // Logic for storeSlug

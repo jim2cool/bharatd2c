@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
-import "@/app/theme/bharat-base/theme.config";
+import "@/app/theme/easy-base/theme.config";
 import ThemeProvider from "@/components/ThemeProvider";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 

@@ -1,4 +1,4 @@
-BHARAT BASE — SECTION CONTRACT
+EASY D2C BASE — SECTION CONTRACT
 (Universal Sections × Theme Skins)
 
 Status: LOCKED
@@ -15,7 +15,7 @@ Themes only skin, never reimplement
 
 No CSS fights between globals, Tailwind, and inline styles
 
-Bharat Base remains stable and scalable
+Easy D2C Base remains stable and scalable
 
 If a section violates this contract, it is invalid, even if it “looks better”.
 
@@ -27,7 +27,7 @@ Themes are VISUAL SKINS.
 Separation of Responsibility
 Layer	Owns	Must NOT Own
 Section (/components)	Structure, data, behavior	Colors, radius, typography
-Theme (/theme/bharat-base)	Visual identity	Markup, logic
+Theme (/theme/easy-base)	Visual identity	Markup, logic
 globals.css	Tokens + base rules	Page-specific hacks
 3. Folder Responsibilities (Confirmed)
 
@@ -50,7 +50,7 @@ TestimonialCard.tsx
 
 TrustBar.tsx
 
-/app/theme/bharat-base
+/app/theme/easy-base
 
 ✅ Theme-specific CSS, tokens, overrides
 ❌ No JSX duplication of sections
@@ -261,6 +261,6 @@ No regressions
 
 12. Final Status
 
-✅ Section architecture is now decided permanently
+✅ Official Section architecture for Easy D2C Base
 ✅ Future themes will be fast and clean
 ✅ CSS fights will stop

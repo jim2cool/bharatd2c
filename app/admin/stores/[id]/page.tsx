@@ -34,7 +34,7 @@ export default function StoreSettingsPage() {
       router.replace('/admin/stores')
       return
     }
-    localStorage.setItem('bharat_active_store_id', id)
+    localStorage.setItem('easy_active_store_id', id)
   }, [id, router])
 
   /* -------------------------------------------------
@@ -72,32 +72,32 @@ export default function StoreSettingsPage() {
   /* -------------------------------------------------
      SAVE
   ------------------------------------------------- */
-const save = async () => {
-  if (!store) return
+  const save = async () => {
+    if (!store) return
 
-  setSaving(true)
-  setError(null)
+    setSaving(true)
+    setError(null)
 
-  const { error } = await supabaseBrowser
-    .from('stores')
-    .update({
-      name: store.name,
-      domain: store.domain,
-      is_active: store.is_active,
-      cod_enabled: store.cod_enabled,
-      buy_now_only_default: store.buy_now_only_default,
-    })
-    .eq('id', store.id)
+    const { error } = await supabaseBrowser
+      .from('stores')
+      .update({
+        name: store.name,
+        domain: store.domain,
+        is_active: store.is_active,
+        cod_enabled: store.cod_enabled,
+        buy_now_only_default: store.buy_now_only_default,
+      })
+      .eq('id', store.id)
 
-  if (error) {
-    console.error('SAVE STORE ERROR', error)
-    setError('Failed to save changes')
+    if (error) {
+      console.error('SAVE STORE ERROR', error)
+      setError('Failed to save changes')
+      setSaving(false)
+      return
+    }
+
     setSaving(false)
-    return
   }
-
-  setSaving(false)
-}
 
   /* -------------------------------------------------
      GUARDS
@@ -189,13 +189,13 @@ const save = async () => {
         />
 
         <Toggle
-  label="Buy Now only mode"
-  hint="Disables cart and forces instant checkout"
-  checked={!!store.buy_now_only_default}
-  onChange={v =>
-    setStore({ ...store, buy_now_only_default: v })
-  }
-/>
+          label="Buy Now only mode"
+          hint="Disables cart and forces instant checkout"
+          checked={!!store.buy_now_only_default}
+          onChange={v =>
+            setStore({ ...store, buy_now_only_default: v })
+          }
+        />
       </Section>
 
       {/* META */}
