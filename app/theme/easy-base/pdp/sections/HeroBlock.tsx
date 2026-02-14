@@ -1,4 +1,4 @@
-import Rating from "@/app/theme/bharat-base/shared/Rating";
+import Rating from "@/app/theme/easy-base/shared/Rating";
 
 type HeroBlockProps = {
   title: string;
