@@ -1,6 +1,6 @@
 "use client";
 
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, ShieldCheck, Zap, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { addToCart } from "@/lib/cart";
 
@@ -77,11 +77,11 @@ export default function ConversionBlock({
       <div className="flex flex-col gap-2">
         {urgencyText && (
           <div className="flex items-center gap-2 px-3 py-2 bg-orange-50 text-orange-700 rounded-xl text-[10px] font-black uppercase tracking-wider border border-orange-100">
-            <span className="animate-pulse">⚡</span> {urgencyText}
+            <Zap size={10} className="text-orange-500 animate-pulse fill-orange-500" /> {urgencyText}
           </div>
         )}
         <div className="flex items-center gap-2 px-3 py-2 bg-neutral-50 text-neutral-500 rounded-xl text-[10px] font-bold uppercase tracking-wider border border-neutral-100">
-          🛡️ 100% Secure Transaction
+          <ShieldCheck size={10} className="text-neutral-400" /> 100% Secure Transaction
         </div>
       </div>
 
@@ -149,8 +149,8 @@ export default function ConversionBlock({
             </div>
 
             {prepaidEnabled && prepaidPrice && (
-              <p className="text-[10px] font-black text-green-600 text-center uppercase tracking-widest bg-green-50 py-2 rounded-lg">
-                ✨ Unlock ₹{price - prepaidPrice} Reward on Prepaid
+              <p className="text-[10px] font-black text-green-600 text-center uppercase tracking-widest bg-green-50 py-2 rounded-lg flex items-center justify-center gap-2">
+                <Sparkles size={10} className="fill-green-600" /> Unlock ₹{price - prepaidPrice} Reward on Prepaid
               </p>
             )}
           </div>

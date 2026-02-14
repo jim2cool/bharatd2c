@@ -24,9 +24,9 @@ export default function PlatformSettingsPage() {
     const [settings, setSettings] = useState<Record<string, any>>({
         maintenance_mode: false,
         registration_enabled: true,
-        support_email: "support@bharatd2c.com",
-        main_domain: "bharatd2c.com",
-        cname_target: "ingress.bharatd2c.com"
+        support_email: "support@easy-d2c.com",
+        main_domain: "easy-d2c.com",
+        cname_target: "ingress.easy-d2c.com"
     });
 
     const [hasChanges, setHasChanges] = useState(false);
@@ -157,14 +157,14 @@ export default function PlatformSettingsPage() {
                                     description="Used for main storefront landing and core routing"
                                     value={settings.main_domain}
                                     onChange={(val: string) => handleChange("main_domain", val)}
-                                    placeholder="bharatd2c.com"
+                                    placeholder="easy-d2c.com"
                                 />
                                 <InputBlock
                                     label="Custom Domain CNAME Target"
                                     description="Value sellers should point their DNS to"
                                     value={settings.cname_target}
                                     onChange={(val: string) => handleChange("cname_target", val)}
-                                    placeholder="ingress.bharatd2c.com"
+                                    placeholder="ingress.easy-d2c.com"
                                 />
                             </div>
                         </section>
@@ -180,7 +180,7 @@ export default function PlatformSettingsPage() {
                                     description="Primary contact address for platform-wide issues"
                                     value={settings.support_email}
                                     onChange={(val: string) => handleChange("support_email", val)}
-                                    placeholder="support@bharatd2c.com"
+                                    placeholder="support@easy-d2c.com"
                                 />
                                 <div className="p-4 bg-purple-50 rounded-2xl border border-purple-100 mt-4">
                                     <div className="flex gap-3">

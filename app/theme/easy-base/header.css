@@ -1,5 +1,5 @@
 /* =========================================================
-   SITE HEADER — BHARAT BASE
+   SITE HEADER — EASY D2C BASE
    ========================================================= */
 
 .site-header {
@@ -8,7 +8,8 @@
   z-index: 50;
 
   background: #ffffff;
-  border-bottom: 1px solid #e5e7eb; /* gray-200 */
+  border-bottom: 1px solid #e5e7eb;
+  /* gray-200 */
 
   /* subtle separation from page */
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);

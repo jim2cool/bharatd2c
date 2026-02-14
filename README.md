@@ -1,3 +1,3 @@
-# Bharat D2C Platform
+# Easy D2C Platform
 
 India-first D2C commerce platform.

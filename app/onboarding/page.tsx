@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabaseBrowser } from '@/lib/supabase-browser'
+import { Shirt, Sparkles, Monitor, Home, Package } from 'lucide-react'
 
 // Helper to slugify store name
 function slugify(text: string) {
@@ -53,11 +54,11 @@ export default function OnboardingPage() {
     const [category, setCategory] = useState('')
 
     const CATEGORIES = [
-        { id: 'fashion', label: 'Fashion & Apparel', icon: '👕' },
-        { id: 'beauty', label: 'Beauty & Wellness', icon: '✨' },
-        { id: 'tech', label: 'Electronics & Tech', icon: '💻' },
-        { id: 'home', label: 'Home & Decor', icon: '🏠' },
-        { id: 'other', label: 'Other / General', icon: '📦' },
+        { id: 'fashion', label: 'Fashion & Apparel', icon: <Shirt className="w-6 h-6" /> },
+        { id: 'beauty', label: 'Beauty & Wellness', icon: <Sparkles className="w-6 h-6" /> },
+        { id: 'tech', label: 'Electronics & Tech', icon: <Monitor className="w-6 h-6" /> },
+        { id: 'home', label: 'Home & Decor', icon: <Home className="w-6 h-6" /> },
+        { id: 'other', label: 'Other / General', icon: <Package className="w-6 h-6" /> },
     ]
 
     const handleCreateStore = async () => {
@@ -231,7 +232,7 @@ export default function OnboardingPage() {
                                         onClick={() => setCategory(cat.id)}
                                         className={`flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-all ${category === cat.id ? 'border-slate-900 bg-slate-50 shadow-md' : 'border-slate-50 hover:border-slate-200 bg-white'}`}
                                     >
-                                        <span className="text-2xl">{cat.icon}</span>
+                                        <span className="text-slate-500">{cat.icon}</span>
                                         <span className="text-sm font-bold text-slate-900">{cat.label}</span>
                                         {category === cat.id && (
                                             <div className="ml-auto w-5 h-5 bg-slate-900 rounded-full flex items-center justify-center">
