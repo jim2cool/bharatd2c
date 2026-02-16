@@ -128,12 +128,21 @@ export default async function middleware(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser()
 
-    if (url.pathname.startsWith("/admin") || url.pathname.startsWith("/super-admin")) {
+    const normalizedPath = url.pathname.replace(/\/$/, "") || "/";
+    const isLoginPath = normalizedPath === "/login" || normalizedPath === "/super-admin/login";
+
+    if ((normalizedPath.startsWith("/admin") || normalizedPath.startsWith("/super-admin")) && !isLoginPath) {
         if (!user) {
-            const redirectUrl = request.nextUrl.clone();
-            const isSuper = url.pathname.startsWith("/super-admin");
-            redirectUrl.pathname = isSuper ? "/super-admin/login" : "/login";
-            redirectUrl.searchParams.set("next", request.nextUrl.pathname);
+            const isSuper = normalizedPath.startsWith("/super-admin");
+            const redirectPath = isSuper ? "/super-admin/login" : "/login";
+            const redirectUrl = new URL(redirectPath, request.url);
+            redirectUrl.searchParams.set("next", url.pathname);
+
+            // Force HTTPS if in production
+            if (process.env.NODE_ENV === 'production') {
+                redirectUrl.protocol = 'https:';
+            }
+
             return NextResponse.redirect(redirectUrl);
         }
 

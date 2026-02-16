@@ -11,6 +11,7 @@ import { MobileStickyCTA } from "./MobileStickyCTA"
 import { UrgencyBar } from "./UrgencyBar"
 import { QuantitySelector } from "./QuantitySelector"
 import { DeliveryEstimator } from "./DeliveryEstimator"
+import { QuantityBreaks } from "./QuantityBreaks"
 import { addToCart, setDirectCheckoutItem } from "@/lib/cart"
 
 interface ConversionProps {
@@ -29,8 +30,18 @@ export function Conversion({ product }: ConversionProps) {
     const selectedBundle = product.bundles.find(b => b.id === selectedBundleId) || product.bundles[0]
 
     // If bundles enabled, qty is from bundle. If disabled, qty is local state.
-    const currentQty = bundlesEnabled ? selectedBundle.unitCount : qty
-    const currentPrice = bundlesEnabled ? selectedBundle.sellingPrice : product.pricing.sellingPrice
+    const baseQty = bundlesEnabled ? selectedBundle.unitCount : qty
+    const basePrice = bundlesEnabled ? selectedBundle.sellingPrice : product.pricing.sellingPrice
+
+    // Quantity Break Logic
+    let qtyDiscount = 0
+    if (!bundlesEnabled) {
+        if (qty === 2) qtyDiscount = 10
+        else if (qty >= 3) qtyDiscount = 15
+    }
+
+    const currentQty = baseQty
+    const currentPrice = Math.round(basePrice * (1 - qtyDiscount / 100))
     const currentMrp = bundlesEnabled ? selectedBundle.mrp : product.pricing.mrp
 
     // Calculate dynamic prepaid savings
@@ -102,10 +113,17 @@ export function Conversion({ product }: ConversionProps) {
                     onSelect={setSelectedBundleId}
                 />
             ) : (
-                <QuantitySelector
-                    qty={qty}
-                    onQtyChange={setQty}
-                />
+                <>
+                    <QuantityBreaks
+                        currentQty={qty}
+                        price={product.pricing.sellingPrice}
+                        onQtySelect={setQty}
+                    />
+                    <QuantitySelector
+                        qty={qty}
+                        onQtyChange={setQty}
+                    />
+                </>
             )}
 
             {/* CTAs */}

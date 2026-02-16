@@ -90,6 +90,13 @@ Deno.serve(async (req) => {
             const nItems = Math.floor(Math.random() * 3) + 1;
             const selected = products.sort(() => 0.5 - Math.random()).slice(0, nItems);
             const totalAmount = selected.reduce((sum, p) => sum + p.price, 0);
+            const totalCogs = selected.reduce((sum, p) => sum + (p.cogs || 0), 0);
+
+            // 6. Calculated Profit Metrics
+            const payment_mode = Math.random() > 0.4 ? "cod" : "online";
+            const estShipping = 70 + Math.floor(Math.random() * 50); // 70-120 range
+            const estGateway = payment_mode === "online" ? (totalAmount * 0.025) : 0;
+            const netProfit = totalAmount - totalCogs - estShipping - estGateway;
 
             const { data: order, error: orderError } = await supabaseClient
                 .from("orders")
@@ -98,8 +105,11 @@ Deno.serve(async (req) => {
                     customer_id: customer.id,
                     order_number: orderNumber,
                     status,
-                    payment_mode: Math.random() > 0.4 ? "cod" : "online",
-                    total_amount,
+                    payment_mode,
+                    total_amount: totalAmount,
+                    shipping_cost_actual: estShipping,
+                    gateway_fee_actual: estGateway,
+                    net_profit: netProfit,
                     created_at: createdAt,
                     risk_level: status === 'delivered' ? 'low' : (Math.random() > 0.9 ? 'high' : 'low'),
                     meta: {
@@ -112,20 +122,24 @@ Deno.serve(async (req) => {
                         pincode: Math.floor(110001 + Math.random() * 500000).toString(),
                         otp_verified: true,
                         is_demo: true,
-                        demo_session: "initial_validation"
+                        demo_session: "p3_profit_simulation"
                     }
                 })
                 .select()
                 .single();
 
-            if (orderError) continue;
+            if (orderError) {
+                console.error("Order Insert Error:", orderError);
+                continue;
+            }
 
-            // 6. Insert Order Items
+            // 7. Insert Order Items with COGS snapshot
             const itemsToInsert = selected.map(p => ({
                 order_id: order.id,
                 product_id: p.id,
                 qty: 1,
                 price: p.price,
+                cogs_at_sale: p.cogs || 0,
                 meta: { is_demo: true }
             }));
 

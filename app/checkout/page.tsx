@@ -5,6 +5,7 @@ import { useEffect, useState, Suspense } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase-browser";
+import { evaluateRTORisk, RTOScore } from "@/lib/rto-intelligence";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -44,6 +45,7 @@ function CheckoutContent() {
     city: "",
     state: "",
   });
+  const [rtoScore, setRtoScore] = useState<RTOScore | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'online'>('cod');
   const [email, setEmail] = useState("");
   const [createAccount, setCreateAccount] = useState(false);
@@ -258,6 +260,10 @@ function CheckoutContent() {
         }));
 
         setPincodeStatus("success");
+
+        // RTO Assessment
+        const risk = evaluateRTORisk(pin, paymentMethod);
+        setRtoScore(risk);
       })
       .catch(() => {
         if (!cancelled) setPincodeStatus("failed");
@@ -535,6 +541,22 @@ function CheckoutContent() {
                 <div className="w-8 h-8 rounded-full bg-neutral-900 text-white flex items-center justify-center text-xs font-bold ring-4 ring-neutral-50">3</div>
                 <h2 className="text-xl font-black text-neutral-900 tracking-tight uppercase tracking-widest text-xs">Payment Information</h2>
               </div>
+
+              {/* RTO RISK ALERT */}
+              {rtoScore && rtoScore.riskLevel !== 'low' && (
+                <div className={`p-4 rounded-2xl flex items-start gap-3 border ${rtoScore.riskLevel === 'high' ? 'bg-red-50 border-red-100 text-red-900' : 'bg-amber-50 border-amber-100 text-amber-900'
+                  }`}>
+                  <AlertCircle className={`h-5 w-5 shrink-0 ${rtoScore.riskLevel === 'high' ? 'text-red-600' : 'text-amber-600'}`} />
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-widest">Regional Order Alert</p>
+                    <p className="text-xs mt-1 font-medium leading-relaxed">
+                      {rtoScore.riskLevel === 'high'
+                        ? "This zone has high historical non-delivery rates. Online payment is highly recommended for priority shipping."
+                        : "Orders in this region occasionally face delivery delays with COD. Prepaid orders get priority dispatch."}
+                    </p>
+                  </div>
+                </div>
+              )}
 
               <div className="grid gap-3">
                 {/* Online Payment Option */}

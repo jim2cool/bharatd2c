@@ -36,7 +36,7 @@ export default function OrderDetailPage() {
 
     const { data: orderData } = await supabaseBrowser
       .from('orders')
-      .select('*')
+      .select('*, shipping_cost_actual, gateway_fee_actual, net_profit')
       .eq('id', id)
       .single()
 
@@ -45,7 +45,8 @@ export default function OrderDetailPage() {
       .select(`
         qty,
         price,
-        products ( title ),
+        cogs_at_sale,
+        products ( title, cogs, shipping_cost_preset, gateway_fee_percentage ),
         variants ( title )
       `)
       .eq('order_id', id)
@@ -179,7 +180,7 @@ export default function OrderDetailPage() {
     setSaving(false)
   }
 
-  /* ---------------- DERIVED TOTALS ---------------- */
+  /* ---------------- DERIVED TOTALS & PROFIT ---------------- */
 
   const itemsSubtotal = items.reduce(
     (sum, i) => sum + i.qty * i.price,
@@ -189,6 +190,21 @@ export default function OrderDetailPage() {
   const taxAmount = meta.tax_amount || 0
   const shippingAmount = meta.shipping_amount || 0
   const grandTotal = itemsSubtotal + taxAmount + shippingAmount
+
+  // Profit Engine Logic
+  const totalCogs = items.reduce((sum, i) => {
+    const unitCogs = i.cogs_at_sale || i.products?.cogs || 0
+    return sum + (i.qty * unitCogs)
+  }, 0)
+
+  // Estimated fees if actuals are 0
+  const estShipping = order.shipping_cost_actual || (order.status === 'shipped' || order.status === 'delivered' ? 70 : 0)
+  const estGateway = order.gateway_fee_actual || (order.payment_mode === 'online' ? (order.total_amount * 0.025) : 0)
+
+  const realProfit = order.total_amount - totalCogs - estShipping - estGateway
+  const profitMargin = order.total_amount > 0 ? (realProfit / order.total_amount) * 100 : 0
+  const marginColor = profitMargin >= 30 ? 'text-green-600' : profitMargin >= 15 ? 'text-amber-600' : 'text-red-600'
+  const marginBg = profitMargin >= 30 ? 'bg-green-50' : profitMargin >= 15 ? 'bg-amber-50' : 'bg-red-50'
 
   /* ---------------- UI ---------------- */
 
@@ -364,6 +380,44 @@ export default function OrderDetailPage() {
 
       {/* RIGHT / ACTION RAIL */}
       <div className="space-y-6">
+
+        {/* PROFIT ENGINE (MANIFESTO PRIME) */}
+        <div className={`border rounded-xl p-5 shadow-sm ${marginBg} border-current/10`}>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-black uppercase tracking-widest text-neutral-800">Profit Breakdown</h2>
+            <div className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${marginColor} bg-white border border-current/20`}>
+              {Math.round(profitMargin)}% Margin
+            </div>
+          </div>
+
+          <div className="space-y-2.5">
+            <div className="flex justify-between text-sm">
+              <span className="text-neutral-500">Gross Revenue</span>
+              <span className="font-bold">₹{order.total_amount}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-neutral-500 text-xs">- Total COGS</span>
+              <span className="text-red-600 font-medium tracking-tight">₹{totalCogs}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-neutral-500 text-xs">- Est. Shipping</span>
+              <span className="text-red-600 font-medium tracking-tight">₹{estShipping}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-neutral-500 text-xs">- Gateway Fees</span>
+              <span className="text-red-600 font-medium tracking-tight">₹{Math.round(estGateway)}</span>
+            </div>
+
+            <div className={`flex justify-between items-center border-t border-current/10 pt-3 mt-1 ${marginColor}`}>
+              <span className="text-xs font-black uppercase tracking-tight">Net Contribution</span>
+              <span className="text-lg font-black tracking-tighter">₹{Math.round(realProfit)}</span>
+            </div>
+          </div>
+
+          <p className="text-[9px] text-neutral-400 mt-4 leading-tight italic font-medium">
+            *Net contribution is calculated after subtracting direct COGS, estimated shipping, and gateway costs.
+          </p>
+        </div>
 
         {/* ORDER SUMMARY */}
         <div className="bg-white border rounded p-4">
