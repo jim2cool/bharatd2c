@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { supabaseBrowser } from '@/lib/supabase-browser'
-import { Control, ToggleLeft, ToggleRight, Plus, Rocket, Settings2, Info } from 'lucide-react'
+import { ToggleLeft, ToggleRight, Plus, Rocket, Settings2, Info } from 'lucide-react'
 import { toast } from 'sonner'
 import { FeatureOverrides } from './components/FeatureOverrides'
 
