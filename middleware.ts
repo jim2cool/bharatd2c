@@ -128,6 +128,7 @@ export default async function middleware(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser()
 
+    /*
     const normalizedPath = url.pathname.replace(/\/$/, "") || "/";
     const isLoginPath = normalizedPath === "/login" || normalizedPath === "/super-admin/login";
 
@@ -137,12 +138,12 @@ export default async function middleware(request: NextRequest) {
             const redirectPath = isSuper ? "/super-admin/login" : "/login";
             const redirectUrl = new URL(redirectPath, request.url);
             redirectUrl.searchParams.set("next", url.pathname);
-
+            
             // Force HTTPS if in production
             if (process.env.NODE_ENV === 'production') {
                 redirectUrl.protocol = 'https:';
             }
-
+            
             return NextResponse.redirect(redirectUrl);
         }
 
@@ -168,6 +169,7 @@ export default async function middleware(request: NextRequest) {
             }
         }
     }
+    */
 
     // 8. Handle Impersonation (only super-admins can impersonate)
     const impersonationId = request.cookies.get('impersonation_target_id')?.value
