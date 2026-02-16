@@ -128,7 +128,6 @@ export default async function middleware(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser()
 
-    /*
     const normalizedPath = url.pathname.replace(/\/$/, "") || "/";
     const isLoginPath = normalizedPath === "/login" || normalizedPath === "/super-admin/login";
 
@@ -136,14 +135,20 @@ export default async function middleware(request: NextRequest) {
         if (!user) {
             const isSuper = normalizedPath.startsWith("/super-admin");
             const redirectPath = isSuper ? "/super-admin/login" : "/login";
+
+            // Safety Check: Avoid redirecting to the same path
+            if (normalizedPath === redirectPath) {
+                return response;
+            }
+
             const redirectUrl = new URL(redirectPath, request.url);
             redirectUrl.searchParams.set("next", url.pathname);
-            
-            // Force HTTPS if in production
-            if (process.env.NODE_ENV === 'production') {
+
+            // Protocol Management for Production
+            if (process.env.NODE_ENV === 'production' || request.headers.get('x-forwarded-proto') === 'https') {
                 redirectUrl.protocol = 'https:';
             }
-            
+
             return NextResponse.redirect(redirectUrl);
         }
 
@@ -155,21 +160,20 @@ export default async function middleware(request: NextRequest) {
             .single()
 
         // Super-admin routes require super_admin role
-        if (url.pathname.startsWith("/super-admin")) {
+        if (normalizedPath.startsWith("/super-admin")) {
             if (profile?.role !== 'super_admin') {
                 return NextResponse.redirect(new URL('/admin?error=unauthorized', request.url))
             }
         }
 
         // Seller/Admin routes require at least 'seller' or 'admin' role
-        if (url.pathname.startsWith("/admin")) {
+        if (normalizedPath.startsWith("/admin")) {
             const allowedRoles = ['seller', 'admin', 'super_admin']
             if (!profile || !allowedRoles.includes(profile.role)) {
                 return NextResponse.redirect(new URL('/login?error=unauthorized', request.url))
             }
         }
     }
-    */
 
     // 8. Handle Impersonation (only super-admins can impersonate)
     const impersonationId = request.cookies.get('impersonation_target_id')?.value
