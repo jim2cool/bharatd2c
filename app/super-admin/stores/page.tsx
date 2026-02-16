@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase-server'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import ImpersonateButton from './components/ImpersonateButton'
+import SeedStoreButton from './components/SeedStoreButton'
 
 export default async function StoresList() {
     const supabase = await createClient()
@@ -69,6 +70,7 @@ export default async function StoresList() {
                                 </td>
                                 <td className="px-6 py-4">
                                     <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <SeedStoreButton storeId={store.id} />
                                         <ImpersonateButton
                                             userId={store.owner_id}
                                             storeSlug={store.slug}
