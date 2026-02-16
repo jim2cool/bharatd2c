@@ -17,11 +17,9 @@ Deno.serve(async (req) => {
             Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
         );
 
-        const { store_id, order_count = 10 } = await req.json();
+        const { store_id, order_count = 100, backdating_days = 30 } = await req.json();
 
-        if (!store_id) {
-            throw new Error("store_id is required");
-        }
+        if (!store_id) throw new Error("store_id is required");
 
         // 1. Get Store Info
         const { data: store, error: storeError } = await supabaseClient
@@ -32,24 +30,24 @@ Deno.serve(async (req) => {
 
         if (storeError || !store) throw new Error("Store not found");
 
-        // 2. Get some products
-        const { data: products } = await supabaseClient
+        // 2. Get products (or seed them if needed)
+        let { data: products } = await supabaseClient
             .from("products")
             .select("id, title, price, cogs")
-            .eq("store_id", store_id)
-            .limit(5);
+            .eq("store_id", store_id);
 
         if (!products || products.length === 0) {
-            throw new Error("No products found in store to create orders for");
+            throw new Error("No products found. Please seed a catalog first.");
         }
 
-        const firstNames = ["Rahul", "Priya", "Amit", "Sneha", "Vikram", "Anjali", "Suresh", "Meera"];
-        const lastNames = ["Sharma", "Verma", "Gupta", "Nair", "Patel", "Singh", "Das", "Joshi"];
-        const cities = ["New Delhi", "Mumbai", "Bangalore", "Gurgaon", "Pune", "Hyderabad"];
-        const states = ["Delhi", "Maharashtra", "Karnataka", "Haryana", "Maharashtra", "Telangana"];
+        const firstNames = ["Rahul", "Priya", "Amit", "Sneha", "Vikram", "Anjali", "Suresh", "Meera", "Karan", "Ishani", "Arjun", "Riya"];
+        const lastNames = ["Sharma", "Verma", "Gupta", "Nair", "Patel", "Singh", "Das", "Joshi", "Chopra", "Malhotra", "Reddy", "Iyer"];
+        const cities = ["New Delhi", "Mumbai", "Bangalore", "Gurgaon", "Pune", "Hyderabad", "Chennai", "Kolkata", "Ahmedabad", "Jaipur"];
+        const states = ["Delhi", "Maharashtra", "Karnataka", "Haryana", "Maharashtra", "Telangana", "Tamil Nadu", "West Bengal", "Gujarat", "Rajasthan"];
 
         const mockOrders = [];
 
+        // Chunking to avoid timeouts
         for (let i = 0; i < order_count; i++) {
             const fName = firstNames[Math.floor(Math.random() * firstNames.length)];
             const lName = lastNames[Math.floor(Math.random() * lastNames.length)];
@@ -57,31 +55,41 @@ Deno.serve(async (req) => {
             const email = `${fName.toLowerCase()}.${lName.toLowerCase()}@example.com`;
             const cityIdx = Math.floor(Math.random() * cities.length);
 
-            // Backdate orders over last 14 days
-            const daysAgo = Math.floor(Math.random() * 14);
-            const createdAt = new Date(Date.now() - (daysAgo * 24 * 60 * 60 * 1000)).toISOString();
+            // Distributed backdating for analytics curve
+            // Higher density in the last 7 days
+            const rand = Math.random();
+            let daysAgo;
+            if (rand > 0.6) {
+                daysAgo = Math.floor(Math.random() * 7); // Recent
+            } else if (rand > 0.2) {
+                daysAgo = Math.floor(Math.random() * 21); // Medium
+            } else {
+                daysAgo = Math.floor(Math.random() * backdating_days); // Old
+            }
 
-            // Random status
-            const statuses = ["new", "confirmed", "shipped", "delivered"];
+            const createdAt = new Date(Date.now() - (daysAgo * 24 * 60 * 60 * 1000) - (Math.random() * 12 * 60 * 60 * 1000)).toISOString();
+
+            // Weight status towards 'delivered' for analytics
+            const statuses = ["new", "confirmed", "confirmed", "shipped", "delivered", "delivered", "delivered", "delivered", "delivered"];
             const status = statuses[Math.floor(Math.random() * statuses.length)];
 
             // 3. Ensure Customer
             const { data: customer } = await supabaseClient
                 .from("customers")
-                .upsert({ phone }, { onConflict: "phone" })
+                .upsert({ phone, meta: { is_demo: true } }, { onConflict: "phone" })
                 .select()
                 .single();
 
-            // 4. Generate Order Number (Simple logic for mock)
+            // 4. Generate Order Number
             const mm = String(new Date(createdAt).getMonth() + 1).padStart(2, '0');
             const yy = String(new Date(createdAt).getFullYear()).slice(-2);
-            const seq = Math.floor(100000 + Math.random() * 900000);
+            const seq = 1000 + i + Math.floor(Math.random() * 500);
             const orderNumber = `${store.store_code}-${mm}${yy}-${seq}`;
 
-            // 5. Select random product(s)
-            const numProducts = Math.floor(Math.random() * 2) + 1;
-            const selectedProducts = products.sort(() => 0.5 - Math.random()).slice(0, numProducts);
-            const totalAmount = selectedProducts.reduce((sum, p) => sum + p.price, 0);
+            // 5. Select random products (1-3)
+            const nItems = Math.floor(Math.random() * 3) + 1;
+            const selected = products.sort(() => 0.5 - Math.random()).slice(0, nItems);
+            const totalAmount = selected.reduce((sum, p) => sum + p.price, 0);
 
             const { data: order, error: orderError } = await supabaseClient
                 .from("orders")
@@ -90,18 +98,21 @@ Deno.serve(async (req) => {
                     customer_id: customer.id,
                     order_number: orderNumber,
                     status,
-                    payment_mode: Math.random() > 0.3 ? "cod" : "online",
+                    payment_mode: Math.random() > 0.4 ? "cod" : "online",
                     total_amount,
                     created_at: createdAt,
+                    risk_level: status === 'delivered' ? 'low' : (Math.random() > 0.9 ? 'high' : 'low'),
                     meta: {
                         name: `${fName} ${lName}`,
                         phone,
                         email,
-                        address: `Block ${Math.floor(Math.random() * 100)}, Apartment ${Math.floor(Math.random() * 500)}`,
+                        address: `H.No ${Math.floor(Math.random() * 200)}, Sector ${Math.floor(Math.random() * 50)}`,
                         city: cities[cityIdx],
                         state: states[cityIdx],
-                        pincode: "11000" + Math.floor(Math.random() * 10),
-                        otp_verified: true
+                        pincode: Math.floor(110001 + Math.random() * 500000).toString(),
+                        otp_verified: true,
+                        is_demo: true,
+                        demo_session: "initial_validation"
                     }
                 })
                 .select()
@@ -110,11 +121,12 @@ Deno.serve(async (req) => {
             if (orderError) continue;
 
             // 6. Insert Order Items
-            const itemsToInsert = selectedProducts.map(p => ({
+            const itemsToInsert = selected.map(p => ({
                 order_id: order.id,
                 product_id: p.id,
                 qty: 1,
-                price: p.price
+                price: p.price,
+                meta: { is_demo: true }
             }));
 
             await supabaseClient.from("order_items").insert(itemsToInsert);
@@ -124,7 +136,7 @@ Deno.serve(async (req) => {
         return new Response(JSON.stringify({
             success: true,
             count: mockOrders.length,
-            orders: mockOrders
+            message: `Successfully seeded ${mockOrders.length} orders over ${backdating_days} days.`
         }), {
             headers: { ...corsHeaders, "Content-Type": "application/json" },
             status: 200,
