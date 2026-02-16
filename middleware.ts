@@ -171,7 +171,7 @@ export default async function middleware(request: NextRequest) {
 
         // Seller/Admin routes require at least 'seller' or 'admin' role
         if (normalizedPath.startsWith("/admin")) {
-            const allowedRoles = ['seller', 'admin', 'super_admin']
+            const allowedRoles = ['seller', 'store_owner', 'admin', 'super_admin']
             if (!profile || !allowedRoles.includes(profile.role)) {
                 return NextResponse.redirect(new URL('/login?error=unauthorized', request.url))
             }
