@@ -10,6 +10,7 @@ import { TrustStrip } from "./TrustStrip"
 import { MobileStickyCTA } from "./MobileStickyCTA"
 import { UrgencyBar } from "./UrgencyBar"
 import { QuantitySelector } from "./QuantitySelector"
+import { DeliveryEstimator } from "./DeliveryEstimator"
 import { addToCart, setDirectCheckoutItem } from "@/lib/cart"
 
 interface ConversionProps {
@@ -120,6 +121,9 @@ export function Conversion({ product }: ConversionProps) {
 
             {/* Trust Strip */}
             <TrustStrip />
+
+            {/* Delivery Estimator */}
+            <DeliveryEstimator />
 
             {/* Mobile Sticky CTA */}
             <MobileStickyCTA

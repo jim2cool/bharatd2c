@@ -6,6 +6,7 @@ import { supabaseBrowser } from '@/lib/supabase-browser'
 import { evaluateCODRisk } from '@/lib/cod-risk'
 import { Layout, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
+import ShippingManager from './components/ShippingManager'
 
 const STATUS_OPTIONS = [
   'new',
@@ -418,80 +419,7 @@ export default function OrderDetailPage() {
           </p>
         </div>
 
-        {/* FULFILLMENT TRACKING */}
-        <div className="bg-white border border-neutral-200 rounded-xl p-6 shadow-sm overflow-hidden relative">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-bold text-neutral-800 flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-purple-500" />
-              Fulfillment
-            </h2>
-            <div className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${meta.fulfillment_status === 'fulfilled' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
-              {meta.fulfillment_status === 'fulfilled' ? 'Fulfilled' : 'Unfulfilled'}
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div>
-              <label className="block text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-1.5 ml-1">Carrier</label>
-              <input
-                className="w-full border border-neutral-100 bg-neutral-50 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-black outline-none"
-                placeholder="e.g. Delhivery, BlueDart"
-                value={meta.carrier || ''}
-                onChange={e => setOrder({ ...order, meta: { ...meta, carrier: e.target.value } })}
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-1.5 ml-1">Tracking Number</label>
-              <input
-                className="w-full border border-neutral-100 bg-neutral-50 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-black outline-none"
-                placeholder="Tracking ID"
-                value={meta.tracking_number || ''}
-                onChange={e => setOrder({ ...order, meta: { ...meta, tracking_number: e.target.value } })}
-              />
-            </div>
-
-            <button
-              onClick={saveCustomer}
-              disabled={saving}
-              className={`w-full py-2.5 rounded-lg text-sm font-bold transition-all shadow-sm ${meta.fulfillment_status === 'fulfilled' ? 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200' : 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-100'}`}
-            >
-              {saving ? 'Processing...' : (meta.fulfillment_status === 'fulfilled' ? 'Update Details' : 'Mark as Fulfilled')}
-            </button>
-
-            {meta.fulfillment_status !== 'fulfilled' && (
-              <button
-                onClick={() => {
-                  const newMeta = { ...meta, fulfillment_status: 'fulfilled', fulfilled_at: new Date().toISOString() }
-                  setOrder({ ...order, meta: newMeta })
-                  // Trigger save directly for status toggle
-                  supabaseBrowser.from('orders').update({ meta: newMeta }).eq('id', order.id).then(() => {
-                    toast.success('Order marked as fulfilled')
-                    loadOrder()
-                  })
-                }}
-                className="w-full py-2 text-[11px] font-bold text-blue-600 hover:underline"
-              >
-                Quick Fulfill (No Tracking)
-              </button>
-            )}
-
-            {meta.fulfillment_status === 'fulfilled' && (
-              <button
-                onClick={() => {
-                  const newMeta = { ...meta, fulfillment_status: 'unfulfilled', fulfilled_at: null }
-                  setOrder({ ...order, meta: newMeta })
-                  supabaseBrowser.from('orders').update({ meta: newMeta }).eq('id', order.id).then(() => {
-                    toast.success('Order marked as unfulfilled')
-                    loadOrder()
-                  })
-                }}
-                className="w-full py-2 text-[11px] font-bold text-red-600 hover:underline"
-              >
-                Reset Fulfillment
-              </button>
-            )}
-          </div>
-        </div>
+        <ShippingManager order={order} onUpdate={loadOrder} />
 
         {/* COD RISK */}
         <div className="bg-orange-50/50 border border-orange-200 rounded-xl p-6">
