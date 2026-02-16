@@ -1,0 +1,13 @@
+{
+    "limits": {
+        "mainBundle": 250000,
+        "cssBundle": 50000,
+        "routeChunk": 150000
+    },
+    "excludePatterns": [
+        "framework-*.js",
+        "webpack-*.js",
+        "main-app-*.js"
+    ],
+    "warnThreshold": 0.9
+}

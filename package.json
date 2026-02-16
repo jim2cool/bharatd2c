@@ -6,7 +6,8 @@
     "dev": "next dev",
     "dev:https": "powershell -ExecutionPolicy Bypass -File ./scripts/dev-https.ps1",
     "stop-dev": "powershell -ExecutionPolicy Bypass -File ./scripts/stop-dev.ps1",
-    "build": "next build",
+    "build": "next build && node scripts/check-bundle-size.mjs",
+    "build:skip-checks": "next build",
     "start": "next start",
     "lint": "eslint"
   },
