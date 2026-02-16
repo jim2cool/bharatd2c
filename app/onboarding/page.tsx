@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabaseBrowser } from '@/lib/supabase-browser'
-import { Shirt, Sparkles, Monitor, Home, Package } from 'lucide-react'
+import { Shirt, Sparkles, Monitor, Home, Package, Stethoscope, Zap } from 'lucide-react'
+import { verticalMapping, VerticalType } from '@/lib/themes/vertical-mapping'
 
 // Helper to slugify store name
 function slugify(text: string) {
@@ -15,6 +16,23 @@ function slugify(text: string) {
         .replace(/[^\w\-]+/g, '') // Remove all non-word chars
         .replace(/\-\-+/g, '-')   // Replace multiple - with single -
 }
+
+// Reserved slugs that cannot be claimed
+const RESERVED_SLUGS = new Set([
+    'admin', 'api', 'www', 'app', 'auth', 'login', 'signup', 'register',
+    'super-admin', 'checkout', 'cart', 'onboarding', 'maintenance',
+    'static', 'assets', 'public', 'private', 'help', 'support',
+    'billing', 'settings', 'dashboard', 'store', 'stores',
+    'easy-d2c', 'easyd2c', 'bharat-d2c', 'bharatd2c',
+    'cdn', 'status', 'track', 'account', 'orders', 'legal',
+    'terms', 'privacy', 'refund', 'contact', 'about', 'blog',
+    'news', 'press', 'careers', 'jobs', 'dev', 'developer',
+    'docs', 'documentation', 'test', 'demo', 'staging', 'prod',
+    'production', 'mail', 'email', 'mx', 'smtp', 'pop', 'imap',
+    'webmail', 'secure', 'vpn', 'portal', 'client', 'customer',
+    'partner', 'affiliate', 'agent', 'support', 'helpdesk',
+    'knowledgebase', 'kb', 'faq', 'forum', 'community',
+])
 
 export default function OnboardingPage() {
     const router = useRouter()
@@ -51,19 +69,34 @@ export default function OnboardingPage() {
     }, [router])
 
 
-    const [category, setCategory] = useState('')
+    const [category, setCategory] = useState<VerticalType>('default')
 
     const CATEGORIES = [
-        { id: 'fashion', label: 'Fashion & Apparel', icon: <Shirt className="w-6 h-6" /> },
-        { id: 'beauty', label: 'Beauty & Wellness', icon: <Sparkles className="w-6 h-6" /> },
-        { id: 'tech', label: 'Electronics & Tech', icon: <Monitor className="w-6 h-6" /> },
-        { id: 'home', label: 'Home & Decor', icon: <Home className="w-6 h-6" /> },
-        { id: 'other', label: 'Other / General', icon: <Package className="w-6 h-6" /> },
+        { id: 'fashion' as VerticalType, label: 'Fashion & Apparel', icon: <Shirt className="w-6 h-6" /> },
+        { id: 'beauty' as VerticalType, label: 'Beauty & Wellness', icon: <Sparkles className="w-6 h-6" /> },
+        { id: 'tech' as VerticalType, label: 'Electronics & Tech', icon: <Monitor className="w-6 h-6" /> },
+        { id: 'health' as VerticalType, label: 'Health & Supplements', icon: <Stethoscope className="w-6 h-6" /> },
+        { id: 'dropshipping' as VerticalType, label: 'Trending / Dropshipping', icon: <Zap className="w-6 h-6" /> },
+        { id: 'default' as VerticalType, label: 'Other / General', icon: <Package className="w-6 h-6" /> },
     ]
 
     const handleCreateStore = async () => {
         setLoading(true)
         setError(null)
+
+        // Validate slug is not reserved
+        if (RESERVED_SLUGS.has(storeSlug)) {
+            setError('This URL is reserved. Please choose a different store URL.')
+            setLoading(false)
+            return
+        }
+
+        // Validate slug length
+        if (storeSlug.length < 3) {
+            setError('Store URL must be at least 3 characters long.')
+            setLoading(false)
+            return
+        }
 
         try {
             const { data: { user } } = await supabaseBrowser.auth.getUser()
@@ -88,7 +121,10 @@ export default function OnboardingPage() {
 
             if (profileError) throw profileError
 
-            // 2. Create Store with Category metadata
+            // 2. Identify the preset config
+            const preset = verticalMapping[category] || verticalMapping['default']
+
+            // 3. Create Store with full theme_config based on category
             const { data: store, error: storeError } = await supabaseBrowser
                 .from('stores')
                 .insert({
@@ -96,7 +132,11 @@ export default function OnboardingPage() {
                     slug: storeSlug,
                     owner_id: user.id,
                     subscription_plan: 'free',
-                    theme_config: { category }, // Store category in theme_config for now
+                    theme_config: {
+                        ...preset.theme_config,
+                        category, // Keep the category for future mapping updates
+                        cro_strategy: preset.cro_strategy // Inject CRO strategy into config
+                    },
                     is_active: true
                 })
                 .select()
@@ -117,7 +157,7 @@ export default function OnboardingPage() {
 
             // 4. Set Active Store Context for Client
             localStorage.setItem('easy_active_store_id', store.id)
-            document.cookie = `easy_active_store_id=${store.id}; path=/; SameSite=Lax`
+            document.cookie = `easy_active_store_id=${store.id}; path=/; SameSite=Lax; Secure; max-age=${60 * 60 * 24 * 365}`
 
             // 5. Redirect to Setup for Seeding
             router.push('/admin/setup')
@@ -213,11 +253,17 @@ export default function OnboardingPage() {
                                         .easy-d2c.com
                                     </span>
                                 </div>
+                                {storeSlug && RESERVED_SLUGS.has(storeSlug) && (
+                                    <p className="text-xs text-red-500 font-medium mt-2 ml-1">This URL is reserved. Please choose another.</p>
+                                )}
+                                {storeSlug && storeSlug.length > 0 && storeSlug.length < 3 && (
+                                    <p className="text-xs text-red-500 font-medium mt-2 ml-1">URL must be at least 3 characters.</p>
+                                )}
                             </div>
 
                             <button
                                 onClick={() => setStep(2)}
-                                disabled={!storeName || !storeSlug}
+                                disabled={!storeName || !storeSlug || storeSlug.length < 3 || RESERVED_SLUGS.has(storeSlug)}
                                 className="w-full flex justify-center py-4 px-4 bg-slate-900 text-white rounded-2xl shadow-xl shadow-slate-200 text-sm font-black hover:bg-slate-800 focus:outline-none transition-all disabled:opacity-50 disabled:translate-y-0 hover:-translate-y-0.5 active:translate-y-0"
                             >
                                 Continue To Next Step

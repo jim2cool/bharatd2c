@@ -85,7 +85,12 @@ export default async function middleware(request: NextRequest) {
                 setAll(cookiesToSet) {
                     cookiesToSet.forEach(({ name, value, options }) => {
                         request.cookies.set(name, value)
-                        response.cookies.set(name, value, options)
+                        response.cookies.set(name, value, {
+                            ...options,
+                            httpOnly: true,
+                            sameSite: 'lax',
+                            secure: process.env.NODE_ENV === 'production',
+                        })
                     })
                 },
             },
@@ -118,17 +123,7 @@ export default async function middleware(request: NextRequest) {
         console.warn("Maintenance check failed, continuing...")
     }
 
-    // 7. Handle Impersonation
-    const impersonationId = request.cookies.get('impersonation_target_id')?.value
-    if (impersonationId) {
-        requestHeaders.set('x-impersonate-user-id', impersonationId)
-        // Adjust response with updated headers
-        response = NextResponse.next({
-            request: { headers: requestHeaders }
-        })
-    }
-
-    // 8. Authentication & Route Protection
+    // 7. Authentication & Route Protection
     const {
         data: { user },
     } = await supabase.auth.getUser()
@@ -140,6 +135,58 @@ export default async function middleware(request: NextRequest) {
             redirectUrl.pathname = isSuper ? "/super-admin/login" : "/login";
             redirectUrl.searchParams.set("next", request.nextUrl.pathname);
             return NextResponse.redirect(redirectUrl);
+        }
+
+        // Fetch profile once for all role checks
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single()
+
+        // Super-admin routes require super_admin role
+        if (url.pathname.startsWith("/super-admin")) {
+            if (profile?.role !== 'super_admin') {
+                return NextResponse.redirect(new URL('/admin?error=unauthorized', request.url))
+            }
+        }
+
+        // Seller/Admin routes require at least 'seller' or 'admin' role
+        if (url.pathname.startsWith("/admin")) {
+            const allowedRoles = ['seller', 'admin', 'super_admin']
+            if (!profile || !allowedRoles.includes(profile.role)) {
+                return NextResponse.redirect(new URL('/login?error=unauthorized', request.url))
+            }
+        }
+    }
+
+    // 8. Handle Impersonation (only super-admins can impersonate)
+    const impersonationId = request.cookies.get('impersonation_target_id')?.value
+    if (impersonationId && user) {
+        const { data: impersonatorProfile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single()
+
+        if (impersonatorProfile?.role === 'super_admin') {
+            requestHeaders.set('x-impersonate-user-id', impersonationId)
+            requestHeaders.set('x-is-impersonating', 'true')
+            requestHeaders.set('x-impersonator-id', user.id)
+
+            // Re-create response with new headers if needed, otherwise continue
+            response = NextResponse.next({
+                request: { headers: requestHeaders }
+            })
+        } else {
+            // Non-super-admin trying to impersonate — clear the cookie with security flags
+            response.cookies.delete('impersonation_target_id')
+            response.cookies.set('impersonation_target_id', '', {
+                maxAge: 0,
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax'
+            })
         }
     }
 

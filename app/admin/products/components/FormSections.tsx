@@ -3,7 +3,10 @@
 import React from 'react'
 import { useFormContext, Controller } from 'react-hook-form'
 import { Card, Field, Label, Stat } from './ProductFormUI'
+import { useParams } from 'next/navigation'
+import { supabaseBrowser } from '@/lib/supabase-browser'
 import { ProductFormData } from '../[id]/useProductEditor'
+import { Editor } from '@/components/admin/Editor'
 
 export function CoreSection() {
     const { register, formState: { errors } } = useFormContext<ProductFormData>()
@@ -165,11 +168,16 @@ export function ContentSection() {
 
             <div>
                 <Label>Detailed description</Label>
-                <textarea
-                    {...register('content_markup')}
-                    rows={8}
-                    className="w-full border rounded-2xl px-4 py-3 font-mono text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-none"
-                    placeholder="HTML or plain text description..."
+                <Controller
+                    control={control}
+                    name="content_markup"
+                    render={({ field }) => (
+                        <Editor
+                            value={field.value || ''}
+                            onChange={field.onChange}
+                            placeholder="Describe your product in detail..."
+                        />
+                    )}
                 />
             </div>
         </Card>
@@ -177,25 +185,59 @@ export function ContentSection() {
 }
 
 export function SEOSection() {
-    const { register, formState: { errors } } = useFormContext<ProductFormData>()
+    const { register, watch, formState: { errors } } = useFormContext<ProductFormData>()
+    const title = watch('seo_title') || watch('title') || 'Product Title'
+    const description = watch('seo_description') || 'Add a compelling description to improve your click-through rate in search results.'
+    const slug = (watch as any)('slug') || 'product-url'
 
     return (
         <Card title="Search engine listing" subtitle="How this product appears on Google">
-            <div className="space-y-4">
-                <Field label="SEO Title" error={errors.seo_title?.message}>
-                    <input
-                        {...register('seo_title')}
-                        className="border rounded-xl px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                        placeholder="SEO title"
-                    />
-                </Field>
-                <Field label="SEO Description" error={errors.seo_description?.message}>
-                    <textarea
-                        {...register('seo_description')}
-                        className="border rounded-xl px-3 py-2 w-full min-h-[100px] focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                        placeholder="SEO description"
-                    />
-                </Field>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                <div className="space-y-4">
+                    <Field label="SEO Title" error={errors.seo_title?.message}>
+                        <div className="relative">
+                            <input
+                                {...register('seo_title')}
+                                className="border rounded-xl px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 outline-none transition-all pr-12"
+                                placeholder="SEO title"
+                                maxLength={60}
+                            />
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-neutral-400">
+                                {watch('seo_title')?.length || 0}/60
+                            </span>
+                        </div>
+                    </Field>
+                    <Field label="SEO Description" error={errors.seo_description?.message}>
+                        <div className="relative">
+                            <textarea
+                                {...register('seo_description')}
+                                className="border rounded-xl px-3 py-2 w-full min-h-[100px] focus:ring-2 focus:ring-blue-500 outline-none transition-all pb-8"
+                                placeholder="SEO description"
+                                maxLength={160}
+                            />
+                            <span className="absolute right-3 bottom-3 text-[10px] font-bold text-neutral-400">
+                                {watch('seo_description')?.length || 0}/160
+                            </span>
+                        </div>
+                    </Field>
+                </div>
+
+                {/* GOOGLE PREVIEW */}
+                <div className="p-6 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-4">Google Search Preview</p>
+                    <div className="max-w-[500px]">
+                        <div className="text-[14px] text-[#202124] flex items-center gap-1 mb-1 truncate">
+                            <span>https://easyd2c.in › products › </span>
+                            <span className="font-medium">{slug}</span>
+                        </div>
+                        <h3 className="text-[20px] text-[#1a0dab] font-normal hover:underline cursor-pointer mb-1 leading-tight truncate">
+                            {title}
+                        </h3>
+                        <p className="text-[14px] text-[#4d5156] leading-relaxed line-clamp-2">
+                            {description}
+                        </p>
+                    </div>
+                </div>
             </div>
         </Card>
     )
@@ -207,17 +249,73 @@ export function ConversionSection() {
     return (
         <Card title="Conversion settings" subtitle="Manage scarcity, urgency and bundles">
             <div className="space-y-8">
-                {/* BUNDLES */}
-                <div className="flex items-center justify-between">
-                    <div>
-                        <Label className="mb-0">Bundle Offer</Label>
-                        <p className="text-xs text-neutral-500">Enable automated product bundles</p>
+                {/* BUNDLES & CROSS-SELL */}
+                <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <Label className="mb-0">Bundle & Cross-sell</Label>
+                            <p className="text-xs text-neutral-500">Enable automated product bundles and cross-sell prompts</p>
+                        </div>
+                        <input
+                            type="checkbox"
+                            className="h-5 w-5 rounded border-neutral-300 text-blue-600 focus:ring-blue-500 transition-all"
+                            {...register('bundle_settings.enabled')}
+                        />
                     </div>
-                    <input
-                        type="checkbox"
-                        className="h-5 w-5 rounded border-neutral-300 text-blue-600 focus:ring-blue-500 transition-all"
-                        {...register('bundle_settings.enabled')}
-                    />
+
+                    {watch('bundle_settings.enabled') && (
+                        <div className="space-y-6 pl-6 border-l-2 border-neutral-100 animate-in slide-in-from-left-2 duration-300">
+                            {/* MULTI-PURCHASE DISCOUNT */}
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <Label className="text-[11px] uppercase tracking-widest text-neutral-400">Multi-purchase Discount</Label>
+                                    <input
+                                        type="checkbox"
+                                        className="h-4 w-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
+                                        {...register('bundle_settings.multi_purchase_enabled')}
+                                    />
+                                </div>
+
+                                {watch('bundle_settings.multi_purchase_enabled') && (
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pb-4">
+                                        <Field label="If Qty >=">
+                                            <input
+                                                type="number"
+                                                {...register('bundle_settings.multi_qty', { valueAsNumber: true })}
+                                                className="border rounded-xl px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                            />
+                                        </Field>
+                                        <Field label="Discount Type">
+                                            <select
+                                                {...register('bundle_settings.multi_discount_type')}
+                                                className="border rounded-xl px-3 py-2 w-full bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                            >
+                                                <option value="percentage">Percentage (%)</option>
+                                                <option value="flat">Flat Amount (₹)</option>
+                                            </select>
+                                        </Field>
+                                        <Field label="Value">
+                                            <input
+                                                type="number"
+                                                {...register('bundle_settings.multi_discount_value', { valueAsNumber: true })}
+                                                className="border rounded-xl px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                            />
+                                        </Field>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="h-px bg-neutral-50" />
+
+                            {/* CROSS-SELL PRODUCTS */}
+                            <div className="space-y-4">
+                                <Label className="text-[11px] uppercase tracking-widest text-neutral-400">Cross-sell Recommendations</Label>
+                                <p className="text-xs text-neutral-500 -mt-2">Products to suggest in the checkout flow.</p>
+
+                                <CrossSellSelector />
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="h-px bg-neutral-100" />
@@ -298,5 +396,74 @@ export function ConversionSection() {
                 </div>
             </div>
         </Card>
+    )
+}
+
+function CrossSellSelector() {
+    const { control } = useFormContext<ProductFormData>()
+    const [allProducts, setAllProducts] = React.useState<any[]>([])
+    const params = useParams()
+
+    React.useEffect(() => {
+        const load = async () => {
+            const { data } = await supabaseBrowser
+                .from('products')
+                .select('id, title, images')
+                .neq('id', params.id)
+                .order('title')
+            if (data) setAllProducts(data)
+        }
+        load()
+    }, [params.id])
+
+    return (
+        <Controller
+            control={control}
+            name="bundle_settings.cross_sell_product_ids"
+            render={({ field }) => {
+                const selectedIds = field.value || []
+
+                return (
+                    <div className="space-y-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {allProducts.map(p => {
+                                const isSelected = selectedIds.includes(p.id)
+                                return (
+                                    <button
+                                        key={p.id}
+                                        type="button"
+                                        onClick={() => {
+                                            if (isSelected) {
+                                                field.onChange(selectedIds.filter((id: string) => id !== p.id))
+                                            } else {
+                                                field.onChange([...selectedIds, p.id])
+                                            }
+                                        }}
+                                        className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${isSelected
+                                            ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500'
+                                            : 'border-neutral-100 hover:border-neutral-300 bg-white'
+                                            }`}
+                                    >
+                                        <div className="w-10 h-10 rounded-lg bg-slate-100 overflow-hidden flex-shrink-0">
+                                            {p.images?.[0] && (
+                                                <img src={p.images[0]} alt="" className="w-full h-full object-cover" />
+                                            )}
+                                        </div>
+                                        <span className={`text-xs font-bold truncate ${isSelected ? 'text-blue-700' : 'text-neutral-700'}`}>
+                                            {p.title}
+                                        </span>
+                                    </button>
+                                )
+                            })}
+                        </div>
+                        {allProducts.length === 0 && (
+                            <div className="p-4 border border-dashed rounded-xl text-center text-xs text-neutral-400">
+                                No other products found to recommend.
+                            </div>
+                        )}
+                    </div>
+                )
+            }}
+        />
     )
 }

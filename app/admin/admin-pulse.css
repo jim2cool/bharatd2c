@@ -1,0 +1,77 @@
+/* Pulse Admin Design System Tokens */
+:root {
+  --pulse-bg: #f8fafc;
+  --pulse-surface: #ffffff;
+  --pulse-card-radius: 2rem;
+  --pulse-neon-blue: #2563eb;
+  --pulse-charcoal: #0f172a;
+}
+
+.pulse-card {
+  background: var(--pulse-surface);
+  border: 1px solid rgba(15, 23, 42, 0.05);
+  border-radius: var(--pulse-card-radius);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pulse-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.08);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  margin: 2px 14px;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+
+.nav-item svg {
+  width: 18px;
+  height: 18px;
+  opacity: 0.7;
+}
+
+.nav-item:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.nav-item.active {
+  background: #0f172a;
+  color: #ffffff;
+  box-shadow: 0 10px 20px -5px rgba(15, 23, 42, 0.15);
+}
+
+.nav-item.active svg {
+  color: #ffffff;
+  opacity: 1;
+}
+
+.nav-group-title {
+  font-size: 10px;
+  font-weight: 900;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding: 0 34px;
+  margin-bottom: 12px;
+}
+
+/* Floating Action Button Pulse */
+.fab-glow {
+  box-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
+  animation: fab-pulse 2s infinite;
+}
+
+@keyframes fab-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
+  70% { box-shadow: 0 0 0 20px rgba(37, 99, 235, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+}

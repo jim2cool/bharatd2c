@@ -15,12 +15,34 @@ interface ProofProps {
     rating: number
     reviewCount: number
     reviews: {
-        featured: Review[]
+        featured: any[]
     }
+    compact?: boolean
 }
 
-export function Proof({ reviews, reviewCount }: ProofProps) {
+export function Proof({ reviews, reviewCount, compact = false }: ProofProps) {
     if (reviewCount === 0) return null
+
+    if (compact) {
+        return (
+            <div data-cluster="proof-compact" className="space-y-4">
+                <h3 className="text-sm font-bold tracking-tight uppercase text-slate-400">What customers say</h3>
+                <div className="flex flex-col gap-3">
+                    {reviews.featured.slice(0, 2).map((review) => (
+                        <div key={review.id} className="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <div className="flex gap-1 mb-1">
+                                {[...Array(5)].map((_, i) => (
+                                    <span key={i} className={`text-[10px] ${i < (review.rating || 5) ? 'text-orange-400' : 'text-slate-200'}`}>★</span>
+                                ))}
+                            </div>
+                            <p className="text-xs font-medium text-slate-700 line-clamp-2 italic">"{review.content}"</p>
+                            <p className="text-[10px] font-bold text-slate-400 mt-2">— {review.author}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        )
+    }
 
     return (
         <section data-cluster="proof" className="py-8 md:py-12 border-t border-border/10">
@@ -44,9 +66,6 @@ export function Proof({ reviews, reviewCount }: ProofProps) {
                         ))}
                     </CarouselContent>
 
-                    {/* Navigation - Top right or bottom? Dawn usually has arrows or dots. 
-                        Let's put them absolute top-right aligned with title if possible, or simple side arrows. 
-                        Simple side arrows are fine for now. */}
                     <div className="hidden md:block">
                         <CarouselPrevious className="left-[-3rem] h-10 w-10 border-none bg-transparent hover:bg-transparent text-foreground/50 hover:text-foreground" />
                         <CarouselNext className="right-[-3rem] h-10 w-10 border-none bg-transparent hover:bg-transparent text-foreground/50 hover:text-foreground" />

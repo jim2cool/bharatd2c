@@ -1,6 +1,9 @@
 import Link from "next/link";
 
-export default function Footer() {
+export default function Footer({ store }: { store?: any }) {
+  const footerConfig = store?.theme_config?.footer;
+  const storeName = store?.name || "Easy D2C";
+
   return (
     <footer className="bg-white border-t border-gray-200">
       <div className="container py-12">
@@ -10,12 +13,11 @@ export default function Footer() {
         ">
           {/* Brand */}
           <div>
-            <h3 className="text-base font-semibold text-gray-900">
-              YourBrand
+            <h3 className="text-base font-semibold text-gray-900 border-b border-black inline-block mb-4">
+              {storeName}
             </h3>
-            <p className="mt-3 text-sm text-gray-600 leading-relaxed">
-              Thoughtfully designed products,
-              built for everyday Indian routines.
+            <p className="text-sm text-gray-600 leading-relaxed">
+              {store?.about || "Thoughtfully designed products, built for everyday Indian routines."}
             </p>
           </div>
 
@@ -23,7 +25,6 @@ export default function Footer() {
           <FooterCol title="Quick Links">
             <Link href="/" className="hover:text-primary transition-colors">Home</Link>
             <Link href="/products" className="hover:text-primary transition-colors">Shop</Link>
-            <Link href="/cart" className="hover:text-primary transition-colors">Cart</Link>
           </FooterCol>
 
           {/* Support */}
@@ -37,9 +38,11 @@ export default function Footer() {
           <FooterCol title="Legal">
             <Link href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-primary transition-colors">Terms & Conditions</Link>
-            <span className="text-xs text-gray-500 mt-2 block">
-              Cash on Delivery available
-            </span>
+            {footerConfig?.showSocials && store?.social_links && (
+              <div className="mt-4 flex gap-4">
+                {/* Social links would be rendered here */}
+              </div>
+            )}
           </FooterCol>
         </div>
       </div>
@@ -52,10 +55,10 @@ export default function Footer() {
           md:flex-row md:items-center md:justify-between
         ">
           <p className="text-xs text-gray-500">
-            © 2026 YourBrand. All rights reserved.
+            {footerConfig?.copyrightText || `© 2026 ${storeName}. All rights reserved.`}
           </p>
-          <p className="text-xs text-gray-500">
-            Made in India 🇮🇳
+          <p className="text-xs text-gray-500 font-medium">
+            Made with <span className="text-red-500">❤️</span> in India 🇮🇳
           </p>
         </div>
       </div>

@@ -116,9 +116,17 @@ export default function SidePreview({
                 icon: <CheckCircle2 className="w-4 h-4 text-green-500" />
             })
 
+            // Check if we started from onboarding flow to redirect back to dashboard
+            const params = new URLSearchParams(window.location.search)
+            const isOnboarding = params.get('onboarding') === 'true'
+
             // Short delay to allow expansion animation to feel natural before nav
             setTimeout(() => {
-                router.push(`/admin/products/${productId}`)
+                if (isOnboarding) {
+                    router.push('/admin') // Redirect back to Dashboard to see progress
+                } else {
+                    router.push(`/admin/products/${productId}`)
+                }
             }, 600)
 
         } catch (error: any) {

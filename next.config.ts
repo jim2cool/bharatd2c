@@ -9,6 +9,14 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: "/.well-known/commerce",
+        destination: "/api/commerce",
+      },
+    ];
+  },
 };
 
 export default nextConfig;

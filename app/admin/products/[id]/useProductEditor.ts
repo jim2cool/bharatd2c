@@ -28,7 +28,14 @@ export type ProductFormData = {
   testimonials: Testimonial[]
   seo_title?: string | null
   seo_description?: string | null
-  bundle_settings: { enabled: boolean }
+  bundle_settings: {
+    enabled: boolean;
+    multi_purchase_enabled?: boolean;
+    multi_qty?: number;
+    multi_discount_type?: 'flat' | 'percentage';
+    multi_discount_value?: number;
+    cross_sell_product_ids?: string[];
+  }
   urgency_settings: { enabled: boolean; type: string; text?: string | null; timer?: number | null; stock?: number | null }
   cod_enabled: boolean
   prepaid_discount_type: 'flat' | 'percentage'
@@ -57,7 +64,18 @@ export function useProductEditor(id: string) {
         return
       }
 
-      setProduct(data)
+      setProduct({
+        ...data,
+        bundle_settings: {
+          enabled: false,
+          multi_purchase_enabled: false,
+          multi_qty: 1,
+          multi_discount_type: 'percentage',
+          multi_discount_value: 0,
+          cross_sell_product_ids: [],
+          ...data.bundle_settings
+        }
+      })
       setLoading(false)
     }
 
@@ -79,6 +97,11 @@ export function useProductEditor(id: string) {
       rating: data.rating ? Number(data.rating) : null,
       review_count: data.review_count ? Number(data.review_count) : null,
       prepaid_discount_value: data.prepaid_discount_value ? Number(data.prepaid_discount_value) : null,
+      bundle_settings: {
+        ...data.bundle_settings,
+        multi_qty: data.bundle_settings.multi_qty ? Number(data.bundle_settings.multi_qty) : undefined,
+        multi_discount_value: data.bundle_settings.multi_discount_value ? Number(data.bundle_settings.multi_discount_value) : undefined,
+      }
     }
 
     const { error } = await supabaseBrowser

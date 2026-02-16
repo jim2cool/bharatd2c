@@ -187,7 +187,7 @@ export default function PlatformSettingsPage() {
                                         <CheckCircle2 className="w-5 h-5 text-purple-600 shrink-0" />
                                         <div className="text-[11px] text-purple-900 font-bold leading-relaxed">
                                             PLATFORM STATUS: Healthy
-                                            <div className="font-medium opacity-70 mt-1 uppercase tracking-widest italic">All systems operational in Region fsn1</div>
+                                            <div className="font-bold opacity-70 mt-1 uppercase tracking-widest text-[9px]">All systems operational in Region fsn1</div>
                                         </div>
                                     </div>
                                 </div>
@@ -235,7 +235,7 @@ function InputBlock({ label, description, value, onChange, placeholder }: any) {
                 placeholder={placeholder}
                 className="w-full px-5 py-3 bg-neutral-50 border border-neutral-100 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-black outline-none transition-all"
             />
-            <p className="text-[10px] text-neutral-400 font-medium ml-1 italic">{description}</p>
+            <p className="text-[10px] text-neutral-400 font-bold ml-1 uppercase tracking-tight">{description}</p>
         </div>
     );
 }

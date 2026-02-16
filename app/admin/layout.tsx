@@ -2,6 +2,7 @@
 import { createClient } from "@/lib/supabase-server";
 import { redirect } from "next/navigation";
 import { AdminLayoutClient } from "./AdminLayoutClient";
+import "./admin-pulse.css";
 
 export const metadata = {
     title: "Admin | Easy D2C",

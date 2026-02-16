@@ -48,6 +48,27 @@ const configSchema = z.object({
         lineHeight: z.enum(["tight", "default", "spacious"]),
         paragraphGap: z.enum(["compact", "default", "loose"]),
     }),
+    announcementBar: z.object({
+        text: z.string(),
+        style: z.enum(["static", "marquee"]),
+        background: z.string(),
+        text_color: z.string(),
+        enabled: z.boolean(),
+    }).optional(),
+    header: z.object({
+        style: z.enum(["default", "minimal", "modern"]),
+        sticky: z.boolean(),
+        transparentOnHero: z.boolean(),
+    }).optional(),
+    footer: z.object({
+        style: z.enum(["standard", "minimal"]),
+        copyrightText: z.string(),
+        showSocials: z.boolean(),
+    }).optional(),
+    cro_strategy: z.object({
+        pdp_order: z.array(z.string()),
+        trust_elements: z.array(z.string()),
+    }).optional(),
 });
 
 type ThemeConfig = z.infer<typeof configSchema>;
@@ -131,6 +152,23 @@ const DEFAULT_CONFIG: ThemeConfig = {
     buttons: PRESETS[0].buttons,
     spacing: PRESETS[0].spacing,
     typography: PRESETS[0].typography,
+    announcementBar: {
+        enabled: true,
+        text: "Free Shipping on Orders Above ₹999 | COD Available",
+        style: "static",
+        background: "#000000",
+        text_color: "#ffffff"
+    },
+    header: {
+        style: "default",
+        sticky: true,
+        transparentOnHero: false
+    },
+    footer: {
+        style: "standard",
+        copyrightText: "© 2026 Easy D2C Platform",
+        showSocials: true
+    }
 };
 
 const FONT_OPTIONS = [
@@ -215,7 +253,10 @@ export default function AppearancePage() {
     useEffect(() => {
         const fetchStore = async () => {
             const id = getActiveStoreIdClient();
-            if (!id) return;
+            if (!id) {
+                setLoading(false);
+                return;
+            }
             setStoreId(id);
             const { data } = await supabaseBrowser.from("stores").select("theme_config").eq("id", id).single();
             if (data?.theme_config && Object.keys(data.theme_config).length > 0) {
@@ -253,7 +294,7 @@ export default function AppearancePage() {
             <div className="flex items-center justify-between mb-10 border-b border-neutral-100 pb-6">
                 <div>
                     <h1 className="text-3xl font-extrabold text-neutral-900 tracking-tight">Appearance</h1>
-                    <p className="text-neutral-500 mt-1 font-medium italic">Define your store's visual identity</p>
+                    <p className="text-neutral-500 mt-1 font-medium">Define your store's visual identity</p>
                 </div>
                 <div className="flex items-center gap-4">
                     {isDirty && <span className="text-xs text-orange-600 font-bold bg-orange-50 px-3 py-1 rounded-full border border-orange-100">Pending Changes</span>}
@@ -351,6 +392,160 @@ export default function AppearancePage() {
 
                     <div className="space-y-4 pt-4 border-t border-neutral-100">
                         <h3 className="text-xs font-black text-neutral-400 uppercase tracking-widest ml-1">Advanced Controls</h3>
+                        <Accordion title="Announcement Bar" icon={Sparkles}>
+                            <div className="space-y-6 py-4">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-sm font-bold text-neutral-800">Enable Announcement Bar</label>
+                                    <input
+                                        type="checkbox"
+                                        checked={config.announcementBar?.enabled}
+                                        onChange={(e) => setValue("announcementBar.enabled", e.target.checked, { shouldDirty: true })}
+                                        className="w-10 h-6 rounded-full appearance-none bg-neutral-200 checked:bg-black transition-all cursor-pointer relative after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:w-4 after:h-4 after:rounded-full after:transition-all checked:after:left-5"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold text-neutral-700 mb-3">Message Text</label>
+                                    <input
+                                        type="text"
+                                        value={config.announcementBar?.text}
+                                        onChange={(e) => setValue("announcementBar.text", e.target.value, { shouldDirty: true })}
+                                        className="w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl text-sm font-bold focus:ring-2 focus:ring-black outline-none transition-all"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold text-neutral-700 mb-3">Animation Style</label>
+                                    <div className="flex gap-2 bg-neutral-50 p-1.5 rounded-xl border border-neutral-100">
+                                        {(["static", "marquee"] as const).map((s) => (
+                                            <button
+                                                key={s}
+                                                type="button"
+                                                onClick={() => setValue("announcementBar.style", s, { shouldDirty: true })}
+                                                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all capitalize ${config.announcementBar?.style === s ? "bg-white text-black shadow-sm" : "text-neutral-500 hover:text-neutral-800"}`}
+                                            >
+                                                {s}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-[10px] font-black text-neutral-400 uppercase tracking-wider mb-2">Background</label>
+                                        <div className="flex items-center gap-3 bg-neutral-50 p-2.5 rounded-xl border border-neutral-100">
+                                            <input type="color" value={config.announcementBar?.background} onChange={(e) => setValue("announcementBar.background", e.target.value, { shouldDirty: true })} className="h-8 w-12 rounded cursor-pointer border-none bg-transparent" />
+                                            <span className="text-xs font-mono font-bold text-neutral-600 uppercase">{config.announcementBar?.background}</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-black text-neutral-400 uppercase tracking-wider mb-2">Text Color</label>
+                                        <div className="flex items-center gap-3 bg-neutral-50 p-2.5 rounded-xl border border-neutral-100">
+                                            <input type="color" value={config.announcementBar?.text_color} onChange={(e) => setValue("announcementBar.text_color", e.target.value, { shouldDirty: true })} className="h-8 w-12 rounded cursor-pointer border-none bg-transparent" />
+                                            <span className="text-xs font-mono font-bold text-neutral-600 uppercase">{config.announcementBar?.text_color}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </Accordion>
+
+                        <Accordion title="Header Variations" icon={Layout}>
+                            <div className="space-y-6 py-4">
+                                <div>
+                                    <label className="block text-sm font-bold text-neutral-700 mb-3">Header Layout</label>
+                                    <div className="grid grid-cols-3 gap-3">
+                                        {(["default", "modern", "minimal"] as const).map((s) => (
+                                            <button
+                                                key={s}
+                                                type="button"
+                                                onClick={() => setValue("header.style", s, { shouldDirty: true })}
+                                                className={`py-6 px-4 text-xs font-bold rounded-xl border-2 transition-all capitalize flex flex-col items-center gap-2 ${config.header?.style === s ? "border-black bg-neutral-50 shadow-md" : "border-neutral-100 hover:border-neutral-300 text-neutral-500"}`}
+                                            >
+                                                <div className="w-full h-1 bg-neutral-200 rounded-full" />
+                                                {s}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <label className="text-sm font-bold text-neutral-800">Sticky Header</label>
+                                    <input
+                                        type="checkbox"
+                                        checked={config.header?.sticky}
+                                        onChange={(e) => setValue("header.sticky", e.target.checked, { shouldDirty: true })}
+                                        className="w-10 h-6 rounded-full appearance-none bg-neutral-200 checked:bg-black transition-all cursor-pointer relative after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:w-4 after:h-4 after:rounded-full after:transition-all checked:after:left-5"
+                                    />
+                                </div>
+                            </div>
+                        </Accordion>
+
+                        <Accordion title="Footer Designer" icon={Layout}>
+                            <div className="space-y-6 py-4">
+                                <div>
+                                    <label className="block text-sm font-bold text-neutral-700 mb-3">Copyright Text</label>
+                                    <input
+                                        type="text"
+                                        value={config.footer?.copyrightText}
+                                        onChange={(e) => setValue("footer.copyrightText", e.target.value, { shouldDirty: true })}
+                                        className="w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl text-sm font-bold focus:ring-2 focus:ring-black outline-none transition-all"
+                                    />
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <label className="text-sm font-bold text-neutral-800">Show Social Connections</label>
+                                    <input
+                                        type="checkbox"
+                                        checked={config.footer?.showSocials}
+                                        onChange={(e) => setValue("footer.showSocials", e.target.checked, { shouldDirty: true })}
+                                        className="w-10 h-6 rounded-full appearance-none bg-neutral-200 checked:bg-black transition-all cursor-pointer relative after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:w-4 after:h-4 after:rounded-full after:transition-all checked:after:left-5"
+                                    />
+                                </div>
+                            </div>
+                        </Accordion>
+
+                        <Accordion title="Advanced CRO Strategy (PDP Order)" icon={Sparkles}>
+                            <div className="space-y-6 py-4">
+                                <p className="text-xs text-neutral-500 font-medium">Drag-and-drop or toggle order of components on your product pages.</p>
+                                <div className="space-y-3">
+                                    {config.cro_strategy?.pdp_order?.map((item, index) => (
+                                        <div key={item} className="flex items-center justify-between p-3 bg-neutral-50 border border-neutral-100 rounded-xl">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-6 h-6 rounded bg-neutral-200 flex items-center justify-center text-[10px] font-bold">{index + 1}</div>
+                                                <span className="text-sm font-bold capitalize">{item.replace('_', ' ')}</span>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    type="button"
+                                                    disabled={index === 0}
+                                                    onClick={() => {
+                                                        const newOrder = [...config.cro_strategy!.pdp_order];
+                                                        [newOrder[index - 1], newOrder[index]] = [newOrder[index], newOrder[index - 1]];
+                                                        setValue("cro_strategy.pdp_order", newOrder, { shouldDirty: true });
+                                                    }}
+                                                    className="p-1.5 hover:bg-neutral-200 rounded text-neutral-600 disabled:opacity-30"
+                                                >
+                                                    <ChevronDown className="w-4 h-4 rotate-180" />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    disabled={index === config.cro_strategy!.pdp_order!.length - 1}
+                                                    onClick={() => {
+                                                        const newOrder = [...config.cro_strategy!.pdp_order];
+                                                        [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1], newOrder[index]];
+                                                        setValue("cro_strategy.pdp_order", newOrder, { shouldDirty: true });
+                                                    }}
+                                                    className="p-1.5 hover:bg-neutral-200 rounded text-neutral-600 disabled:opacity-30"
+                                                >
+                                                    <ChevronDown className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {!config.cro_strategy?.pdp_order && (
+                                        <div className="text-center py-6 border-2 border-dashed border-neutral-100 rounded-2xl">
+                                            <span className="text-xs text-neutral-400 font-bold">Standard Industry Order Active</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </Accordion>
+
                         <Accordion title="Color Palette Detail" icon={Palette}>
                             <div className="grid grid-cols-2 gap-6 py-4">
                                 {Object.entries(config.colors).map(([key, value]) => (
@@ -386,6 +581,17 @@ export default function AppearancePage() {
                             style={{ fontFamily: config.typography.bodyFont, backgroundColor: config.colors.background }}
                         >
                             <div className="rounded-[2rem] overflow-hidden border border-neutral-100 h-[700px] flex flex-col">
+                                {config.announcementBar?.enabled && (
+                                    <div
+                                        className="py-1.5 px-4 text-[9px] font-bold uppercase tracking-widest text-center overflow-hidden whitespace-nowrap"
+                                        style={{ backgroundColor: config.announcementBar.background, color: config.announcementBar.text_color }}
+                                    >
+                                        <div className={config.announcementBar.style === 'marquee' ? 'animate-marquee inline-block' : ''}>
+                                            {config.announcementBar.text}
+                                            {config.announcementBar.style === 'marquee' && <span className="ml-8">{config.announcementBar.text}</span>}
+                                        </div>
+                                    </div>
+                                )}
                                 <div className="px-6 py-5 border-b border-neutral-100 flex items-center justify-between" style={{ backgroundColor: config.colors.surface }}>
                                     <span className="font-black text-xl tracking-tighter" style={{ fontFamily: config.typography.headingFont, color: config.colors.text }}>LUMINA</span>
                                     <div className="flex items-center gap-4">

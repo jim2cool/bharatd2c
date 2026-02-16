@@ -25,7 +25,7 @@ export function ContentAccordions({ sections }: ContentProps) {
                         </AccordionTrigger>
                         <AccordionContent className="pb-4">
                             <div
-                                className="text-sm text-muted-foreground leading-relaxed max-w-none"
+                                className="prose prose-sm prose-neutral dark:prose-invert leading-relaxed max-w-none"
                                 dangerouslySetInnerHTML={{ __html: section.content }}
                             />
                         </AccordionContent>

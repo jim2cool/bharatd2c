@@ -111,7 +111,7 @@ export default function GeneralSettingsPage() {
             <div className="flex items-center justify-between mb-10 border-b border-neutral-100 pb-6">
                 <div>
                     <h1 className="text-3xl font-extrabold text-neutral-900 tracking-tight">Store Information</h1>
-                    <p className="text-neutral-500 mt-1 font-medium italic">Manage your brand's core identity and social presence</p>
+                    <p className="text-neutral-500 mt-1 font-medium">Manage your brand's core identity and social presence</p>
                 </div>
                 <div className="flex items-center gap-4">
                     {isDirty && <span className="text-xs text-orange-600 font-bold bg-orange-50 px-3 py-1 rounded-full border border-orange-100">Unsaved Changes</span>}
@@ -155,7 +155,7 @@ export default function GeneralSettingsPage() {
                                         className="w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl font-bold focus:ring-2 focus:ring-black outline-none transition-all"
                                         placeholder="https://example.com/logo.png"
                                     />
-                                    <p className="text-[10px] text-neutral-400 font-medium italic">Direct link to your logo image. File upload coming soon.</p>
+                                    <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-tight">Direct link to your logo image. File upload coming soon.</p>
                                 </div>
                                 <div className="w-24 h-24 rounded-xl border border-neutral-100 bg-neutral-50 flex items-center justify-center p-2 overflow-hidden">
                                     {watch("logo_url") ? (

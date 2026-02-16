@@ -5,7 +5,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabaseBrowser } from '@/lib/supabase-browser'
 import { getActiveStoreIdClient } from '@/lib/getActiveStore.client'
-import { ProductListSkeleton } from '../components/AdminSkeletons'
+import { PageSkeleton } from '@/components/ui/Skeletons'
+import { EmptyState } from '@/components/ui/EmptyState'
 import {
   Plus,
   Search,
@@ -29,6 +30,7 @@ type Product = {
   status: 'published' | 'draft'
   qty?: number | null
   location?: string | null
+  media?: { src: string; type: 'image' | 'video' }[] | null
 }
 
 const PAGE_SIZE = 10
@@ -150,12 +152,7 @@ export default function ProductsPage() {
      GUARD RENDER
   ---------------------------------------- */
   if (!storeId || loading) {
-    return (
-      <div className="p-6 space-y-4">
-        <div className="h-8 w-48 bg-gray-200 rounded animate-pulse mb-6" />
-        <ProductListSkeleton />
-      </div>
-    )
+    return <PageSkeleton />
   }
 
   return (
@@ -164,9 +161,9 @@ export default function ProductsPage() {
       <div className="flex items-end justify-between">
         <div>
           <h1 className="text-3xl font-black text-neutral-900 tracking-tight">
-            Inventory <span className="text-neutral-400 ml-1">({allProducts.length})</span>
+            Catalog <span className="text-neutral-400 ml-1">({allProducts.length})</span>
           </h1>
-          <p className="text-neutral-500 text-sm font-medium mt-1">Manage your catalog and stock levels.</p>
+          <p className="text-neutral-500 text-sm font-medium mt-1">Manage your storefront products and digital assets.</p>
         </div>
 
         <div className="flex gap-3">
@@ -256,126 +253,146 @@ export default function ProductsPage() {
         )}
       </div>
 
-      {/* TABLE */}
-      <div className="bg-white rounded-[2.5rem] border border-neutral-100 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-neutral-50">
-                <th className="p-6 w-8 text-center">
-                  <input
-                    type="checkbox"
-                    className="rounded border-neutral-300 focus:ring-neutral-900"
-                    checked={
-                      products.length > 0 &&
-                      selected.length === products.length
-                    }
-                    onChange={toggleSelectAll}
-                  />
-                </th>
-                <th className="p-6 text-left font-bold text-neutral-400 uppercase tracking-widest text-[10px]">Product / Catalog</th>
-                <th className="p-6 text-right font-bold text-neutral-400 uppercase tracking-widest text-[10px]">Price</th>
-                <th className="p-6 text-right font-bold text-neutral-400 uppercase tracking-widest text-[10px]">Margins</th>
-                <th className="p-6 text-right font-bold text-neutral-400 uppercase tracking-widest text-[10px]">Inventory</th>
-                <th className="p-6 text-left font-bold text-neutral-400 uppercase tracking-widest text-[10px]">Location</th>
-                <th className="p-6 text-center font-bold text-neutral-400 uppercase tracking-widest text-[10px]">Status</th>
-              </tr>
-            </thead>
+      {/* TABLE or EMPTY STATE */}
+      {products.length === 0 ? (
+        <EmptyState
+          title="No products in your catalog"
+          description="Ready to start selling? Create your first product or use AI to generate a starter catalog."
+          icon={<ShoppingBag className="w-8 h-8 opacity-20" />}
+          action={{
+            label: "Add Product",
+            onClick: () => router.push('/admin/products/new')
+          }}
+        />
+      ) : (
+        <div className="bg-white rounded-[2.5rem] border border-neutral-100 shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-neutral-50">
+                  <th className="p-6 w-8 text-center">
+                    <input
+                      type="checkbox"
+                      className="rounded border-neutral-300 focus:ring-neutral-900"
+                      checked={
+                        products.length > 0 &&
+                        selected.length === products.length
+                      }
+                      onChange={toggleSelectAll}
+                    />
+                  </th>
+                  <th className="p-6 text-left font-bold text-neutral-400 uppercase tracking-widest text-[10px]">Product / Catalog</th>
+                  <th className="p-6 text-right font-bold text-neutral-400 uppercase tracking-widest text-[10px]">Price</th>
+                  <th className="p-6 text-right font-bold text-neutral-400 uppercase tracking-widest text-[10px]">Margins</th>
+                  <th className="p-6 text-right font-bold text-neutral-400 uppercase tracking-widest text-[10px]">Inventory</th>
+                  <th className="p-6 text-left font-bold text-neutral-400 uppercase tracking-widest text-[10px]">Location</th>
+                  <th className="p-6 text-center font-bold text-neutral-400 uppercase tracking-widest text-[10px]">Status</th>
+                </tr>
+              </thead>
 
-            <tbody className="divide-y divide-neutral-50">
-              {products.map(p => {
-                const margin =
-                  p.price > 0
-                    ? Math.round(((p.price - p.cogs) / p.price) * 100)
-                    : 0
 
-                return (
-                  <tr key={p.id} className="group hover:bg-neutral-50 transition-colors">
-                    <td className="p-6 text-center">
-                      <input
-                        type="checkbox"
-                        className="rounded border-neutral-300 focus:ring-neutral-900"
-                        checked={selected.includes(p.id)}
-                        onChange={() => toggleSelect(p.id)}
-                      />
-                    </td>
+              <tbody className="divide-y divide-neutral-50">
+                {products.map(p => {
+                  const margin =
+                    (p.price || 0) > 0
+                      ? Math.round((((p.price || 0) - (p.cogs || 0)) / (p.price || 1)) * 100)
+                      : 0
 
-                    <td className="p-6">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl border border-neutral-100 bg-neutral-50 flex-shrink-0 relative overflow-hidden group-hover:shadow-md transition-all">
-                          {/* Using a placeholder or first image if we had access to full object */}
-                          <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-neutral-300">
-                            IMG
+                  return (
+                    <tr key={p.id} className="group hover:bg-neutral-50 transition-colors">
+                      <td className="p-6 text-center">
+                        <input
+                          type="checkbox"
+                          className="rounded border-neutral-300 focus:ring-neutral-900"
+                          checked={selected.includes(p.id)}
+                          onChange={() => toggleSelect(p.id)}
+                        />
+                      </td>
+
+                      <td className="p-6">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-xl border border-neutral-100 bg-neutral-50 flex-shrink-0 relative overflow-hidden group-hover:shadow-md transition-all">
+                            {p.media?.[0]?.src ? (
+                              <img
+                                src={p.media[0].src}
+                                alt={p.title}
+                                className="absolute inset-0 w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-neutral-300">
+                                IMG
+                              </div>
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <Link
+                              href={`/admin/products/${p.id}`}
+                              className="font-bold text-neutral-900 hover:text-blue-600 transition-colors truncate block"
+                            >
+                              {p.title}
+                            </Link>
+                            <p className="text-[11px] text-neutral-400 font-medium">Standard Variant</p>
                           </div>
                         </div>
-                        <div className="min-w-0">
-                          <Link
-                            href={`/admin/products/${p.id}`}
-                            className="font-bold text-neutral-900 hover:text-blue-600 transition-colors truncate block"
-                          >
-                            {p.title}
-                          </Link>
-                          <p className="text-[11px] text-neutral-400 font-medium">Standard Variant</p>
-                        </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    <td className="p-6 text-right">
-                      <p className="font-bold text-neutral-900">₹{p.price.toLocaleString()}</p>
-                      <p className="text-[10px] text-neutral-400 font-medium tracking-tight whitespace-nowrap">COGS: ₹{p.cogs}</p>
-                    </td>
+                      <td className="p-6 text-right">
+                        <p className="font-bold text-neutral-900">₹{(p.price || 0).toLocaleString()}</p>
+                        <p className="text-[10px] text-neutral-400 font-medium tracking-tight whitespace-nowrap">COGS: ₹{p.cogs || 0}</p>
+                      </td>
 
-                    <td className="p-6 text-right">
-                      <span
-                        className={`text-xs font-black px-2 py-1 rounded-lg ${margin >= 40
-                          ? 'bg-green-50 text-green-700'
-                          : margin >= 20
-                            ? 'bg-orange-50 text-orange-700'
-                            : 'bg-red-50 text-red-700'
-                          }`}
-                      >
-                        {margin}%
-                      </span>
-                    </td>
-
-                    <td className="p-6 text-right">
-                      <div className="flex flex-col items-end">
-                        <span className={`text-sm font-bold ${p.qty && p.qty < 10 ? 'text-orange-600' : 'text-neutral-900'}`}>
-                          {p.qty ?? 'N/A'}
+                      <td className="p-6 text-right">
+                        <span
+                          className={`text-xs font-black px-2 py-1 rounded-lg ${margin >= 40
+                            ? 'bg-green-50 text-green-700'
+                            : margin >= 20
+                              ? 'bg-orange-50 text-orange-700'
+                              : 'bg-red-50 text-red-700'
+                            }`}
+                        >
+                          {margin}%
                         </span>
-                        <div className="w-16 h-1 bg-neutral-100 rounded-full mt-1.5 overflow-hidden">
-                          <div
-                            className={`h-full rounded-full ${p.qty && p.qty < 10 ? 'bg-orange-500' : 'bg-neutral-900'}`}
-                            style={{ width: `${Math.min((p.qty || 0) * 2, 100)}%` }}
-                          />
+                      </td>
+
+                      <td className="p-6 text-right">
+                        <div className="flex flex-col items-end">
+                          <span className={`text-sm font-bold ${p.qty && p.qty < 10 ? 'text-orange-600' : 'text-neutral-900'}`}>
+                            {p.qty ?? 'N/A'}
+                          </span>
+                          <div className="w-16 h-1 bg-neutral-100 rounded-full mt-1.5 overflow-hidden">
+                            <div
+                              className={`h-full rounded-full ${p.qty && p.qty < 10 ? 'bg-orange-500' : 'bg-neutral-900'}`}
+                              style={{ width: `${Math.min((p.qty || 0) * 2, 100)}%` }}
+                            />
+                          </div>
                         </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    <td className="p-6">
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-1.5 h-1.5 rounded-full bg-neutral-300" />
-                        <span className="text-xs font-bold text-neutral-600">{p.location ?? 'Global'}</span>
-                      </div>
-                    </td>
+                      <td className="p-6">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-1.5 h-1.5 rounded-full bg-neutral-300" />
+                          <span className="text-xs font-bold text-neutral-600">{p.location ?? 'Global'}</span>
+                        </div>
+                      </td>
 
-                    <td className="p-6 text-center">
-                      <span
-                        className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${p.status === 'published'
-                          ? 'bg-green-900 text-white shadow-sm'
-                          : 'bg-neutral-100 text-neutral-500'
-                          }`}
-                      >
-                        {p.status}
-                      </span>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+                      <td className="p-6 text-center">
+                        <span
+                          className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${p.status === 'published'
+                            ? 'bg-green-900 text-white shadow-sm'
+                            : 'bg-neutral-100 text-neutral-500'
+                            }`}
+                        >
+                          {p.status}
+                        </span>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* PAGINATION */}
       {totalPages > 1 && (

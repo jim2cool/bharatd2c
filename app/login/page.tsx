@@ -52,7 +52,7 @@ export default function LoginPage() {
         const activeStoreId = localStorage.getItem('easy_active_store_id')
         if (!activeStoreId) {
           localStorage.setItem('easy_active_store_id', stores[0].id)
-          document.cookie = `easy_active_store_id=${stores[0].id}; path=/; SameSite=Lax`
+          document.cookie = `easy_active_store_id=${stores[0].id}; path=/; SameSite=Lax; Secure; max-age=${60 * 60 * 24 * 365}`
         }
         router.push('/admin')
       } else {

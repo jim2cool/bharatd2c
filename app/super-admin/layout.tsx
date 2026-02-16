@@ -23,8 +23,8 @@ export default async function SuperAdminLayout({
         .eq('id', user.id)
         .single()
 
-    // Strict Role Check AND Email Override for Bootstrapping
-    const isSuperAdmin = profile?.role === 'super_admin' || user.email === 'shashwat@e4a.in'
+    // Strict Role Check — no email bypasses
+    const isSuperAdmin = profile?.role === 'super_admin'
 
     if (!isSuperAdmin) {
         redirect('/admin?error=unauthorized')
@@ -44,6 +44,7 @@ export default async function SuperAdminLayout({
                     <NavLink href="/super-admin/stores">All Stores</NavLink>
                     <NavLink href="/super-admin/users">Users</NavLink>
                     <NavLink href="/super-admin/billing">Billing & Plans</NavLink>
+                    <NavLink href="/super-admin/features">Features & Controls</NavLink>
                     <NavLink href="/super-admin/settings">Platform Settings</NavLink>
                 </nav>
 

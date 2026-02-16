@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase-server'
 import SuperAdminAnalytics from './components/SuperAdminAnalytics'
+import SuperAdminSupabaseUsage from './components/SuperAdminSupabaseUsage'
 import { Store, Users, ShoppingBag, IndianRupee, TrendingUp, Calendar } from 'lucide-react'
 
 export default async function SuperAdminDashboard() {
@@ -13,7 +14,7 @@ export default async function SuperAdminDashboard() {
         .eq('id', user?.id)
         .single()
 
-    if (profile?.role !== 'super_admin' && user?.email !== 'shashwat@e4a.in') {
+    if (profile?.role !== 'super_admin') {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
                 <div className="text-center p-8 bg-white border border-red-100 rounded-2xl shadow-sm">
@@ -207,7 +208,10 @@ export default async function SuperAdminDashboard() {
                     </div>
                 </div>
 
-                {/* 4. DATA TABLES GRID */}
+                {/* 4. ECOSYSTEM HEALTH TELEMETRY */}
+                <SuperAdminSupabaseUsage />
+
+                {/* 5. DATA TABLES GRID */}
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
                     {/* STORES SECTION */}
                     <div className="bg-white rounded-[2.5rem] border border-neutral-200 shadow-sm overflow-hidden">

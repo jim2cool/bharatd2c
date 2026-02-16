@@ -1,18 +1,45 @@
 'use client'
-
 import Link from 'next/link'
+import './admin-pulse.css'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import StoreSwitcher from '@/components/admin/StoreSwitcher'
 import { getActiveStoreIdClient } from '@/lib/getActiveStore.client'
 import { supabaseBrowser } from '@/lib/supabase-browser'
-import { Toaster } from 'sonner'
-import { Globe } from 'lucide-react'
+import { Toaster, toast } from 'sonner'
+import {
+  Globe,
+  LayoutDashboard,
+  Package,
+  ShoppingBag,
+  Users,
+  BarChart3,
+  Settings,
+  Globe2,
+  Palette,
+  Megaphone,
+  FileText,
+  Image as ImageIcon,
+  Layers,
+  Percent,
+  ChevronRight,
+  LogOut,
+  Plus,
+  Truck,
+  Sparkles
+} from 'lucide-react'
 import { getStoreBaseUrl } from '@/lib/getStoreUrl'
 
-type NavItem =
-  | { label: string; href: string }
-  | { section: string }
+type NavItem = {
+  label: string
+  href: string
+  icon: any
+}
+
+type NavGroup = {
+  section: string
+  items: NavItem[]
+}
 
 export function AdminLayoutClient({
   children,
@@ -24,124 +51,249 @@ export function AdminLayoutClient({
   const [storeId, setStoreId] = useState<string | null>(null)
   const [storeUrl, setStoreUrl] = useState<string>('/')
 
-  // ✅ hydrate client-only storeId AFTER mount
   useEffect(() => {
     const sid = getActiveStoreIdClient()
     setStoreId(sid)
 
     if (sid) {
       getStoreBaseUrl(supabaseBrowser).then(url => setStoreUrl(url))
+
+      // 🛰️ REAL-TIME ORDER NOTIFICATIONS
+      const channel = supabaseBrowser
+        .channel('admin-order-pulse')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'orders',
+            filter: `store_id=eq.${sid}`
+          },
+          (payload) => {
+            const newOrder = payload.new as any
+            toast.success('New Order Received!', {
+              description: `Order #${newOrder.order_number} just landed.`,
+              action: {
+                label: 'View Order',
+                onClick: () => router.push(`/admin/orders/${newOrder.id}`)
+              },
+              duration: 8000,
+            })
+
+            // Play a subtle notification sound if possible, or just the visual toast
+          }
+        )
+        .subscribe()
+
+      return () => {
+        supabaseBrowser.removeChannel(channel)
+      }
     }
-  }, [])
+  }, [router])
 
-  const NAV: NavItem[] = [
-    { label: 'Home', href: '/admin' },
-    { label: 'Manage Stores', href: '/admin/stores' },
-    { label: 'Orders', href: '/admin/orders' },
-    { label: 'Products', href: '/admin/products' },
-    { label: 'Collections', href: '/admin/collections' },
-    { label: 'Media', href: '/admin/media' },
-    { label: 'Pages', href: '/admin/pages' },
-    { label: 'Customers', href: '#' },
-    { label: 'Analytics', href: '#' },
-
-    { section: 'Operations' },
-    { label: 'Shipping', href: '#' },
-    { label: 'Payments', href: '#' },
-    { label: 'Taxes', href: '#' },
-
-    { section: 'Settings' },
-    { label: 'Store Info', href: '/admin/settings/general' },
+  const GROUPS: NavGroup[] = [
     {
-      label: 'Store details',
-      href: storeId ? `/admin/stores/${storeId}` : '/admin/stores',
+      section: 'Pulse',
+      items: [
+        { label: 'Overview', href: '/admin', icon: LayoutDashboard },
+        { label: 'Analytics', href: '#', icon: BarChart3 },
+      ]
     },
-    { label: 'Domains', href: '/admin/settings/domains' },
-    { label: 'Appearance', href: '/admin/settings/appearance' },
-    { label: 'Users & permissions', href: '#' },
+    {
+      section: 'Growth',
+      items: [
+        { label: 'Orders', href: '/admin/orders', icon: ShoppingBag },
+        { label: 'Customers', href: '#', icon: Users },
+        { label: 'Discounts', href: '/admin/discounts', icon: Percent },
+        { label: 'Bundles', href: '/admin/products/bundles', icon: Layers },
+        { label: 'Marketing', href: '/admin/marketing', icon: Megaphone },
+      ]
+    },
+    {
+      section: 'Storefront',
+      items: [
+        { label: 'Products', href: '/admin/products', icon: Package },
+        { label: 'Collections', href: '/admin/collections', icon: Layers },
+        { label: 'Media', href: '/admin/media', icon: ImageIcon },
+        { label: 'Pages', href: '/admin/pages', icon: FileText },
+        { label: 'Appearance', href: '/admin/settings/appearance', icon: Palette },
+      ]
+    },
+    {
+      section: 'Operations',
+      items: [
+        { label: 'Logistics', href: '/admin/logistics', icon: Truck },
+        { label: 'Dropshipping', href: '/admin/dropshipping', icon: Package },
+      ]
+    },
+    {
+      section: 'Config',
+      items: [
+        { label: 'Domain', href: '/admin/settings/domains', icon: Globe2 },
+        { label: 'Settings', href: '/admin/settings/general', icon: Settings },
+      ]
+    }
   ]
 
+  const [isOpen, setIsOpen] = useState(false)
+
   return (
-    <div className="flex min-h-screen bg-[#f6f6f7]">
+    <div className="flex min-h-screen bg-[#f8fafc]">
       {/* LEFT NAV */}
-      <aside className="w-[240px] bg-white border-r">
-        <div className="px-4 py-4 border-b">
-          <div className="text-lg font-semibold">Easy D2C</div>
-          <div className="text-xs text-gray-500">Admin</div>
+      <aside className="w-[260px] bg-white border-r border-slate-100 flex flex-col admin-pulse-sidebar sticky top-0 h-screen">
+        <div className="px-6 py-8">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-neutral-900 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-neutral-200">
+              <div className="w-4 h-4 border-2 border-white rounded-sm rotate-45" />
+            </div>
+            <div>
+              <div className="text-base font-black text-neutral-900 tracking-tighter uppercase">Easy D2C</div>
+              <div className="text-[10px] font-black text-blue-600 uppercase tracking-widest -mt-1">Pulse Enterprise</div>
+            </div>
+          </div>
         </div>
 
-        <nav className="px-2 py-3 text-sm">
-          {NAV.map((item, idx) =>
-            'section' in item ? (
-              <div
-                key={idx}
-                className="mt-4 mb-1 px-3 text-xs font-semibold text-gray-500 uppercase"
-              >
-                {item.section}
-              </div>
-            ) : (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={`block px-3 py-2 rounded mb-1 ${pathname === item.href
-                  ? 'bg-gray-100 font-medium'
-                  : 'text-gray-700 hover:bg-gray-50'
-                  } ${item.href === '#'
-                    ? 'opacity-50 cursor-not-allowed'
-                    : ''
-                  }`}
-              >
-                {item.label}
-              </Link>
-            )
-          )}
+        <nav className="flex-1 overflow-y-auto pb-8 scrollbar-hide">
+          {GROUPS.map((group, gIdx) => (
+            <div key={gIdx} className="mb-6">
+              <div className="nav-group-title">{group.section}</div>
+              {group.items.map((item) => {
+                const Icon = item.icon
+                const isActive = pathname === item.href
+                const isPlaceholder = item.href === '#'
+
+                return (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className={`nav-item ${isActive ? 'active' : ''} ${isPlaceholder ? 'opacity-40 cursor-not-allowed grayscale' : ''}`}
+                    onClick={(e) => isPlaceholder && e.preventDefault()}
+                  >
+                    <Icon className="shrink-0" />
+                    <span className="flex-1">{item.label}</span>
+                    {isActive && <ChevronRight className="w-3.5 h-3.5 opacity-50" />}
+                  </Link>
+                )
+              })}
+            </div>
+          ))}
         </nav>
-      </aside>
 
-      {/* RIGHT SIDE */}
-      <div className="flex-1 flex flex-col">
-        <Toaster position="top-right" richColors />
-        {/* TOP BAR */}
-        <header className="h-[56px] bg-white border-b flex items-center justify-between px-6">
-          <div className="text-sm font-medium text-gray-700">
-            Admin
-          </div>
+        {/* BOTTOM SECTION */}
+        <div className="p-4 border-t border-slate-50 space-y-2">
+          {storeId && (
+            <a
+              href={storeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-between p-3 bg-neutral-900 text-white rounded-2xl shadow-xl shadow-neutral-100 group transition-all hover:bg-neutral-800"
+            >
+              <div className="flex items-center gap-3">
+                <Globe className="w-4 h-4 text-blue-400" />
+                <span className="text-[11px] font-black uppercase tracking-widest">Live Store</span>
+              </div>
+              <ArrowUpRight className="w-3.5 h-3.5 opacity-50 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            </a>
+          )}
 
-          <div className="flex items-center gap-4 text-sm">
-            {storeId && (
-              <a
-                href={storeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-1.5 bg-neutral-900 text-white rounded-xl text-xs font-black hover:bg-neutral-800 transition-all shadow-lg shadow-neutral-100"
-              >
-                <Globe className="w-3.5 h-3.5" />
-                View Store
-              </a>
-            )}
+          <div className="p-2 flex items-center justify-between">
             <StoreSwitcher />
-
-            <Link href="/admin/stores" className="text-gray-600 hover:text-black">
-              Manage Stores
-            </Link>
-
             <button
               onClick={async () => {
                 await supabaseBrowser.auth.signOut()
                 router.push('/login')
               }}
-              className="text-gray-600 hover:text-black"
+              className="p-2.5 rounded-xl hover:bg-neutral-50 text-neutral-400 hover:text-red-500 transition-all"
+              title="Logout"
             >
-              Logout
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* RIGHT SIDE */}
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+        <Toaster position="top-right" richColors />
+
+        {/* TOP BAR */}
+        <header className="h-[72px] bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center justify-between px-10 sticky top-0 z-40">
+          <div className="flex items-center gap-4">
+            <h2 className="text-sm font-black text-neutral-900 uppercase tracking-widest opacity-40">
+              {GROUPS.find(g => g.items.some(i => i.href === pathname))?.section || 'Admin'}
+            </h2>
+            <ChevronRight className="w-3 h-3 text-neutral-300" />
+            <h1 className="text-sm font-black text-neutral-900 uppercase tracking-widest">
+              {GROUPS.flatMap(g => g.items).find(i => i.href === pathname)?.label || 'Dashboard'}
+            </h1>
+          </div>
+
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-xl border border-slate-100">
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-[10px] font-black text-neutral-500 uppercase tracking-widest">Cloud Engine: Active</span>
+            </div>
+            <button className="w-10 h-10 bg-neutral-900 rounded-2xl flex items-center justify-center text-white shadow-lg transition-transform hover:scale-105 active:scale-95">
+              <Plus className="w-5 h-5" />
             </button>
           </div>
         </header>
 
         {/* CONTENT */}
-        <main className="flex-1 p-6">
+        <main className="flex-1 overflow-y-auto p-10 bg-[#f8fafc]/50">
           {children}
         </main>
+
+        {/* FLOATING QUICK ACTIONS */}
+        <div className="fixed bottom-10 right-10 z-50 flex flex-col items-end gap-4">
+          {isOpen && (
+            <div className="flex flex-col gap-3 mb-2 animate-in slide-in-from-bottom-10 fade-in duration-300">
+              <a
+                href={storeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 px-6 py-3 bg-white border border-slate-100 rounded-2xl text-xs font-black uppercase tracking-widest shadow-2xl hover:bg-slate-50 transition-all group"
+              >
+                <Globe className="w-4 h-4 text-blue-600" />
+                <span>View Store</span>
+                <ArrowUpRight className="w-3.5 h-3.5 opacity-30 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              </a>
+              <Link
+                href="/admin/products/generate"
+                className="flex items-center gap-3 px-6 py-3 bg-white border border-slate-100 rounded-2xl text-xs font-black uppercase tracking-widest shadow-2xl hover:bg-slate-50 transition-all group"
+              >
+                <Plus className="w-4 h-4 text-neutral-900" />
+                <span>Create Product</span>
+                <Sparkles className="w-3.5 h-3.5 text-blue-400 group-hover:rotate-12 transition-transform" />
+              </Link>
+            </div>
+          )}
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className={`w-16 h-16 rounded-[2rem] flex items-center justify-center text-white shadow-2xl transition-all duration-500 scale-110 active:scale-95 fab-glow ${isOpen ? 'bg-neutral-900 rotate-45' : 'bg-blue-600'
+              }`}
+          >
+            <Plus className="w-8 h-8" />
+          </button>
+        </div>
       </div>
     </div>
+  )
+}
+
+function ArrowUpRight(props: any) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M7 7h10v10" /><path d="M7 17L17 7" />
+    </svg>
   )
 }

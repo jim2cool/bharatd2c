@@ -5,7 +5,9 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabaseBrowser } from '@/lib/supabase-browser'
 import { getActiveStoreIdClient } from '@/lib/getActiveStore.client'
-import { OrderListSkeleton } from '../components/AdminSkeletons'
+import { PageSkeleton } from '@/components/ui/Skeletons'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { ShoppingBag } from 'lucide-react'
 
 const PAGE_SIZE = 25
 
@@ -121,12 +123,7 @@ export default function OrdersPage() {
   /* ---------------- GUARD RENDER ---------------- */
 
   if (!storeId || loading) {
-    return (
-      <div className="px-6 py-6 space-y-4">
-        <div className="h-8 w-48 bg-gray-200 rounded animate-pulse mb-6" />
-        <OrderListSkeleton />
-      </div>
-    )
+    return <PageSkeleton />
   }
 
   /* ---------------- UI ---------------- */
@@ -171,96 +168,96 @@ export default function OrdersPage() {
         })}
       </div>
 
-      {/* TABLE */}
-      <div className="bg-white border rounded overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b text-gray-600">
-            <tr>
-              <th className="w-10 px-4 py-2"></th>
-              <th className="text-left px-4 py-2">Order</th>
-              <th className="text-left px-4 py-2">Customer</th>
-              <th className="text-right px-4 py-2">Total</th>
-              <th className="text-left px-4 py-2">Payment</th>
-              <th className="text-left px-4 py-2">Verified</th>
-              <th className="text-left px-4 py-2">Status</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {filteredOrders.length === 0 && (
+      {/* TABLE or EMPTY STATE */}
+      {filteredOrders.length === 0 ? (
+        <EmptyState
+          title="No orders yet"
+          description="Your orders will appear here once customers start purchasing. Try placing a test order on your storefront."
+          icon={<ShoppingBag className="w-8 h-8 opacity-20" />}
+        />
+      ) : (
+        <div className="bg-white border rounded overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 border-b text-gray-600">
               <tr>
-                <td colSpan={6} className="px-4 py-6 text-center">
-                  No orders found
-                </td>
+                <th className="w-10 px-4 py-2"></th>
+                <th className="text-left px-4 py-2">Order</th>
+                <th className="text-left px-4 py-2">Customer</th>
+                <th className="text-right px-4 py-2">Total</th>
+                <th className="text-left px-4 py-2">Payment</th>
+                <th className="text-left px-4 py-2">Verified</th>
+                <th className="text-left px-4 py-2">Status</th>
               </tr>
-            )}
+            </thead>
 
-            {filteredOrders.map(order => (
-              <tr
-                key={order.id}
-                className="border-b hover:bg-gray-50"
-              >
-                <td className="px-4 py-1.5">
-                  <input type="checkbox" disabled />
-                </td>
+            <tbody>
+              {filteredOrders.map(order => (
+                <tr
+                  key={order.id}
+                  className="border-b hover:bg-gray-50"
+                >
+                  <td className="px-4 py-1.5">
+                    <input type="checkbox" disabled />
+                  </td>
 
-                <td className="px-4 py-1.5">
-                  <Link
-                    href={`/admin/orders/${order.id}`}
-                    className="text-blue-600 font-medium"
-                  >
-                    #{order.order_number}
-                  </Link>
-                  <div className="text-xs text-gray-500">
-                    {formatIST(order.created_at)} IST
-                  </div>
-                </td>
+                  <td className="px-4 py-1.5">
+                    <Link
+                      href={`/admin/orders/${order.id}`}
+                      className="text-blue-600 font-medium"
+                    >
+                      #{order.order_number}
+                    </Link>
+                    <div className="text-xs text-gray-500">
+                      {formatIST(order.created_at)} IST
+                    </div>
+                  </td>
 
-                <td className="px-4 py-1.5">
-                  <div className="font-medium">
-                    {order.meta?.name || '—'}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {order.meta?.phone}
-                  </div>
-                </td>
+                  <td className="px-4 py-1.5">
+                    <div className="font-medium">
+                      {order.meta?.name || '—'}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {order.meta?.phone}
+                    </div>
+                  </td>
 
-                <td className="px-4 py-1.5 text-right">
-                  ₹{order.total_amount}
-                </td>
+                  <td className="px-4 py-1.5 text-right">
+                    ₹{order.total_amount}
+                  </td>
 
-                <td className="px-4 py-1.5">
-                  {order.payment_mode?.toUpperCase()}
-                </td>
+                  <td className="px-4 py-1.5">
+                    {order.payment_mode?.toUpperCase()}
+                  </td>
 
-                <td className="px-4 py-1.5">
-                  {order.payment_mode === 'cod' ? (
-                    order.meta?.otp_verified ? (
-                      <span className="text-green-600 text-xs font-semibold flex items-center gap-1">
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
-                        OTP Verified
-                      </span>
+                  <td className="px-4 py-1.5">
+                    {order.payment_mode === 'cod' ? (
+                      order.meta?.otp_verified ? (
+                        <span className="text-green-600 text-xs font-semibold flex items-center gap-1">
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
+                          OTP Verified
+                        </span>
+                      ) : (
+                        <span className="text-red-500 text-xs font-medium">PENDING</span>
+                      )
                     ) : (
-                      <span className="text-red-500 text-xs font-medium">PENDING</span>
-                    )
-                  ) : (
-                    <span className="text-gray-400 text-xs italic">Prepaid</span>
-                  )}
-                </td>
+                      <span className="text-gray-400 text-xs font-bold uppercase tracking-widest">Prepaid</span>
+                    )}
+                  </td>
 
-                <td className="px-4 py-1.5">
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${STATUS_PILL[order.status] || 'bg-gray-100'
-                      }`}
-                  >
-                    {order.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                  <td className="px-4 py-1.5">
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${STATUS_PILL[order.status] || 'bg-gray-100'
+                        }`}
+                    >
+                      {order.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* PAGINATION */}
       <div className="flex justify-between items-center mt-4">

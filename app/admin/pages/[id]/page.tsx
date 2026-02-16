@@ -155,7 +155,7 @@ export default function PageEditor() {
                                 value={content}
                                 onChange={(e) => setContent(e.target.value)}
                             />
-                            <p className="text-[10px] text-gray-400 mt-1 italic">Basic HTML editor coming soon. Using raw textarea for now.</p>
+                            <p className="text-[10px] text-gray-400 mt-1 font-bold">Basic HTML editor coming soon. Using raw textarea for now.</p>
                         </div>
                     </div>
 

@@ -132,7 +132,7 @@ export default function HomepageEditor() {
             <div className="flex items-center justify-between mb-8 border-b border-neutral-100 pb-6">
                 <div>
                     <h1 className="text-3xl font-extrabold text-neutral-900 tracking-tight">Homepage Design</h1>
-                    <p className="text-neutral-500 mt-1 font-medium italic">Craft your store's first impression</p>
+                    <p className="text-neutral-500 mt-1 font-medium">Craft your store's first impression</p>
                 </div>
                 <div className="flex items-center gap-4">
                     <Button
