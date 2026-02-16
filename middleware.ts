@@ -129,22 +129,25 @@ export default async function middleware(request: NextRequest) {
     } = await supabase.auth.getUser()
 
     const normalizedPath = url.pathname.replace(/\/$/, "") || "/";
-    const isLoginPath = normalizedPath === "/login" || normalizedPath === "/super-admin/login";
+    const pathSegments = normalizedPath.split('/');
+    const isLoginPath = pathSegments.includes("login");
 
-    if ((normalizedPath.startsWith("/admin") || normalizedPath.startsWith("/super-admin")) && !isLoginPath) {
+    if (isLoginPath) {
+        return response;
+    }
+
+    if ((normalizedPath.startsWith("/admin") || normalizedPath.startsWith("/super-admin"))) {
         if (!user) {
             const isSuper = normalizedPath.startsWith("/super-admin");
             const redirectPath = isSuper ? "/super-admin/login" : "/login";
 
-            // Safety Check: Avoid redirecting to the same path
-            if (normalizedPath === redirectPath) {
-                return response;
-            }
+            // Final safety: never redirect to a login path from this block
+            // (even though isLoginPath check above should have caught it)
+            if (normalizedPath === redirectPath) return response;
 
             const redirectUrl = new URL(redirectPath, request.url);
             redirectUrl.searchParams.set("next", url.pathname);
 
-            // Protocol Management for Production
             if (process.env.NODE_ENV === 'production' || request.headers.get('x-forwarded-proto') === 'https') {
                 redirectUrl.protocol = 'https:';
             }
