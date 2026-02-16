@@ -51,27 +51,27 @@ export function QuickAddModal({ isOpen, product, onClose }: { isOpen: boolean; p
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200">
-            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+            <div className="fixed inset-0 bg-foreground/60 backdrop-blur-sm" onClick={onClose} />
 
-            <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col sm:flex-row">
+            <div className="relative w-full max-w-lg bg-[var(--bg-primary)] rounded-[var(--radius-card)] shadow-2xl overflow-hidden flex flex-col sm:flex-row">
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 z-10 p-2 bg-white/80 hover:bg-neutral-100 rounded-full transition-colors"
+                    className="absolute top-4 right-4 z-10 p-2 bg-card/80 hover:bg-secondary rounded-full transition-colors"
                 >
                     <X className="w-4 h-4" />
                 </button>
 
                 {/* Product Image */}
-                <div className="relative w-full sm:w-2/5 aspect-square sm:aspect-auto bg-neutral-100">
+                <div className="relative w-full sm:w-2/5 aspect-square sm:aspect-auto bg-secondary">
                     <Image src={image} alt={product.title} fill className="object-cover" />
                 </div>
 
                 {/* Main Content */}
                 <div className="flex-1 p-6 flex flex-col">
-                    <h2 className="text-xl font-bold font-serif text-neutral-900 mb-2 leading-tight">
+                    <h2 className="text-xl font-bold font-serif text-[var(--text-primary)] mb-2 leading-tight">
                         {product.title}
                     </h2>
-                    <p className="text-lg font-semibold text-neutral-900 mb-6">
+                    <p className="text-lg font-semibold text-[var(--text-primary)] mb-6">
                         ₹{product.price}
                     </p>
 
@@ -81,28 +81,28 @@ export function QuickAddModal({ isOpen, product, onClose }: { isOpen: boolean; p
                         </div>
                     ) : variants.length > 0 ? (
                         <div className="flex-1 flex flex-col gap-3 mb-6 overflow-y-auto pr-2 max-h-[40vh] sm:max-h-auto scrollbar-thin">
-                            <span className="text-xs font-bold uppercase tracking-wider text-neutral-500">Select Option</span>
+                            <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] opacity-60">Select Option</span>
                             {variants.map((v) => (
                                 <button
                                     key={v.id}
                                     onClick={() => setSelectedVariantId(v.id)}
-                                    className={`flex flex-col text-left p-3 border rounded-xl transition-all ${selectedVariantId === v.id ? 'border-black ring-1 ring-black bg-neutral-50' : 'border-neutral-200 hover:border-neutral-300'}`}
+                                    className={`flex flex-col text-left p-3 border rounded-[var(--radius-button)] transition-all ${selectedVariantId === v.id ? 'border-[var(--primary)] ring-1 ring-[var(--primary)] bg-[var(--bg-secondary)]' : 'border-[var(--border)] hover:border-[var(--text-secondary)]'}`}
                                 >
-                                    <span className="font-semibold text-sm text-neutral-900">{v.title}</span>
-                                    <span className="text-sm text-neutral-600">₹{v.price}</span>
+                                    <span className="font-semibold text-sm text-[var(--text-primary)]">{v.title}</span>
+                                    <span className="text-sm text-[var(--text-secondary)] opacity-70">₹{v.price}</span>
                                 </button>
                             ))}
                         </div>
                     ) : (
                         <div className="flex-1 flex items-center mb-6">
-                            <p className="text-sm text-neutral-500 italic">No variants available for this product.</p>
+                            <p className="text-sm text-muted-foreground italic">No variants available for this product.</p>
                         </div>
                     )}
 
                     <Button
                         onClick={handleAddToCart}
                         disabled={loading}
-                        className="w-full h-12 rounded-full uppercase tracking-widest text-xs font-bold"
+                        className="w-full h-12 rounded-[var(--radius-button)] uppercase tracking-widest text-xs font-bold"
                     >
                         Add to Cart
                     </Button>

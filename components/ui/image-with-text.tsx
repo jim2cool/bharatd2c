@@ -49,7 +49,7 @@ export default function ImageWithText({
                         </div>
                         {ctaText && ctaLink && (
                             <div className="pt-6">
-                                <Button asChild size="lg" className="rounded-none bg-black text-white hover:bg-black/90 h-16 px-16 uppercase tracking-[0.3em] text-[10px] font-bold transition-all shadow-xl">
+                                <Button asChild size="lg" className="rounded-none bg-foreground text-primary-foreground hover:bg-foreground/90 h-16 px-16 uppercase tracking-[0.3em] text-[10px] font-bold transition-all shadow-xl">
                                     <Link href={ctaLink}>
                                         {ctaText}
                                     </Link>

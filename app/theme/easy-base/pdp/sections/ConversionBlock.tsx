@@ -56,32 +56,32 @@ export default function ConversionBlock({
   }
 
   return (
-    <section className="bg-white border border-neutral-100 rounded-[2rem] p-8 shadow-sm space-y-6">
+    <section className="bg-[var(--bg-primary)] border border-[var(--border)] rounded-[var(--radius-card)] p-8 shadow-[var(--shadow-card)] space-y-6">
       {/* PRICING HIERARCHY */}
       <div className="space-y-2">
         <div className="flex items-center gap-3">
-          <span className="text-4xl font-black text-neutral-900 tracking-tighter">₹{price}</span>
+          <span className="text-4xl font-bold text-[var(--primary)] tracking-tighter">₹{price}</span>
           {mrp && (
             <div className="flex flex-col">
-              <span className="text-sm line-through text-neutral-400 font-medium leading-none">₹{mrp}</span>
-              <span className="text-[10px] font-black text-green-600 uppercase tracking-widest mt-1">
+              <span className="text-sm line-through text-[var(--text-secondary)] font-normal leading-none">₹{mrp}</span>
+              <span className="text-[10px] font-semibold text-green-600 uppercase tracking-widest mt-1">
                 Save ₹{savings} ({percentOff}%)
               </span>
             </div>
           )}
         </div>
-        <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest">Inclusive of all local taxes & shipping</p>
+        <p className="text-[10px] text-[var(--text-secondary)] uppercase tracking-widest">Inclusive of all local taxes &amp; shipping</p>
       </div>
 
       {/* URGENCY & TRUST BANNERS */}
       <div className="flex flex-col gap-2">
         {urgencyText && (
-          <div className="flex items-center gap-2 px-3 py-2 bg-orange-50 text-orange-700 rounded-xl text-[10px] font-black uppercase tracking-wider border border-orange-100">
-            <Zap size={10} className="text-orange-500 animate-pulse fill-orange-500" /> {urgencyText}
+          <div className="flex items-center gap-2 px-3 py-2 bg-[var(--urgency-bg)] text-[var(--urgency-text)] rounded-[var(--radius-button)] text-[10px] font-semibold uppercase tracking-wider border border-[var(--border)]">
+            <Zap size={10} className="animate-pulse" /> {urgencyText}
           </div>
         )}
-        <div className="flex items-center gap-2 px-3 py-2 bg-neutral-50 text-neutral-500 rounded-xl text-[10px] font-bold uppercase tracking-wider border border-neutral-100">
-          <ShieldCheck size={10} className="text-neutral-400" /> 100% Secure Transaction
+        <div className="flex items-center gap-2 px-3 py-2 bg-[var(--badge-bg)] text-[var(--badge-text)] rounded-[var(--radius-button)] text-[10px] font-semibold uppercase tracking-wider border border-[var(--border)]">
+          <ShieldCheck size={10} /> 100% Secure Transaction
         </div>
       </div>
 
@@ -92,17 +92,17 @@ export default function ConversionBlock({
           <div className="space-y-3">
             {prepaidEnabled && prepaidPrice && (
               <Button
-                className="w-full h-14 bg-black text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:shadow-black/20 hover:scale-[1.01] transition-all group"
+                className="w-full h-14 bg-[var(--primary)] text-[var(--primary-foreground)] rounded-[var(--radius-button)] font-semibold text-xs uppercase tracking-[0.2em] shadow-[var(--shadow-cta)] hover:shadow-[var(--shadow-hover)] hover:scale-[1.01] transition-all"
                 onClick={handlePrepaid}
               >
-                Pay Online & Save ₹{price - prepaidPrice}
+                Pay Online &amp; Save ₹{price - prepaidPrice}
               </Button>
             )}
 
             {codAvailable && (
               <Button
                 variant="outline"
-                className="w-full h-14 border-neutral-200 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-neutral-50 hover:border-black transition-all"
+                className="w-full h-14 border-[var(--border)] text-[var(--text-primary)] rounded-[var(--radius-button)] font-semibold text-xs uppercase tracking-[0.2em] hover:bg-[var(--bg-secondary)] hover:border-[var(--primary)] transition-all"
                 onClick={handleCOD}
               >
                 Order via Cash on Delivery
@@ -110,7 +110,7 @@ export default function ConversionBlock({
             )}
 
             <button
-              className="w-full py-4 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-400 hover:text-black transition-colors"
+              className="w-full py-4 text-[10px] font-semibold uppercase tracking-[0.3em] text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors"
               onClick={handleAddToCart}
             >
               / Add to Bag
@@ -122,7 +122,7 @@ export default function ConversionBlock({
             <div className="flex gap-3">
               {prepaidEnabled && prepaidPrice && (
                 <Button
-                  className="flex-[2] h-14 bg-black text-white rounded-2xl font-black text-xs uppercase tracking-wider shadow-xl"
+                  className="flex-[2] h-14 bg-[var(--primary)] text-[var(--primary-foreground)] rounded-[var(--radius-button)] font-semibold text-xs uppercase tracking-wider shadow-[var(--shadow-cta)]"
                   onClick={handlePrepaid}
                 >
                   Pay Now
@@ -132,7 +132,7 @@ export default function ConversionBlock({
               {codAvailable && (
                 <Button
                   variant="outline"
-                  className="flex-1 h-14 border-neutral-200 rounded-2xl font-black text-[10px] uppercase tracking-wider"
+                  className="flex-1 h-14 border-[var(--border)] text-[var(--text-primary)] rounded-[var(--radius-button)] font-semibold text-[10px] uppercase tracking-wider hover:bg-[var(--bg-secondary)]"
                   onClick={handleCOD}
                 >
                   COD
@@ -141,15 +141,15 @@ export default function ConversionBlock({
 
               <Button
                 variant="secondary"
-                className="h-14 w-14 rounded-2xl bg-neutral-100 flex items-center justify-center"
+                className="h-14 w-14 rounded-[var(--radius-button)] bg-[var(--bg-secondary)] flex items-center justify-center"
                 onClick={handleAddToCart}
               >
-                <ShoppingCart size={20} className="text-neutral-500" />
+                <ShoppingCart size={20} className="text-[var(--text-secondary)]" />
               </Button>
             </div>
 
             {prepaidEnabled && prepaidPrice && (
-              <p className="text-[10px] font-black text-green-600 text-center uppercase tracking-widest bg-green-50 py-2 rounded-lg flex items-center justify-center gap-2">
+              <p className="text-[10px] font-semibold text-green-600 text-center uppercase tracking-widest bg-green-50 py-2 rounded-[var(--radius-button)] flex items-center justify-center gap-2">
                 <Sparkles size={10} className="fill-green-600" /> Unlock ₹{price - prepaidPrice} Reward on Prepaid
               </p>
             )}
@@ -158,12 +158,12 @@ export default function ConversionBlock({
       </div>
 
       {/* SMALL FOOTER TRUST */}
-      <div className="pt-4 border-t border-neutral-50 flex items-center justify-between opacity-40 grayscale group-hover:grayscale-0 transition-all">
-        <div className="text-[8px] font-black uppercase tracking-widest">Easy D2C Trusted</div>
+      <div className="pt-4 border-t border-[var(--border)] flex items-center justify-between opacity-40 transition-all">
+        <div className="text-[8px] font-semibold uppercase tracking-widest text-[var(--text-secondary)]">Easy D2C Trusted</div>
         <div className="flex gap-2">
-          <div className="w-4 h-4 bg-neutral-200 rounded-sm" />
-          <div className="w-4 h-4 bg-neutral-200 rounded-sm" />
-          <div className="w-4 h-4 bg-neutral-200 rounded-sm" />
+          <div className="w-4 h-4 bg-[var(--border)] rounded-[var(--radius-button)]" />
+          <div className="w-4 h-4 bg-[var(--border)] rounded-[var(--radius-button)]" />
+          <div className="w-4 h-4 bg-[var(--border)] rounded-[var(--radius-button)]" />
         </div>
       </div>
     </section>

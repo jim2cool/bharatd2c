@@ -57,7 +57,7 @@ export default function MegaMenu({ storeId }: { storeId?: string }) {
         >
             <Link
                 href="/collections"
-                className="flex items-center gap-1 text-sm font-medium text-gray-700 hover:text-primary transition-colors tracking-wide py-4"
+                className="flex items-center gap-1 text-sm font-medium text-foreground hover:text-primary transition-colors tracking-wide py-4"
             >
                 Shop
                 <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
@@ -65,7 +65,7 @@ export default function MegaMenu({ storeId }: { storeId?: string }) {
 
             {isOpen && (
                 <div
-                    className="absolute top-full left-1/2 -translate-x-1/2 w-[800px] bg-white border border-gray-100 shadow-xl rounded-xl p-6 mt-1 animate-in fade-in slide-in-from-top-2 duration-200 z-50 flex gap-8"
+                    className="absolute top-full left-1/2 -translate-x-1/2 w-[800px] bg-card border border-border shadow-xl rounded-xl p-6 mt-1 animate-in fade-in slide-in-from-top-2 duration-200 z-50 flex gap-8"
                 >
                     {/* Main Categories column */}
                     <div className="flex-1 grid grid-cols-2 gap-x-8 gap-y-6">
@@ -73,12 +73,12 @@ export default function MegaMenu({ storeId }: { storeId?: string }) {
                             <div key={collection.id} className="group">
                                 <Link
                                     href={`/collections/${collection.slug}`}
-                                    className="block font-semibold text-gray-900 mb-1 group-hover:text-primary transition-colors"
+                                    className="block font-semibold text-foreground mb-1 group-hover:text-primary transition-colors"
                                 >
                                     {collection.title}
                                 </Link>
                                 {collection.description && (
-                                    <p className="text-sm text-gray-500 line-clamp-2">
+                                    <p className="text-sm text-muted-foreground line-clamp-2">
                                         {collection.description}
                                     </p>
                                 )}
@@ -86,7 +86,7 @@ export default function MegaMenu({ storeId }: { storeId?: string }) {
                         ))}
 
                         {!isLoading && collections.length === 0 && (
-                            <p className="text-sm text-gray-500">No categories found.</p>
+                            <p className="text-sm text-muted-foreground">No categories found.</p>
                         )}
 
                         {isLoading && (
@@ -97,13 +97,13 @@ export default function MegaMenu({ storeId }: { storeId?: string }) {
                     </div>
 
                     {/* Featured/Promotional Column */}
-                    <div className="w-[300px] bg-gray-50 rounded-lg p-5 flex flex-col justify-between">
+                    <div className="w-[300px] bg-muted rounded-lg p-5 flex flex-col justify-between">
                         <div>
                             <span className="text-xs font-bold uppercase tracking-wider text-primary mb-2 block">Featured</span>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                            <h3 className="text-lg font-semibold text-foreground mb-3">
                                 {collections[0]?.title || "Discover Our Collection"}
                             </h3>
-                            <p className="text-sm text-gray-600 mb-4">
+                            <p className="text-sm text-muted-foreground mb-4">
                                 Explore our handpicked curation of premium products designed for your lifestyle.
                             </p>
                         </div>

@@ -17,7 +17,6 @@ export function SocialProofEngine({ className }: SocialProofEngineProps) {
     const [viewerCount, setViewerCount] = useState(14);
 
     useEffect(() => {
-        // Randomly show/hide social proof toasts
         const interval = setInterval(() => {
             if (activeToast) {
                 setActiveToast(null);
@@ -28,10 +27,9 @@ export function SocialProofEngine({ className }: SocialProofEngineProps) {
             }
         }, activeToast ? 5000 : 12000);
 
-        // Randomly update viewer count
         const viewerInterval = setInterval(() => {
             setViewerCount(prev => {
-                const change = Math.floor(Math.random() * 5) - 2; // -2 to +2
+                const change = Math.floor(Math.random() * 5) - 2;
                 return Math.max(8, Math.min(45, prev + change));
             });
         }, 8000);
@@ -44,49 +42,49 @@ export function SocialProofEngine({ className }: SocialProofEngineProps) {
 
     return (
         <div className={cn("space-y-4", className)}>
-            {/* Viewer Count Indicator */}
-            <div className="flex items-center gap-3 px-6 py-3 bg-neutral-50 border border-neutral-100 rounded-full w-fit group hover:bg-white hover:shadow-lg transition-all duration-500">
+            {/* Viewer Count */}
+            <div className="flex items-center gap-3 px-6 py-3 bg-[var(--callout-bg)] border border-[var(--callout-border)] rounded-[var(--radius-badge)] w-fit group hover:shadow-[var(--shadow-hover)] transition-all duration-500">
                 <div className="relative">
-                    <Users className="w-4 h-4 text-neutral-400 group-hover:text-primary transition-colors" />
-                    <span className="absolute -top-1 -right-1 w-2 h-2 bg-emerald-500 rounded-full border border-white animate-pulse" />
+                    <Users className="w-4 h-4 text-[var(--text-secondary)] group-hover:text-[var(--primary)] transition-colors" />
+                    <span className="absolute -top-1 -right-1 w-2 h-2 bg-[var(--primary)] rounded-full border border-[var(--bg-primary)] animate-pulse" />
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-neutral-900">
-                    <span className="tabular-nums">{viewerCount}</span> people are viewing this right now
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-[var(--text-primary)]">
+                    <span className="tabular-nums">{viewerCount}</span> people viewing right now
                 </span>
             </div>
 
-            {/* Sales Pulse Toast (Fixed Position or Inline) */}
+            {/* Sales Pulse Toast */}
             <AnimatePresence mode='wait'>
                 {activeToast && (
                     <motion.div
                         initial={{ opacity: 0, y: 20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                        className="bg-white border border-neutral-100 rounded-[2rem] p-5 shadow-2xl flex items-center gap-4 max-w-sm pointer-events-none"
+                        className="bg-[var(--bg-primary)] border border-[var(--border)] rounded-[var(--radius-card)] p-5 shadow-[var(--shadow-card)] flex items-center gap-4 max-w-sm pointer-events-none"
                     >
-                        <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center shrink-0">
-                            <ShoppingBag className="w-6 h-6 text-primary" />
+                        <div className="w-12 h-12 bg-[var(--badge-bg)] rounded-[var(--radius-image)] flex items-center justify-center shrink-0">
+                            <ShoppingBag className="w-6 h-6 text-[var(--badge-text)]" />
                         </div>
 
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1.5 mb-0.5">
-                                <MapPin className="w-3 h-3 text-neutral-400" />
-                                <span className="text-[9px] font-black uppercase tracking-[0.1em] text-neutral-400">{activeToast.city}, IN</span>
+                                <MapPin className="w-3 h-3 text-[var(--text-secondary)]" />
+                                <span className="text-[9px] font-semibold uppercase tracking-[0.1em] text-[var(--text-secondary)]">{activeToast.city}, IN</span>
                             </div>
-                            <p className="text-[11px] leading-tight font-black text-neutral-900 truncate">
-                                {activeToast.name} <span className="text-neutral-500 font-bold uppercase tracking-tight">ordered this {activeToast.time}</span>
+                            <p className="text-[11px] leading-tight font-semibold text-[var(--text-primary)] truncate">
+                                {activeToast.name} <span className="text-[var(--text-secondary)] font-normal uppercase tracking-tight">ordered this {activeToast.time}</span>
                             </p>
                         </div>
 
-                        <div className="shrink-0 flex items-center gap-1 px-2 py-1 bg-emerald-50 rounded-lg">
-                            <CheckCircle2 className="w-2.5 h-2.5 text-emerald-500 fill-emerald-500/10" />
-                            <span className="text-[8px] font-black uppercase tracking-widest text-emerald-500">Verified</span>
+                        <div className="shrink-0 flex items-center gap-1 px-2 py-1 bg-[var(--badge-bg)] rounded-[var(--radius-badge)] border border-[var(--callout-border)]">
+                            <CheckCircle2 className="w-2.5 h-2.5 text-[var(--badge-text)]" />
+                            <span className="text-[8px] font-semibold uppercase tracking-widest text-[var(--badge-text)]">Verified</span>
                         </div>
                     </motion.div>
                 )}
             </AnimatePresence>
 
-            {/* Mini Trust Bar (Social-First) */}
+            {/* Mini Trust Bar */}
             <div className="flex items-center gap-6 pt-2">
                 {[
                     { label: "10k+ Orders", icon: ShoppingBag },
@@ -95,8 +93,8 @@ export function SocialProofEngine({ className }: SocialProofEngineProps) {
                     const Icon = item.icon;
                     return (
                         <div key={id} className="flex items-center gap-1.5">
-                            <Icon className="w-3 h-3 text-primary/40" />
-                            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-neutral-400">{item.label}</span>
+                            <Icon className="w-3 h-3 text-[var(--primary)] opacity-60" />
+                            <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-[var(--text-secondary)]">{item.label}</span>
                         </div>
                     );
                 })}

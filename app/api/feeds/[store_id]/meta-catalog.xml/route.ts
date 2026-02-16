@@ -23,10 +23,10 @@ const escapeXml = (unsafe: string) => {
 
 export async function GET(
     req: NextRequest,
-    { params }: { params: { store_id: string } }
+    { params }: { params: Promise<{ store_id: string }> }
 ) {
     try {
-        const storeId = params.store_id
+        const { store_id: storeId } = await params
 
         // 1. Fetch Store Profile to get their custom domain URL
         const { data: store, error: storeError } = await supabase

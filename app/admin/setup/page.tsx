@@ -7,32 +7,11 @@ import { getActiveStoreIdClient } from '@/lib/getActiveStore.client'
 import { getStoreBaseUrl } from '@/lib/getStoreUrl'
 import { Sparkles, Check, Loader2, Globe, ArrowRight, LayoutDashboard } from 'lucide-react'
 
-const CATEGORY_PRESETS: Record<string, any> = {
-    'fashion': {
-        category: 'fashion',
-        font: 'font-serif',
-        radius: 'rounded-none',
-        cardStyle: 'minimal'
-    },
-    'electronics': {
-        category: 'electronics',
-        font: 'font-sans',
-        radius: 'rounded-xl',
-        cardStyle: 'bordered'
-    },
-    'other': {
-        category: 'other',
-        font: 'font-sans',
-        radius: 'rounded-lg',
-        cardStyle: 'default'
-    }
-}
-
 export default function SetupPage() {
     const router = useRouter()
     const [status, setStatus] = useState<'loading' | 'seeding' | 'finishing'>('loading')
     const [progress, setProgress] = useState(0)
-    const [message, setMessage] = useState('Initializing your empire...')
+    const [message, setMessage] = useState('Initializing your store...')
     const [storeUrl, setStoreUrl] = useState('')
 
     useEffect(() => {
@@ -44,42 +23,33 @@ export default function SetupPage() {
             }
 
             try {
-                // 1. Get Store Category
                 setStatus('seeding')
-                setMessage('Curating your brand identity...')
-                const { data: store } = await supabaseBrowser
-                    .from('stores')
-                    .select('theme_config')
-                    .eq('id', storeId)
-                    .single()
+                setMessage('Activating intelligence layer...')
+                setProgress(20)
 
-                const category = store?.theme_config?.category || 'other'
-                const preset = CATEGORY_PRESETS[category] || CATEGORY_PRESETS['other']
+                // Trigger intelligence recompute — this uses ob_seller_profiles (set during onboarding)
+                // to derive the full store config. Do NOT overwrite theme_config here.
+                const { error: computeError } = await supabaseBrowser.rpc('compute_store_render_config', {
+                    p_store_id: storeId
+                })
 
-                // 2. Apply Theme Preset
-                setProgress(30)
-                await new Promise(r => setTimeout(r, 800))
-                setMessage('Applying premium design tokens...')
+                if (computeError) {
+                    console.error('Recompute error (non-fatal):', computeError)
+                }
 
-                await supabaseBrowser
-                    .from('stores')
-                    .update({ theme_config: preset })
-                    .eq('id', storeId)
-
-                // 2b. Fetch Store URL for display
+                // Fetch Store URL for display
                 const url = await getStoreBaseUrl(supabaseBrowser)
                 setStoreUrl(url)
 
-                // 3. (Optional) Could seed demo products here if needed
                 setProgress(70)
                 setMessage('Polishing your storefront...')
-                await new Promise(r => setTimeout(r, 1000))
+                await new Promise(r => setTimeout(r, 800))
 
                 setProgress(100)
                 setStatus('finishing')
-                setMessage('Your empire is ready.')
+                setMessage('Your store is ready.')
 
-                // 🚀 AUTO-OPEN STORE PREVIEW
+                // AUTO-OPEN STORE PREVIEW
                 if (url) {
                     window.open(url, '_blank')
                 }

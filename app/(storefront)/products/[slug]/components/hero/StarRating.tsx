@@ -48,18 +48,17 @@ export function StarRating({
                                 <Star
                                     className={cn(
                                         iconSize[size],
-                                        "absolute inset-0 text-[#FFB800] fill-[#FFB800]"
+                                        "absolute inset-0"
                                     )}
+                                    style={{ color: 'var(--star-colour)', fill: 'var(--star-colour)' }}
                                     strokeWidth={1}
                                 />
                             )}
                             {isHalf && (
                                 <div className="absolute inset-0 overflow-hidden w-[50%]">
                                     <Star
-                                        className={cn(
-                                            iconSize[size],
-                                            "text-[#FFB800] fill-[#FFB800]"
-                                        )}
+                                        className={iconSize[size]}
+                                        style={{ color: 'var(--star-colour)', fill: 'var(--star-colour)' }}
                                         strokeWidth={1}
                                     />
                                 </div>

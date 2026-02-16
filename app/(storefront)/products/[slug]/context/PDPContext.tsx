@@ -4,10 +4,12 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { ProductData } from '../types/pdp';
 import { CategoryConfig, SellerModifier } from '@/types/architecture';
 import { CATEGORY_MODULE_REGISTRY } from '@/lib/architecture/category-registry';
+import { StoreConfig } from '@/types/store-config';
 
 interface PDPContextType {
     product: ProductData;
     categoryConfig: CategoryConfig;
+    storeConfig: StoreConfig;
     activeModules: string[];
     selectedVariant: any;
     setSelectedVariant: (variant: any) => void;
@@ -33,11 +35,13 @@ const PDPContext = createContext<PDPContextType | undefined>(undefined);
 export function PDPProvider({
     children,
     product,
-    categoryConfig
+    categoryConfig,
+    storeConfig
 }: {
     children: ReactNode;
     product: ProductData;
     categoryConfig: CategoryConfig;
+    storeConfig: StoreConfig;
 }) {
     // Determine active modules based on category
     const categorySchema = CATEGORY_MODULE_REGISTRY[categoryConfig.category] || CATEGORY_MODULE_REGISTRY['multi'];
@@ -93,6 +97,7 @@ export function PDPProvider({
         <PDPContext.Provider value={{
             product,
             categoryConfig,
+            storeConfig,
             activeModules,
             selectedVariant,
             setSelectedVariant,

@@ -21,23 +21,23 @@ export function FinancingCalculator({ price = 24999, className }: FinancingCalcu
     const monthlyEmi = Math.round(price / selectedPlan.months);
 
     return (
-        <div className={cn("p-8 bg-neutral-900 text-white rounded-[3rem] shadow-2xl relative overflow-hidden group", className)}>
-            {/* Ambient Background Glow */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 blur-[100px] pointer-events-none" />
+        <div className={cn("p-8 bg-[var(--callout-bg)] border border-[var(--callout-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-card)] relative overflow-hidden group", className)}>
+            {/* Ambient glow */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--primary)]/10 blur-[100px] pointer-events-none" />
 
             <div className="relative z-10 flex flex-col gap-8">
                 <div className="flex justify-between items-start">
                     <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-primary">
+                        <div className="flex items-center gap-2 text-[var(--primary)]">
                             <Zap className="w-3.5 h-3.5 fill-current" />
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Flexi-Pay Intelligence</span>
+                            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--primary)]">Flexi-Pay Intelligence</span>
                         </div>
-                        <h3 className="text-3xl font-black tracking-tighter italic uppercase leading-none">
+                        <h3 className="text-3xl font-bold tracking-tighter italic uppercase leading-none text-[var(--text-primary)]">
                             Dream Big. <br />
-                            <span className="text-neutral-500">Pay Small.</span>
+                            <span className="text-[var(--text-secondary)]">Pay Small.</span>
                         </h3>
                     </div>
-                    <CreditCard className="w-8 h-8 text-neutral-800" />
+                    <CreditCard className="w-8 h-8 text-[var(--text-secondary)] opacity-30" />
                 </div>
 
                 <div className="flex flex-col gap-4">
@@ -47,10 +47,10 @@ export function FinancingCalculator({ price = 24999, className }: FinancingCalcu
                                 key={plan.label}
                                 onClick={() => setSelectedPlan(plan)}
                                 className={cn(
-                                    "flex-1 px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-300",
+                                    "flex-1 px-4 py-3 rounded-[var(--radius-button)] text-[10px] font-semibold uppercase tracking-widest transition-all duration-300",
                                     selectedPlan.months === plan.months
-                                        ? "bg-white text-neutral-900 shadow-xl"
-                                        : "bg-white/5 text-neutral-500 border border-white/5 hover:bg-white/10"
+                                        ? "bg-[var(--primary)] text-[var(--primary-foreground)] shadow-[var(--shadow-cta)]"
+                                        : "bg-[var(--bg-secondary)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-[var(--primary)]/40"
                                 )}
                             >
                                 {plan.months}m
@@ -58,34 +58,49 @@ export function FinancingCalculator({ price = 24999, className }: FinancingCalcu
                         ))}
                     </div>
 
-                    <div className="p-6 bg-white/5 border border-white/5 rounded-3xl flex items-center justify-between group-hover:bg-white/10 transition-colors hover:border-white/20">
+                    <div className="p-6 bg-[var(--bg-primary)] border border-[var(--border)] rounded-[var(--radius-card)] flex items-center justify-between hover:border-[var(--primary)]/30 transition-colors">
                         <div>
-                            <span className="block text-[9px] font-black uppercase tracking-widest text-neutral-500 mb-1">Monthly Installment</span>
+                            <span className="block text-[9px] font-semibold uppercase tracking-widest text-[var(--text-secondary)] mb-1">Monthly Installment</span>
                             <div className="flex items-baseline gap-1">
-                                <span className="text-2xl font-black">₹{monthlyEmi.toLocaleString()}</span>
-                                <span className="text-[10px] font-medium text-neutral-500">/ month</span>
+                                <span className="text-2xl font-bold text-[var(--text-primary)]">₹{monthlyEmi.toLocaleString()}</span>
+                                <span className="text-[10px] font-medium text-[var(--text-secondary)]">/ month</span>
                             </div>
                         </div>
-                        <div className="px-3 py-1 bg-green-500/10 text-green-500 rounded-full text-[9px] font-black uppercase tracking-widest border border-green-500/20">
+                        <div className="px-3 py-1 bg-[var(--badge-bg)] text-[var(--badge-text)] rounded-[var(--radius-badge)] text-[9px] font-semibold uppercase tracking-widest border border-[var(--callout-border)]">
                             {selectedPlan.interest} EMI
                         </div>
                     </div>
                 </div>
 
-                <button className="w-full py-5 bg-white text-neutral-900 rounded-2xl text-xs font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-primary transition-all duration-300">
-                    Apply Now for Instant Approval
+                <button className="w-full py-5 bg-[var(--primary)] text-[var(--primary-foreground)] rounded-[var(--radius-button)] flex items-center justify-center gap-2 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[var(--shadow-cta)]">
+                    <FileTextIcon />
+                    <span className="text-[11px] font-semibold uppercase tracking-widest">Apply Now for Instant Approval</span>
                     <ChevronRight className="w-4 h-4" />
                 </button>
 
-                <div className="flex items-center justify-center gap-6 opacity-40">
-                    <div className="flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest">
+                <div className="flex items-center justify-center gap-6 opacity-40 text-[var(--text-secondary)]">
+                    <div className="flex items-center gap-1.5 text-[8px] font-semibold uppercase tracking-widest">
                         <ShieldCheck className="w-3 h-3" /> Secure Processing
                     </div>
-                    <div className="flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest">
+                    <div className="flex items-center gap-1.5 text-[8px] font-semibold uppercase tracking-widest">
                         <Zap className="w-3 h-3" /> No Credit Score Impact
                     </div>
                 </div>
             </div>
         </div>
+    );
+}
+
+// Inline icon to avoid unused import
+function FileTextIcon() {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
+            <polyline points="10 9 9 9 8 9" />
+        </svg>
     );
 }

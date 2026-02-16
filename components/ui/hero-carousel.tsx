@@ -71,13 +71,13 @@ export default function HeroCarousel({ slides: propSlides }: { slides?: any[] })
                   className="object-cover"
                 />
                 {/* Gradient Overlay for Contrast (P2-1) */}
-                <div className="absolute inset-0 bg-black/30" />
+                <div className="absolute inset-0 bg-foreground/30" />
               </div>
 
               {/* Content Overlay - Fashion Lifestyle Style */}
-              <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-6 md:p-12 z-10 text-white">
+              <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-6 md:p-12 z-10 text-primary-foreground">
                 <div className="max-w-4xl space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-12 duration-1000">
-                  <p className="text-xs md:text-sm font-sans font-bold tracking-[0.4em] uppercase text-white/90 drop-shadow-md">
+                  <p className="text-xs md:text-sm font-sans font-bold tracking-[0.4em] uppercase text-primary-foreground/90 drop-shadow-md">
                     {slide.subtitle}
                   </p>
                   <h1 className="text-5xl md:text-8xl lg:text-9xl font-serif font-normal tracking-tight leading-[1] drop-shadow-lg uppercase">
@@ -87,7 +87,7 @@ export default function HeroCarousel({ slides: propSlides }: { slides?: any[] })
                     <Button
                       asChild
                       size="lg"
-                      className="bg-white/10 backdrop-blur-md text-white hover:bg-white hover:text-black border border-white/30 rounded-full h-14 px-12 md:px-14 uppercase tracking-[0.2em] text-[10px] font-bold transition-all duration-500 shadow-2xl"
+                      className="bg-card/10 backdrop-blur-md text-primary-foreground hover:bg-card hover:text-foreground border border-white/30 rounded-full h-14 px-12 md:px-14 uppercase tracking-[0.2em] text-[10px] font-bold transition-all duration-500 shadow-2xl"
                     >
                       <Link href={slide.link || slide.cta_link || slide.ctaLink || "/"}>
                         {slide.cta || slide.cta_text || slide.ctaText || "Shop Now"}
@@ -101,8 +101,8 @@ export default function HeroCarousel({ slides: propSlides }: { slides?: any[] })
         </CarouselContent>
 
         {/* Minimal Navigation Arrows - Dawn Style */}
-        <CarouselPrevious className="left-8 bg-transparent border-white/40 text-white hover:bg-white hover:text-black h-12 w-12 md:h-14 md:w-14 transition-all" />
-        <CarouselNext className="right-8 bg-transparent border-white/40 text-white hover:bg-white hover:text-black h-12 w-12 md:h-14 md:w-14 transition-all" />
+        <CarouselPrevious className="left-8 bg-transparent border-white/40 text-primary-foreground hover:bg-card hover:text-foreground h-12 w-12 md:h-14 md:w-14 transition-all" />
+        <CarouselNext className="right-8 bg-transparent border-white/40 text-primary-foreground hover:bg-card hover:text-foreground h-12 w-12 md:h-14 md:w-14 transition-all" />
 
       </Carousel>
 
@@ -112,8 +112,8 @@ export default function HeroCarousel({ slides: propSlides }: { slides?: any[] })
           <button
             key={i}
             className={`h-1.5 rounded-full transition-all duration-500 ${i === (api?.selectedScrollSnap() || 0)
-              ? "bg-white w-12"
-              : "bg-white/40 w-2 hover:bg-white/60"
+              ? "bg-card w-12"
+              : "bg-card/40 w-2 hover:bg-card/60"
               }`}
             onClick={() => api?.scrollTo(i)}
             aria-label={`Go to slide ${i + 1}`}
@@ -122,7 +122,7 @@ export default function HeroCarousel({ slides: propSlides }: { slides?: any[] })
       </div>
 
       {/* Scroll Down Indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce z-20 text-white/80 hidden md:block">
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce z-20 text-primary-foreground/80 hidden md:block">
         <span className="text-xs uppercase tracking-widest">Scroll Down</span>
       </div>
     </section>

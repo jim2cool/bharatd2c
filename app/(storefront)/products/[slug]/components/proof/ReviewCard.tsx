@@ -7,7 +7,7 @@ export function ReviewCard({ review }: { review: Review }) {
         <div className="h-full p-6 bg-muted/10 border border-border/20 rounded-sm flex flex-col justify-between transition-colors hover:bg-muted/20">
             <div>
                 {/* Stars - Clean, Black, Small */}
-                <div className="flex gap-0.5 mb-4">
+                <div className="flex gap-0.5" style={{ marginBottom: 'calc(var(--component-gap) * 0.5)' }}>
                     {[...Array(5)].map((_, i) => (
                         <Star
                             key={i}

@@ -40,7 +40,6 @@ const DEFAULT_INGREDIENTS: Ingredient[] = [
 export function IngredientsGlossary({ ingredients, className }: IngredientsGlossaryProps) {
     const [searchTerm, setSearchTerm] = useState("");
 
-    // Parse ingredients if string
     const parsedIngredients: Ingredient[] = React.useMemo(() => {
         if (!ingredients) return DEFAULT_INGREDIENTS;
         if (Array.isArray(ingredients)) return ingredients;
@@ -58,29 +57,30 @@ export function IngredientsGlossary({ ingredients, className }: IngredientsGloss
         i.function.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    // Token-mapped rating styles — no hardcoded colours
     const getRatingStyle = (rating: Ingredient['rating']) => {
         switch (rating) {
-            case 'good': return { color: 'text-emerald-600', bg: 'bg-emerald-50', icon: ShieldCheck, label: 'Scientific Grade' };
-            case 'natural': return { color: 'text-green-600', bg: 'bg-green-50', icon: Leaf, label: 'Natural Source' };
-            case 'average': return { color: 'text-amber-600', bg: 'bg-amber-50', icon: Info, label: 'Usage Limited' };
-            case 'poor': return { color: 'text-rose-600', bg: 'bg-rose-50', icon: AlertCircle, label: 'Not Recommended' };
+            case 'good': return { icon: ShieldCheck, label: 'Scientific Grade' };
+            case 'natural': return { icon: Leaf, label: 'Natural Source' };
+            case 'average': return { icon: Info, label: 'Usage Limited' };
+            case 'poor': return { icon: AlertCircle, label: 'Not Recommended' };
         }
     };
 
     return (
-        <div className={cn("bg-white border border-neutral-100 rounded-[2.5rem] p-8 shadow-sm", className)}>
+        <div className={cn("bg-[var(--bg-primary)] border border-[var(--border)] rounded-[var(--radius-card)] p-8 shadow-[var(--shadow-card)]", className)}>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
                 <div>
-                    <h3 className="text-sm font-black uppercase tracking-[0.2em] mb-2">Transparency Glossary</h3>
-                    <p className="text-xs text-neutral-500 font-bold uppercase tracking-tight">Full Ingredient Breakdown & Safety Scores</p>
+                    <h3 className="text-sm font-semibold uppercase tracking-[0.2em] mb-2 text-[var(--text-primary)]">Transparency Glossary</h3>
+                    <p className="text-xs text-[var(--text-secondary)] font-medium uppercase tracking-tight">Full Ingredient Breakdown & Safety Scores</p>
                 </div>
 
                 <div className="relative group">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 group-focus-within:text-primary transition-colors" />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)] group-focus-within:text-[var(--primary)] transition-colors" />
                     <input
                         type="text"
                         placeholder="SEARCH INGREDIENTS..."
-                        className="pl-12 pr-6 py-3 bg-neutral-50 border-0 rounded-2xl text-[10px] font-black tracking-widest uppercase focus:ring-2 focus:ring-primary/20 transition-all w-full md:w-64"
+                        className="pl-12 pr-6 py-3 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-[var(--radius-button)] text-[10px] font-medium tracking-widest uppercase focus:ring-2 focus:ring-[var(--primary)]/20 transition-all w-full md:w-64 text-[var(--text-primary)]"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -93,18 +93,18 @@ export function IngredientsGlossary({ ingredients, className }: IngredientsGloss
                     const Icon = style.icon;
 
                     return (
-                        <div key={idx} className="p-6 bg-neutral-50/50 rounded-3xl border border-neutral-100 hover:border-primary/20 transition-all group">
+                        <div key={idx} className="p-6 bg-[var(--bg-secondary)] rounded-[var(--radius-card)] border border-[var(--border)] hover:border-[var(--primary)]/20 transition-all group">
                             <div className="flex items-start justify-between mb-4">
                                 <div className="space-y-1">
-                                    <h4 className="text-xs font-black uppercase tracking-wider text-neutral-900">{ingredient.name}</h4>
-                                    <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">{ingredient.function}</span>
+                                    <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-primary)]">{ingredient.name}</h4>
+                                    <span className="text-[10px] font-medium text-[var(--text-secondary)] uppercase tracking-widest">{ingredient.function}</span>
                                 </div>
-                                <div className={cn("px-3 py-1.5 rounded-full flex items-center gap-1.5", style.bg)}>
-                                    <Icon className={cn("w-3 h-3", style.color)} />
-                                    <span className={cn("text-[9px] font-black uppercase tracking-widest", style.color)}>{style.label}</span>
+                                <div className="px-3 py-1.5 rounded-[var(--radius-badge)] flex items-center gap-1.5 bg-[var(--badge-bg)]">
+                                    <Icon className="w-3 h-3 text-[var(--badge-text)]" />
+                                    <span className="text-[9px] font-semibold uppercase tracking-widest text-[var(--badge-text)]">{style.label}</span>
                                 </div>
                             </div>
-                            <p className="text-[11px] leading-relaxed text-neutral-600 font-medium">
+                            <p className="text-[11px] leading-relaxed text-[var(--text-secondary)] font-medium">
                                 {ingredient.description}
                             </p>
                         </div>
@@ -114,18 +114,18 @@ export function IngredientsGlossary({ ingredients, className }: IngredientsGloss
 
             {filteredIngredients.length === 0 && (
                 <div className="py-12 text-center">
-                    <p className="text-xs font-black uppercase tracking-widest text-neutral-400">No matching ingredients found.</p>
+                    <p className="text-xs font-medium uppercase tracking-widest text-[var(--text-secondary)]">No matching ingredients found.</p>
                 </div>
             )}
 
-            <div className="mt-8 pt-6 border-t border-dashed border-neutral-200 flex flex-wrap gap-6 justify-center">
+            <div className="mt-8 pt-6 border-t border-dashed border-[var(--border)] flex flex-wrap gap-6 justify-center">
                 {['good', 'natural', 'average'].map((r: any) => {
                     const style = getRatingStyle(r);
                     const Icon = style.icon;
                     return (
                         <div key={r} className="flex items-center gap-2">
-                            <Icon className={cn("w-3.5 h-3.5", style.color)} />
-                            <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">{style.label}</span>
+                            <Icon className="w-3.5 h-3.5 text-[var(--badge-text)]" />
+                            <span className="text-[10px] font-medium uppercase tracking-widest text-[var(--text-secondary)]">{style.label}</span>
                         </div>
                     );
                 })}

@@ -46,73 +46,76 @@ const DEFAULT_CERTS: Certification[] = [
     }
 ];
 
-export function DocGradeCertifications({
-    certifications = DEFAULT_CERTS,
-    className
-}: DocGradeCertificationsProps) {
+export function DocGradeCertifications({ certifications = DEFAULT_CERTS, className }: DocGradeCertificationsProps) {
     return (
-        <div className={cn("bg-emerald-50/30 border border-emerald-100 rounded-[3rem] p-10 md:p-14 shadow-sm relative overflow-hidden", className)}>
-            {/* Background Medical Pattern (Simplified) */}
-            <div className="absolute top-0 right-0 p-12 opacity-[0.03] rotate-12">
-                <Activity className="w-64 h-64 text-emerald-900" />
+        <div className={cn("bg-[var(--callout-bg)] border border-[var(--callout-border)] rounded-none p-8 md:p-12 shadow-[var(--shadow-card)] relative overflow-hidden", className)}>
+            <div className="absolute top-0 right-0 p-12 opacity-[0.02] rotate-12 pointer-events-none">
+                <Activity className="w-64 h-64 text-[var(--primary)]" />
             </div>
 
             <div className="relative z-10">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">
                     <div className="space-y-4">
-                        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-100 rounded-full border border-emerald-200">
-                            <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
-                            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-700">Safety Verified</span>
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-[var(--badge-bg)] border border-[var(--callout-border)] rounded-full">
+                            <ShieldCheck className="w-3.5 h-3.5 text-[var(--badge-text)]" />
+                            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[var(--badge-text)]">Laboratory Verified</span>
                         </div>
-                        <h2 className="text-4xl font-black tracking-tighter text-neutral-900">Clinical & Health <br /><span className="text-emerald-600">Certifications.</span></h2>
+                        <h2 className="text-4xl font-normal leading-[0.85] tracking-tighter text-[var(--text-primary)]" style={{ fontFamily: 'var(--heading-font)' }}>
+                            Clinical Grade <br /><span className="italic" style={{ color: 'var(--primary)' }}>Certifications.</span>
+                        </h2>
                     </div>
 
-                    <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700 hover:text-emerald-900 transition-colors group">
+                    <button className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.2em] text-[var(--primary)] hover:opacity-70 transition-all group border-b border-[var(--primary)] pb-1">
                         <FileText className="w-4 h-4" />
-                        Download Full Lab Report
-                        <ExternalLink className="w-3 h-3 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                        Download Analysis Report
+                        <ExternalLink className="w-3 h-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                     </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {certifications.map((cert) => (
-                        <div key={cert.id} className="p-8 bg-white rounded-[2.5rem] border border-emerald-50 shadow-sm hover:shadow-xl hover:shadow-emerald-900/5 transition-all group">
-                            <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center mb-6 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-500">
-                                <Award className="w-6 h-6" />
+                        <div key={cert.id} className="p-6 bg-[var(--bg-primary)]/40 backdrop-blur-sm rounded-none border border-[var(--callout-border)] shadow-sm hover:bg-[var(--bg-primary)]/60 transition-all group flex flex-col justify-between">
+                            <div>
+                                <div className="w-10 h-10 rounded-full bg-[var(--bg-secondary)] border border-[var(--border)] flex items-center justify-center mb-6 text-[var(--primary)] group-hover:scale-110 transition-transform duration-500">
+                                    <Award className="w-5 h-5" />
+                                </div>
+
+                                <h3 className="text-[11px] font-black uppercase tracking-widest text-[var(--text-primary)] mb-1 leading-tight">{cert.name}</h3>
+                                <p className="text-[8px] text-[var(--primary)] font-bold uppercase tracking-tight mb-4">{cert.org}</p>
+
+                                <p className="text-[10px] leading-relaxed text-[var(--text-secondary)] font-medium mb-6 opacity-80 uppercase tracking-tight">
+                                    {cert.description}
+                                </p>
                             </div>
 
-                            <h3 className="text-sm font-black uppercase tracking-widest text-neutral-900 mb-1">{cert.name}</h3>
-                            <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-tight mb-4">{cert.org}</p>
-
-                            <p className="text-[11px] leading-relaxed text-neutral-500 font-medium mb-6">
-                                {cert.description}
-                            </p>
-
-                            <div className="pt-4 border-t border-emerald-50 flex items-center justify-between">
+                            <div className="pt-4 border-t border-[var(--callout-border)] border-dashed flex items-center justify-between">
                                 <div className="flex items-center gap-1.5">
-                                    <CheckCircle className="w-3 h-3 text-emerald-500 fill-emerald-500/10" />
-                                    <span className="text-[9px] font-black uppercase tracking-widest text-emerald-500">Verified</span>
+                                    <CheckCircle className="w-3 h-3 text-[var(--primary)]" />
+                                    <span className="text-[8px] font-black uppercase tracking-widest text-[var(--text-primary)]">Verified</span>
                                 </div>
                                 {cert.expiry && (
-                                    <span className="text-[9px] font-bold text-neutral-300 uppercase tracking-widest">Valid: {cert.expiry}</span>
+                                    <span className="text-[8px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">EXP: {cert.expiry}</span>
                                 )}
                             </div>
                         </div>
                     ))}
                 </div>
 
-                <div className="mt-12 p-6 bg-white/40 backdrop-blur-md rounded-3xl border border-emerald-100 flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div className="flex items-center gap-4 text-center md:text-left">
-                        <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-black text-xs">
-                            AQI
+                <div className="mt-10 p-5 bg-[var(--bg-primary)]/80 rounded-none border border-[var(--callout-border)] border-l-4 border-l-[var(--primary)] flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                        <div className="w-8 h-8 rounded-full bg-[var(--badge-bg)] border border-[var(--callout-border)] flex items-center justify-center text-[var(--badge-text)] font-black text-[9px] tracking-tighter">
+                            AQC
                         </div>
                         <div>
-                            <span className="block text-[9px] font-black uppercase tracking-widest text-emerald-600">Internal Audit Status</span>
-                            <span className="text-xs font-bold text-neutral-700">Batch #992-B: Triple Purity Cleared (Clean Room Grade A)</span>
+                            <span className="block text-[8px] font-black uppercase tracking-widest text-[var(--primary)]">Audit Compliance Check</span>
+                            <span className="text-[10px] font-bold text-[var(--text-primary)] uppercase tracking-tight">Batch #SB-902 Verified Clean Room Grade A+</span>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {/* Structural Axiom Decoration */}
+            <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[var(--primary)]/10 to-transparent" />
         </div>
     );
 }

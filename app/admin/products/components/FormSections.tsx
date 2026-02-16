@@ -35,7 +35,8 @@ import {
     Star,
     MessageSquare,
     BadgeCheck,
-    ArrowUpFromLine
+    ArrowUpFromLine,
+    Banknote
 } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import type { PrepaidConfig } from "@/lib/types/prepaid"
@@ -1492,7 +1493,7 @@ export function CrossSellSelector() {
 }
 
 export function ShippingSection({ isOpen, onToggle }: { isOpen?: boolean; onToggle?: () => void }) {
-    const { control } = useFormContext<ProductFormData>()
+    const { control, register } = useFormContext<ProductFormData>()
 
     return (
         <Card
@@ -1527,7 +1528,8 @@ export function ShippingSection({ isOpen, onToggle }: { isOpen?: boolean; onTogg
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
-                <Field label="Physical Weight (grams)" subtitle="Used for Partial COD shipping rates">
+                <Field label="Physical Weight (grams)">
+                    <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest mb-2">Used for Partial COD shipping rates</p>
                     <div className="relative group">
                         <input
                             {...register('weight_grams', { valueAsNumber: true })}

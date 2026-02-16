@@ -66,14 +66,29 @@ export default function AppearancePage() {
             const storeId = getActiveStoreIdClient();
             if (!storeId) throw new Error("No active store");
 
+            // 1. Save full theme_config blob (preserves legacy config + provides source data for recompute)
             const { error } = await supabase
                 .from('stores')
                 .update({ theme_config: values })
                 .eq('id', storeId);
 
             if (error) throw error;
-            toast.success("Theme updated successfully");
-            // Optionally reload inputs to reset dirty state properly
+
+            // 2. Sync intelligence behavioural fields directly to ob_seller_profiles
+            //    (vw_store_config reads these from ob_seller_profiles, NOT from theme_config)
+            if (values.seller) {
+                await supabase.from('ob_seller_profiles').upsert({
+                    store_id: storeId,
+                    urgency_level: values.seller.urgencyLevel,
+                    social_proof_weight: values.seller.socialProofWeight,
+                    cta_prominence: values.seller.ctaProminence,
+                }, { onConflict: 'store_id' });
+            }
+
+            // 3. Trigger recompute so vw_store_config reflects the new values for PDP intelligence mode
+            await supabase.rpc('compute_store_render_config', { p_store_id: storeId });
+
+            toast.success("Theme updated — storefront is refreshing");
             reset(values);
         } catch (err) {
             console.error("Error saving theme:", err);

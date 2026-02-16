@@ -1,8 +1,8 @@
 "use client"
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, Timer, Flame, AlertCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Timer, Flame } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface UrgencyControllerProps {
@@ -22,7 +22,6 @@ export function UrgencyController({
 }: UrgencyControllerProps) {
     const [timeLeft, setTimeLeft] = useState<{ hours: number, mins: number, secs: number } | null>(null);
 
-    // Default end time to 4 hours from now if not provided
     const targetDate = useMemo(() => endTime || new Date(Date.now() + 4 * 60 * 60 * 1000), [endTime]);
 
     useEffect(() => {
@@ -51,62 +50,49 @@ export function UrgencyController({
 
     return (
         <div className={cn("space-y-4", className)}>
-            {/* Stock Scarcity Bar */}
-            <div className="p-5 bg-white border border-neutral-100 rounded-[2rem] shadow-sm overflow-hidden relative group transition-all duration-500 hover:shadow-xl hover:shadow-neutral-200/50">
+            {/* Stock Scarcity Bar — uses urgency token family */}
+            <div className="p-5 bg-[var(--callout-bg)] border border-[var(--callout-border)] rounded-[var(--radius-card)] overflow-hidden relative group transition-all duration-500 hover:shadow-[var(--shadow-hover)]">
                 <div className="flex justify-between items-center mb-4">
                     <div className="flex items-center gap-2">
-                        <div className={cn(
-                            "w-2 h-2 rounded-full animate-ping",
-                            isLowStock ? "bg-rose-500" : "bg-orange-500"
-                        )} />
-                        <span className={cn(
-                            "text-[10px] font-black uppercase tracking-widest",
-                            isLowStock ? "text-rose-600" : "text-orange-600"
-                        )}>
-                            {isLowStock ? "CRITICAL STOCK ALERT" : "LIMITED INVENTORY"}
+                        <div className="w-2 h-2 rounded-full animate-ping bg-[var(--urgency-text)]" />
+                        <span className="text-[10px] font-semibold uppercase tracking-widest text-[var(--urgency-text)]">
+                            {isLowStock ? "LOW STOCK" : "LIMITED INVENTORY"}
                         </span>
                     </div>
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400">
-                        Only <span className="text-neutral-900">{stock} Units</span> Left
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--text-secondary)]">
+                        Only <span className="text-[var(--text-primary)]">{stock} Units</span> Left
                     </span>
                 </div>
 
-                <div className="relative h-2 w-full bg-neutral-100 rounded-full overflow-hidden">
+                <div className="relative h-2 w-full bg-[var(--border)] rounded-full overflow-hidden">
                     <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${stockPercentage}%` }}
                         transition={{ duration: 1.5, ease: "circOut" }}
-                        className={cn(
-                            "absolute top-0 left-0 h-full rounded-full",
-                            isLowStock
-                                ? "bg-gradient-to-r from-rose-400 to-rose-600"
-                                : "bg-gradient-to-r from-orange-400 to-primary"
-                        )}
+                        className="absolute top-0 left-0 h-full rounded-full bg-[var(--urgency-text)]"
                     />
                 </div>
 
-                <p className="mt-3 text-[9px] text-neutral-400 font-bold uppercase tracking-tighter leading-none">
+                <p className="mt-3 text-[9px] text-[var(--text-secondary)] font-medium uppercase tracking-tighter leading-none">
                     *85% of reserved stock for this cycle has been fulfilled.
                 </p>
 
-                {/* Decorative background element */}
                 <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:rotate-12 transition-transform duration-700">
-                    <Flame className="w-16 h-16 text-neutral-900" />
+                    <Flame className="w-16 h-16 text-[var(--urgency-text)]" />
                 </div>
             </div>
 
-            {/* Flash Countdown */}
+            {/* Countdown Timer — uses urgency tokens */}
             {timeLeft && (
-                <div className="p-5 bg-neutral-900 rounded-[2rem] flex items-center justify-between text-white shadow-2xl relative overflow-hidden group">
-                    {/* Animated Pulsing Background */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-primary/10 animate-pulse" />
+                <div className="p-5 bg-[var(--urgency-bg)] border border-[var(--callout-border)] rounded-[var(--radius-card)] flex items-center justify-between relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-gradient-to-r from-[var(--primary)]/5 via-transparent to-[var(--primary)]/5 animate-pulse" />
 
                     <div className="flex items-center gap-4 relative z-10">
-                        <div className="w-10 h-10 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center">
-                            <Timer className="w-5 h-5 text-primary" />
+                        <div className="w-10 h-10 rounded-[var(--radius-card)] bg-[var(--callout-bg)] border border-[var(--callout-border)] flex items-center justify-center">
+                            <Timer className="w-5 h-5 text-[var(--urgency-text)]" />
                         </div>
                         <div>
-                            <span className="block text-[9px] font-black uppercase tracking-widest opacity-40">Offer Ends In</span>
+                            <span className="block text-[9px] font-semibold uppercase tracking-widest text-[var(--text-secondary)]">Offer Ends In</span>
                             <div className="flex items-center gap-1.5">
                                 {[
                                     { val: timeLeft.hours, label: 'h' },
@@ -114,8 +100,8 @@ export function UrgencyController({
                                     { val: timeLeft.secs, label: 's' }
                                 ].map((t, idx) => (
                                     <React.Fragment key={idx}>
-                                        <span className="text-lg font-black tracking-tighter tabular-nums">{t.val.toString().padStart(2, '0')}{t.label}</span>
-                                        {idx < 2 && <span className="opacity-20 text-xs">:</span>}
+                                        <span className="text-lg font-bold tracking-tighter tabular-nums text-[var(--urgency-text)]">{t.val.toString().padStart(2, '0')}{t.label}</span>
+                                        {idx < 2 && <span className="opacity-20 text-xs text-[var(--urgency-text)]">:</span>}
                                     </React.Fragment>
                                 ))}
                             </div>
@@ -123,10 +109,9 @@ export function UrgencyController({
                     </div>
 
                     <div className="flex flex-col items-end relative z-10">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-primary mb-1">Flash Deal</span>
-                        <div className="px-3 py-1 bg-white/10 rounded-full border border-white/10 flex items-center gap-1.5">
-                            <Zap className="w-3 h-3 text-primary fill-primary" />
-                            <span className="text-[9px] font-black uppercase tracking-widest">Active</span>
+                        <span className="text-[10px] font-semibold uppercase tracking-widest text-[var(--urgency-text)] mb-1">Flash Deal</span>
+                        <div className="px-3 py-1 bg-[var(--callout-bg)] rounded-[var(--radius-badge)] border border-[var(--callout-border)] flex items-center gap-1.5">
+                            <span className="text-[9px] font-semibold uppercase tracking-widest text-[var(--urgency-text)]">Active</span>
                         </div>
                     </div>
                 </div>

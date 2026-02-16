@@ -26,7 +26,8 @@ import {
   LogOut,
   Plus,
   Truck,
-  Sparkles
+  Sparkles,
+  Beaker
 } from 'lucide-react'
 import { getStoreBaseUrl } from '@/lib/getStoreUrl'
 import { Menu, X, ArrowUpRight } from 'lucide-react'
@@ -53,7 +54,7 @@ export function AdminLayoutClient({
   const [storeId, setStoreId] = useState<string | null>(null)
   const [storeName, setStoreName] = useState<string>('Easy D2C')
   const [storeUrl, setStoreUrl] = useState<string>('/')
-  const [architecture, setArchitecture] = useState<string>('product-engine')
+  const [architecture, setArchitecture] = useState<string>('product_engine')
 
   useEffect(() => {
     setMounted(true)
@@ -63,11 +64,11 @@ export function AdminLayoutClient({
     if (sid) {
       getStoreBaseUrl(supabaseBrowser).then(url => setStoreUrl(url))
 
-      // Fetch Store Info
-      supabaseBrowser.from('stores').select('name, theme_config').eq('id', sid).single().then(({ data }) => {
-        if (data?.name) setStoreName(data.name)
-        if (data?.theme_config?.architecture) {
-          setArchitecture(data.theme_config.architecture)
+      // Fetch Store Info from resolved config view (canonical source of truth)
+      supabaseBrowser.from('vw_store_config_resolved').select('store_name, commerce_architecture').eq('store_id', sid).single().then(({ data }) => {
+        if (data?.store_name) setStoreName(data.store_name)
+        if (data?.commerce_architecture) {
+          setArchitecture(data.commerce_architecture)
         }
       })
 
@@ -126,7 +127,7 @@ export function AdminLayoutClient({
         { label: 'Discounts', href: '/admin/discounts', icon: Percent },
         { label: 'Marketing', href: '/admin/marketing', icon: Megaphone },
       ].filter(item => {
-        if (architecture === 'story-first' && item.label === 'Discounts') return false;
+        if (architecture === 'story_first' && item.label === 'Discounts') return false;
         return true;
       })
     },
@@ -143,10 +144,11 @@ export function AdminLayoutClient({
     {
       section: 'Operations',
       items: [
+        { label: 'RTO Intelligence', href: '/admin/intelligence/rto', icon: Sparkles },
         { label: 'Logistics', href: '/admin/logistics', icon: Truck },
         { label: 'Dropshipping', href: '/admin/dropshipping', icon: Package },
       ].filter(item => {
-        if (architecture === 'story-first') return false;
+        if (architecture === 'story_first') return false;
         return true;
       })
     },
@@ -162,6 +164,7 @@ export function AdminLayoutClient({
       items: [
         { label: 'Domain', href: '/admin/settings/domains', icon: Globe2 },
         { label: 'Settings', href: '/admin/settings/general', icon: Settings },
+        { label: 'V3 Testing', href: '/admin/testing', icon: Beaker },
       ]
     }
   ].filter(group => group.items.length > 0);

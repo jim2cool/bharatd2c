@@ -31,7 +31,7 @@ export function CTAGroup({
     prepaidOfferText
 }: CTAGroupProps) {
     return (
-        <div className="flex flex-col gap-3 mt-2">
+        <div className="flex flex-col" style={{ gap: 'calc(var(--component-gap) * 0.75)' }}>
 
             {/* 1. Primary: Prepaid (Pay Online) - Saffron Accent */}
             {prepaidEnabled && (
@@ -39,7 +39,7 @@ export function CTAGroup({
                     <ScaleTap className="w-full">
                         <Button
                             size="lg"
-                            className="w-full h-14 text-base font-bold uppercase tracking-widest rounded-[var(--radius-button)] shadow-[var(--shadow-elevation)] hover:shadow-lg transition-all relative overflow-hidden group bg-primary text-primary-foreground border-transparent active:scale-[0.98]"
+                            className="w-full h-14 text-base font-bold uppercase tracking-widest rounded-[var(--radius-button)] shadow-sm hover:shadow-lg transition-all relative overflow-hidden group bg-[var(--primary)] text-[var(--primary-foreground)] border-transparent active:scale-[0.98]"
                             onClick={onPrepaidClick}
                             data-cta="prepaid"
                         >
@@ -67,7 +67,7 @@ export function CTAGroup({
                     <Button
                         variant="outline"
                         size="lg"
-                        className="w-full h-14 text-sm font-bold uppercase tracking-widest rounded-[var(--radius-button)] border-[var(--border-width)] border-border hover:border-foreground/30 hover:bg-surface-hover transition-colors text-foreground"
+                        className="w-full h-14 text-sm font-bold uppercase tracking-widest rounded-[var(--radius-button)] border-[var(--border)] hover:border-[var(--text-primary)]/30 hover:bg-[var(--bg-secondary)] transition-colors text-[var(--text-primary)]"
                         onClick={onCodClick}
                         data-cta="cod"
                     >
@@ -83,7 +83,7 @@ export function CTAGroup({
                     <Button
                         variant="secondary"
                         size="lg"
-                        className="w-full h-14 text-sm font-bold uppercase tracking-widest rounded-[var(--radius-button)] bg-card hover:bg-muted text-foreground transition-colors border border-border/50"
+                        className="w-full h-14 text-sm font-bold uppercase tracking-widest rounded-[var(--radius-button)] bg-[var(--bg-secondary)] hover:bg-[var(--border)] text-[var(--text-primary)] transition-colors border border-[var(--border)]/50"
                         onClick={onAddToCart}
                         data-cta="cart"
                     >

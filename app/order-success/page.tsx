@@ -2,67 +2,88 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Check, MessageCircle, ArrowRight } from "lucide-react";
 
-export default function OrderSuccess() {
+import { getActiveStoreId } from "@/lib/getActiveStore";
+import { getProducts } from "@/lib/products";
+import ProductCard from "@/components/ui/product-card";
+
+export default async function OrderSuccess() {
+  const storeId = await getActiveStoreId();
+  const recommendations = storeId ? await getProducts(storeId) : [];
+  const displayRecs = recommendations.slice(0, 4);
+
   return (
-    <main className="min-h-screen bg-background flex items-center justify-center py-12 md:py-24">
-      <section className="container max-w-lg px-4 mx-auto text-center">
-        <div className="mb-8 animate-in zoom-in duration-500">
-          <div className="mx-auto mb-6 h-20 w-20 rounded-full bg-green-100 flex items-center justify-center">
-            <Check className="h-10 w-10 text-green-600" strokeWidth={3} />
+    <main className="min-h-screen bg-[var(--bg-primary)] py-12 md:py-24">
+      <section className="container max-w-4xl px-4 mx-auto">
+        <div className="max-w-lg mx-auto text-center mb-16">
+          <div className="mb-8 animate-in zoom-in duration-500">
+            <div className="mx-auto mb-6 h-20 w-20 rounded-[2rem] bg-[var(--primary)] text-[var(--cta-text)] flex items-center justify-center shadow-lg">
+              <Check className="h-10 w-10" strokeWidth={3} />
+            </div>
+
+            <h1 className="text-4xl font-black tracking-tight text-[var(--text-primary)] mb-3 uppercase italic">
+              Order Confirmed
+            </h1>
+
+            <p className="text-[var(--text-secondary)] text-lg font-medium">
+              Thank you for your trust. We've received your order and started processing it.
+            </p>
           </div>
 
-          <h1 className="text-3xl font-medium tracking-tight text-foreground mb-3">
-            Order Confirmed
-          </h1>
+          <div className="rounded-[2.5rem] border border-[var(--border)] bg-[var(--bg-secondary)] p-8 text-left space-y-6 mb-8 shadow-sm">
+            <h3 className="font-black text-[var(--text-primary)] text-xs uppercase tracking-widest border-b border-[var(--border)] pb-4">
+              What happens next?
+            </h3>
 
-          <p className="text-muted-foreground text-lg">
-            Thank you for your order. We've received it successfully.
-          </p>
-        </div>
+            <ul className="space-y-4 text-sm text-[var(--text-secondary)] font-bold">
+              <li className="flex gap-4 items-center">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-[var(--cta-text)] text-[10px] font-black">1</span>
+                Our team will verify your order details
+              </li>
+              <li className="flex gap-4 items-center">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-[var(--cta-text)] text-[10px] font-black">2</span>
+                You'll receive a confirmation call shortly
+              </li>
+              <li className="flex gap-4 items-center">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-[var(--cta-text)] text-[10px] font-black">3</span>
+                Tracking details will be sent via SMS
+              </li>
+            </ul>
+          </div>
 
-        <div className="rounded-lg border border-border bg-muted/30 p-8 text-left space-y-4 mb-8">
-          <h3 className="font-medium text-foreground text-base">
-            What happens next?
-          </h3>
+          <div className="space-y-4">
+            <Button asChild size="lg" className="w-full h-14 bg-[var(--primary)] text-[var(--cta-text)] rounded-2xl text-sm font-black uppercase tracking-widest shadow-xl border-none">
+              <a href="https://wa.me/91XXXXXXXXXX">
+                <MessageCircle className="h-5 w-5 mr-2" />
+                Contact Support
+              </a>
+            </Button>
 
-          <ul className="space-y-3 text-sm text-foreground/80">
-            <li className="flex gap-3 items-start">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-foreground/10 text-xs font-bold">1</span>
-              Our team will verify your order
-            </li>
-            <li className="flex gap-3 items-start">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-foreground/10 text-xs font-bold">2</span>
-              You'll receive a confirmation call for Cash on Delivery
-            </li>
-            <li className="flex gap-3 items-start">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-foreground/10 text-xs font-bold">3</span>
-              Dispatch details will be shared once shipped
-            </li>
-          </ul>
-        </div>
-
-        <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Need help or want to make a change?
-          </p>
-
-          <Button asChild size="lg" className="w-full gap-2 rounded-none h-12 uppercase tracking-wide font-bold">
-            <a href="https://wa.me/91XXXXXXXXXX">
-              <MessageCircle className="h-4 w-4" />
-              Contact Support
-            </a>
-          </Button>
-
-          <div className="pt-2">
-            <Link
-              href="/products"
-              className="text-sm font-medium text-foreground hover:underline underline-offset-4 flex items-center justify-center gap-1 group"
-            >
-              Continue Shopping
-              <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
-            </Link>
+            <div className="pt-4">
+              <Link
+                href="/collections"
+                className="text-[10px] font-black text-[var(--text-secondary)] hover:text-[var(--text-primary)] uppercase tracking-widest flex items-center justify-center gap-2 group transition-colors"
+              >
+                Continue Shopping
+                <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </div>
           </div>
         </div>
+
+        {/* RECOMMENDATIONS */}
+        {displayRecs.length > 0 && (
+          <div className="mt-20 pt-20 border-t border-[var(--border)]">
+            <div className="text-center mb-12">
+              <h2 className="text-2xl font-black text-[var(--text-primary)] tracking-tight uppercase tracking-widest text-xs mb-2">You might also like</h2>
+              <p className="text-[var(--text-secondary)] text-sm font-medium italic">Our community favorites</p>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {displayRecs.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          </div>
+        )}
       </section>
     </main>
   );

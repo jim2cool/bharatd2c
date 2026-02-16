@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Globe, MapPin, Award, Heart } from 'lucide-react';
+import { MapPin, Award, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface AuthenticityNarrativeProps {
@@ -24,53 +24,69 @@ export function AuthenticityNarrative({
         <div className={cn("group w-full space-y-16", className)}>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-end">
                 <div className="lg:col-span-7 space-y-8">
-                    <div className="inline-flex items-center gap-3 px-6 py-2 bg-neutral-100 rounded-full border border-neutral-200">
-                        <Award className="w-4 h-4 text-primary" />
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-800">Verified Origin & Heritage</span>
+                    {/* Badge */}
+                    <div className="inline-flex items-center gap-3 px-6 py-2 border"
+                        style={{ background: 'var(--badge-bg)', borderColor: 'var(--border)', borderRadius: 'var(--radius-badge)' }}>
+                        <Award className="w-4 h-4" style={{ color: 'var(--primary)' }} />
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.2em]"
+                            style={{ color: 'var(--badge-text)' }}>Verified Origin &amp; Heritage</span>
                     </div>
 
-                    <h2 className="text-5xl lg:text-7xl font-black italic tracking-tighter text-neutral-900 leading-[0.9]">
+                    <h2 className="text-5xl lg:text-7xl font-semibold italic tracking-tighter leading-[0.9]"
+                        style={{ fontFamily: 'var(--heading-font)', color: 'var(--text-primary)' }}>
                         Crafted at the <br />
-                        <span className="text-stone-400">Source of Being.</span>
+                        <span style={{ color: 'var(--text-secondary)' }}>Source of Being.</span>
                     </h2>
 
-                    <p className="text-xl lg:text-2xl text-neutral-600 font-medium leading-relaxed max-w-2xl">
+                    <p className="text-xl lg:text-2xl font-medium leading-relaxed max-w-2xl"
+                        style={{ color: 'var(--text-secondary)' }}>
                         {story}
                     </p>
                 </div>
 
                 <div className="lg:col-span-5 grid grid-cols-2 gap-4">
-                    <div className="aspect-[4/5] bg-stone-100 rounded-[3rem] p-8 flex flex-col justify-between overflow-hidden relative">
-                        <MapPin className="w-8 h-8 text-stone-300 mb-8" />
+                    {/* Origin card — callout-bg */}
+                    <div className="aspect-[4/5] p-8 flex flex-col justify-between overflow-hidden relative border"
+                        style={{ background: 'var(--callout-bg)', borderColor: 'var(--callout-border)', borderRadius: 'var(--radius-card)' }}>
+                        <MapPin className="w-8 h-8 mb-8" style={{ color: 'var(--text-secondary)' }} />
                         <div>
-                            <span className="block text-[10px] font-black uppercase tracking-widest text-stone-400 mb-1">Geographic Origin</span>
-                            <span className="text-lg font-black text-stone-900">{origin}</span>
+                            <span className="block text-[10px] font-semibold uppercase tracking-widest mb-1"
+                                style={{ color: 'var(--text-secondary)' }}>Geographic Origin</span>
+                            <span className="text-lg font-semibold"
+                                style={{ color: 'var(--text-primary)' }}>{origin}</span>
                         </div>
-                        {/* Abstract map texture would go here */}
                     </div>
-                    <div className="aspect-[4/5] bg-neutral-900 rounded-[3rem] p-8 flex flex-col justify-between text-white">
-                        <Award className="w-8 h-8 text-neutral-700 mb-8" />
+                    {/* Artisan card — primary (dark) */}
+                    <div className="aspect-[4/5] p-8 flex flex-col justify-between"
+                        style={{ background: 'var(--primary)', color: 'var(--primary-foreground)', borderRadius: 'var(--radius-card)' }}>
+                        <Award className="w-8 h-8 mb-8 opacity-40" />
                         <div>
-                            <span className="block text-[10px] font-black uppercase tracking-widest opacity-40 mb-1">Master Artisan</span>
-                            <span className="text-lg font-black">{artisan}</span>
+                            <span className="block text-[10px] font-semibold uppercase tracking-widest opacity-40 mb-1">Master Artisan</span>
+                            <span className="text-lg font-semibold">{artisan}</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="pt-16 border-t border-neutral-100 grid grid-cols-2 md:grid-cols-4 gap-8">
+            {/* Materials grid */}
+            <div className="pt-16 grid grid-cols-2 md:grid-cols-4 gap-8"
+                style={{ borderTop: '1px solid var(--border)' }}>
                 {materials.map((m, i) => (
                     <div key={i} className="space-y-3">
-                        <div className="w-12 h-px bg-primary" />
+                        <div className="w-12 h-px" style={{ background: 'var(--primary)' }} />
                         <div>
-                            <span className="block text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-1">Material 0{i + 1}</span>
-                            <span className="text-xs font-black text-neutral-900">{m}</span>
+                            <span className="block text-[10px] font-semibold uppercase tracking-widest mb-1"
+                                style={{ color: 'var(--text-secondary)' }}>Material 0{i + 1}</span>
+                            <span className="text-xs font-semibold"
+                                style={{ color: 'var(--text-primary)' }}>{m}</span>
                         </div>
                     </div>
                 ))}
             </div>
 
-            <div className="relative h-[400px] lg:h-[600px] rounded-[4rem] overflow-hidden">
+            {/* Hero image */}
+            <div className="relative h-[400px] lg:h-[600px] overflow-hidden"
+                style={{ borderRadius: 'var(--radius-card)' }}>
                 <img
                     src="https://images.unsplash.com/photo-1544027993-37dbfe43562a?auto=format&fit=crop&q=80&w=2000"
                     alt="Artisan Workspace"
@@ -78,12 +94,13 @@ export function AuthenticityNarrative({
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-12 lg:p-20">
                     <div className="flex items-center gap-6">
-                        <div className="w-20 h-20 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center">
-                            <Heart className="w-8 h-8 text-white fill-white" />
+                        <div className="w-20 h-20 backdrop-blur-xl border border-white/20 flex items-center justify-center"
+                            style={{ borderRadius: 'var(--radius-badge)', background: 'rgba(255,255,255,0.1)' }}>
+                            <Heart className="w-8 h-8 text-primary-foreground fill-white" />
                         </div>
-                        <div className="text-white">
-                            <span className="block text-sm font-black italic tracking-widest uppercase mb-1">Social Impact</span>
-                            <p className="text-2xl font-black leading-tight max-w-sm">Every purchase supports 12 weaving families in the holy city.</p>
+                        <div className="text-primary-foreground">
+                            <span className="block text-sm font-semibold italic tracking-widest uppercase mb-1">Social Impact</span>
+                            <p className="text-2xl font-semibold leading-tight max-w-sm">Every purchase supports 12 weaving families in the holy city.</p>
                         </div>
                     </div>
                 </div>

@@ -5,7 +5,8 @@ import { useEffect, useState, Suspense } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { calculateRiskScore, RiskResult } from "@/lib/rto-engine";
-import { getSessionSignals, useAdaptiveTracking } from "@/lib/adaptive-engine";
+import { getSessionSignals, useAdaptiveTracking, getSessionRTOModifier } from "@/lib/adaptive-engine";
+import { getDeviceFingerprint } from "@/lib/fingerprint";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -20,10 +21,13 @@ import {
   CheckCircle2,
   ShoppingBag,
   ArrowRight,
-  Plus
+  Plus,
+  Check,
+  MessageCircle
 } from "lucide-react";
 import { calculatePrepaidDiscount, type PrepaidRule, type CartItemForDiscount } from "@/lib/utils/discount-engine";
 import { calculatePartialAmount } from "@/lib/utils/payment-utils";
+import { supabaseBrowser } from "@/lib/supabase-browser";
 
 // Local type removed to use imported CartItem from @/lib/cart
 
@@ -287,6 +291,11 @@ function CheckoutContent() {
       });
       setBundleDiscount(Math.round(totalBDiscount));
 
+      // Build product → collection map from joined data
+      const colMap: Record<string, string[]> = {};
+      data.forEach((p: any) => {
+        colMap[p.id] = (p.product_collections || []).map((c: any) => c.collection_id);
+      });
       setProductCollections(colMap);
 
       // --- NEW: Partial COD Pre-resolution ---
@@ -297,7 +306,7 @@ function CheckoutContent() {
 
       const hasProductForcingPartial = data.some(p => p.partial_cod_enabled && !p.use_store_partial_settings);
 
-      const storeConfig = store?.partial_cod_config || platformSettings?.partial_cod_config || {};
+      const storeConfig = store?.partial_cod_config || {};
       const storeEnabled = storeConfig.enabled === true;
 
       if (storeEnabled || hasProductForcingPartial) {
@@ -407,6 +416,10 @@ function CheckoutContent() {
     setAttempted(true);
     if (!isValid || submitting) return;
 
+    // Compute RTO intelligence signals at submit time
+    const sessionScore = getSessionRTOModifier();
+    const fingerprint = getDeviceFingerprint();
+
     // P1-1: COD Verification Step (Driven by RTO Layer 3)
     const needsVerification = paymentMethod === 'cod' && rtoResult?.action_type === 'whatsapp_confirm';
 
@@ -439,7 +452,14 @@ function CheckoutContent() {
         const res = await fetch("/api/orders/create", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...form, cart, payment_method: 'cod', otp_verified: true }),
+          body: JSON.stringify({
+            ...form,
+            cart,
+            payment_method: 'cod',
+            otp_verified: true,
+            session_score: sessionScore,
+            device_fingerprint: fingerprint,
+          }),
         });
 
         const data = await res.json();
@@ -470,7 +490,9 @@ function CheckoutContent() {
               form,
               cart,
               rto_score: rtoResult?.score,
-              rto_level: rtoResult?.level
+              rto_level: rtoResult?.level,
+              session_score: sessionScore,
+              device_fingerprint: fingerprint,
             })
           }),
         });
@@ -503,16 +525,16 @@ function CheckoutContent() {
   };
 
   return (
-    <main className="min-h-screen bg-[#fafafa] pb-12">
-      <header className="border-b border-neutral-100 py-6 bg-white sticky top-0 z-50 shadow-sm">
+    <main className="min-h-screen bg-[var(--bg-primary)] pb-12">
+      <header className="border-b border-[var(--border)] py-6 bg-[var(--bg-primary)] sticky top-0 z-50 shadow-sm">
         <div className="container max-w-5xl px-6 flex items-center justify-between mx-auto">
           {store?.logo_url ? (
             <Image src={store.logo_url} alt={store.name} width={120} height={40} className="h-8 w-auto object-contain" />
           ) : (
-            <div className="text-2xl font-black text-neutral-900 tracking-tighter uppercase">{store?.name || "Easy D2C"}</div>
+            <div className="text-2xl font-black text-[var(--text-primary)] tracking-tighter uppercase">{store?.name || "Easy D2C"}</div>
           )}
-          <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neutral-400">
-            <Lock className="w-3.5 h-3.5 text-neutral-900" />
+          <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)]">
+            <Lock className="w-3.5 h-3.5 text-[var(--text-primary)]" />
             <span>Secure 256-bit SSL Checkout</span>
           </div>
         </div>
@@ -525,11 +547,11 @@ function CheckoutContent() {
           <div className="lg:col-span-7 order-2 lg:order-1 space-y-12">
             {/* ERROR ALERT */}
             {paymentError && (
-              <div className="bg-red-50 border border-red-100 p-4 rounded-2xl flex items-start gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
-                <AlertCircle className="h-5 w-5 text-red-600 shrink-0" />
+              <div className="bg-[var(--error)]/10 border border-[var(--error)]/20 p-4 rounded-2xl flex items-start gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
+                <AlertCircle className="h-5 w-5 text-[var(--error)] shrink-0" />
                 <div>
-                  <p className="text-sm font-bold text-red-900">Payment Failed</p>
-                  <p className="text-xs text-red-700 mt-0.5">{paymentError}</p>
+                  <p className="text-sm font-bold text-[var(--error)]">Payment Failed</p>
+                  <p className="text-xs text-[var(--error)] mt-0.5">{paymentError}</p>
                 </div>
               </div>
             )}
@@ -537,36 +559,36 @@ function CheckoutContent() {
             {/* CONTACT */}
             <div className="space-y-6">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-neutral-900 text-white flex items-center justify-center text-xs font-bold ring-4 ring-neutral-50">1</div>
-                <h2 className="text-xl font-black text-neutral-900 tracking-tight uppercase tracking-widest text-xs">Customer Details</h2>
+                <div className="w-8 h-8 rounded-full bg-[var(--primary)] text-[var(--cta-text)] flex items-center justify-center text-xs font-bold ring-4 ring-[var(--bg-secondary)]">1</div>
+                <h2 className="text-xl font-black text-[var(--text-primary)] tracking-tight uppercase tracking-widest text-xs">Customer Details</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Full Delivery Name</Label>
+                  <Label htmlFor="name" className="text-[10px] uppercase font-bold text-[var(--text-secondary)] tracking-wider">Full Delivery Name</Label>
                   <Input
                     id="name"
                     placeholder="e.g. Rahul Sharma"
                     value={form.name}
                     onChange={(e) => setField("name", e.target.value)}
-                    className={`h-12 rounded-xl bg-white border-neutral-100 focus:ring-neutral-900 transition-all ${attempted && !nameValid ? "border-red-500 ring-1 ring-red-500" : ""}`}
+                    className={`h-12 rounded-xl bg-[var(--bg-primary)] border-[var(--border)] focus:ring-[var(--primary)] transition-all ${attempted && !nameValid ? "border-red-500 ring-1 ring-red-500" : ""}`}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Phone Number (For Tracking)</Label>
+                  <Label htmlFor="phone" className="text-[10px] uppercase font-bold text-[var(--text-secondary)] tracking-wider">Phone Number (For Tracking)</Label>
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-neutral-400">+91</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-[var(--text-secondary)]">+91</span>
                     <Input
                       id="phone"
                       placeholder="00000 00000"
                       inputMode="numeric"
                       value={form.phone}
                       onChange={(e) => setField("phone", e.target.value)}
-                      className={`h-12 pl-12 rounded-xl bg-white border-neutral-100 focus:ring-neutral-900 transition-all ${attempted && !phoneValid ? "border-red-500 ring-1 ring-red-500" : ""}`}
+                      className={`h-12 pl-12 rounded-xl bg-[var(--bg-primary)] border-[var(--border)] focus:ring-[var(--primary)] transition-all ${attempted && !phoneValid ? "border-red-500 ring-1 ring-red-500" : ""}`}
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">
+                  <Label htmlFor="email" className="text-[10px] uppercase font-bold text-[var(--text-secondary)] tracking-wider">
                     Email Address {paymentMethod === 'online' && <span className="text-red-500">*</span>}
                   </Label>
                   <Input
@@ -575,23 +597,23 @@ function CheckoutContent() {
                     placeholder="e.g. rahul@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className={`h-12 rounded-xl bg-white border-neutral-100 focus:ring-neutral-900 transition-all ${attempted && paymentMethod === 'online' && !emailValid ? "border-red-500 ring-1 ring-red-500" : ""}`}
+                    className={`h-12 rounded-xl bg-[var(--bg-primary)] border-[var(--border)] focus:ring-[var(--primary)] transition-all ${attempted && paymentMethod === 'online' && !emailValid ? "border-red-500 ring-1 ring-red-500" : ""}`}
                   />
-                  {paymentMethod === 'online' && <p className="text-[9px] text-neutral-400 font-bold uppercase tracking-widest">Required for online payment security</p>}
+                  {paymentMethod === 'online' && <p className="text-[9px] text-[var(--text-secondary)] font-bold uppercase tracking-widest">Required for online payment security</p>}
                 </div>
               </div>
 
               {/* ACCOUNT CREATION TOGGLE */}
-              <div className="bg-neutral-50 p-6 rounded-2xl flex items-center justify-between border border-neutral-100/50">
+              <div className="bg-[var(--bg-secondary)] p-6 rounded-2xl flex items-center justify-between border border-[var(--border)]/50">
                 <div className="space-y-1">
-                  <p className="text-sm font-black text-neutral-900">Save my details for next time</p>
-                  <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest">Create an account to track orders & faster checkout</p>
+                  <p className="text-sm font-black text-[var(--text-primary)]">Save my details for next time</p>
+                  <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest">Create an account to track orders & faster checkout</p>
                 </div>
                 <input
                   type="checkbox"
                   checked={createAccount}
                   onChange={(e) => setCreateAccount(e.target.checked)}
-                  className="w-5 h-5 rounded-md border-neutral-200 text-neutral-900 focus:ring-neutral-900"
+                  className="w-5 h-5 rounded-md border-[var(--border)] text-[var(--primary)] focus:ring-[var(--primary)]"
                 />
               </div>
             </div>
@@ -599,12 +621,12 @@ function CheckoutContent() {
             {/* ADDRESS */}
             <div className="space-y-6">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-neutral-900 text-white flex items-center justify-center text-xs font-bold ring-4 ring-neutral-50">2</div>
-                <h2 className="text-xl font-black text-neutral-900 tracking-tight uppercase tracking-widest text-xs">Shipping Address</h2>
+                <div className="w-8 h-8 rounded-full bg-[var(--primary)] text-[var(--cta-text)] flex items-center justify-center text-xs font-bold ring-4 ring-[var(--bg-secondary)]">2</div>
+                <h2 className="text-xl font-black text-[var(--text-primary)] tracking-tight uppercase tracking-widest text-xs">Shipping Address</h2>
               </div>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="pincode" className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Pincode</Label>
+                  <Label htmlFor="pincode" className="text-[10px] uppercase font-bold text-[var(--text-secondary)] tracking-wider">Pincode</Label>
                   <div className="relative">
                     <Input
                       id="pincode"
@@ -612,10 +634,10 @@ function CheckoutContent() {
                       inputMode="numeric"
                       value={form.pincode}
                       onChange={(e) => setField("pincode", e.target.value)}
-                      className={`h-12 rounded-xl bg-white border-neutral-100 focus:ring-neutral-900 transition-all ${attempted && !pincodeValid ? "border-red-500 ring-1 ring-red-500" : ""}`}
+                      className={`h-12 rounded-xl bg-[var(--bg-primary)] border-[var(--border)] focus:ring-[var(--primary)] transition-all ${attempted && !pincodeValid ? "border-red-500 ring-1 ring-red-500" : ""}`}
                     />
                     <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                      {pincodeStatus === "loading" && <div className="w-4 h-4 border-2 border-neutral-200 border-t-neutral-900 rounded-full animate-spin" />}
+                      {pincodeStatus === "loading" && <div className="w-4 h-4 border-2 border-[var(--border)] border-t-[var(--primary)] rounded-full animate-spin" />}
                       {pincodeStatus === "success" && <CheckCircle2 className="w-4 h-4 text-green-500" />}
                       {pincodeStatus === "failed" && <AlertCircle className="w-4 h-4 text-red-500" />}
                     </div>
@@ -623,34 +645,34 @@ function CheckoutContent() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="address" className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Full Address Details</Label>
+                  <Label htmlFor="address" className="text-[10px] uppercase font-bold text-[var(--text-secondary)] tracking-wider">Full Address Details</Label>
                   <Textarea
                     id="address"
                     rows={3}
                     placeholder="House no, Street Name, Landmark / Colony"
                     value={form.address}
                     onChange={(e) => setField("address", e.target.value)}
-                    className={`rounded-xl bg-white border-neutral-100 focus:ring-neutral-900 transition-all ${attempted && !addressValid ? "border-red-500 ring-1 ring-red-500" : ""}`}
+                    className={`rounded-xl bg-[var(--bg-primary)] border-[var(--border)] focus:ring-[var(--primary)] transition-all ${attempted && !addressValid ? "border-red-500 ring-1 ring-red-500" : ""}`}
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="city" className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">City</Label>
+                    <Label htmlFor="city" className="text-[10px] uppercase font-bold text-[var(--text-secondary)] tracking-wider">City</Label>
                     <Input
                       id="city"
                       value={form.city}
                       onChange={(e) => setField("city", e.target.value)}
-                      className="h-12 rounded-xl bg-white border-neutral-100"
+                      className="h-12 rounded-xl bg-[var(--bg-primary)] border-[var(--border)]"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="state" className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">State</Label>
+                    <Label htmlFor="state" className="text-[10px] uppercase font-bold text-[var(--text-secondary)] tracking-wider">State</Label>
                     <Input
                       id="state"
                       value={form.state}
                       onChange={(e) => setField("state", e.target.value)}
-                      className="h-12 rounded-xl bg-white border-neutral-100"
+                      className="h-12 rounded-xl bg-[var(--bg-primary)] border-[var(--border)]"
                     />
                   </div>
                 </div>
@@ -658,15 +680,15 @@ function CheckoutContent() {
             </div>
 
             {/* PAYMENT */}
-            <div className="space-y-6 pt-12 border-t border-neutral-100">
+            <div className="space-y-6 pt-12 border-t border-[var(--border)]">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-neutral-900 text-white flex items-center justify-center text-xs font-bold ring-4 ring-neutral-50">3</div>
-                <h2 className="text-xl font-black text-neutral-900 tracking-tight uppercase tracking-widest text-xs">Payment Information</h2>
+                <div className="w-8 h-8 rounded-full bg-[var(--primary)] text-[var(--cta-text)] flex items-center justify-center text-xs font-bold ring-4 ring-[var(--bg-secondary)]">3</div>
+                <h2 className="text-xl font-black text-[var(--text-primary)] tracking-tight uppercase tracking-widest text-xs">Payment Information</h2>
               </div>
 
               {/* RTO RISK ALERT & INTERVENTIONS */}
               {rtoResult && rtoResult.level !== 'low' && (
-                <div className={`p-5 rounded-3xl flex items-start gap-4 border shadow-sm transition-all duration-500 animate-in fade-in zoom-in-95 ${rtoResult.level === 'high' ? 'bg-red-50 border-red-100 text-red-900 ring-4 ring-red-500/5' : 'bg-amber-50 border-amber-100 text-amber-900 ring-4 ring-amber-500/5'
+                <div className={`p-5 rounded-3xl flex items-start gap-4 border shadow-sm transition-all duration-500 animate-in fade-in zoom-in-95 ${rtoResult.level === 'high' ? 'bg-[var(--error)]/10 border-[var(--error)]/20 text-[var(--error)] ring-4 ring-[var(--error)]/5' : 'bg-amber-50 border-amber-100 text-amber-900 ring-4 ring-amber-500/5'
                   }`}>
                   <div className={`mt-1 p-2 rounded-xl ${rtoResult.level === 'high' ? 'bg-red-100' : 'bg-amber-100'}`}>
                     <AlertCircle className={`h-5 w-5 shrink-0 ${rtoResult.level === 'high' ? 'text-red-600' : 'text-amber-600'}`} />
@@ -679,13 +701,15 @@ function CheckoutContent() {
                     </p>
 
                     {rtoResult.action_type === 'prepaid_only' && (
-                      <div className="mt-4 p-3 bg-white/50 border border-current/10 rounded-2xl text-[10px] font-bold uppercase tracking-tight">
+                      <div className="mt-4 p-3 bg-[var(--bg-primary)]/50 border border-[var(--border)] rounded-2xl text-[10px] font-bold uppercase tracking-tight">
                         COD is restricted for this area. Please pay online to secure your delivery.
                       </div>
                     )}
                     {rtoResult.action_type === 'partial_prepaid' && (
-                      <div className="mt-4 p-3 bg-white/50 border border-current/10 rounded-2xl text-[10px] font-bold uppercase tracking-tight">
-                        Secure your order by paying ₹200 now. Balance ₹{Math.round(total - 200)} on delivery.
+                      <div className="mt-4 p-3 bg-[var(--bg-primary)]/50 border border-[var(--border)] rounded-2xl text-[10px] font-bold uppercase tracking-tight">
+                        <p className="text-[var(--text-secondary)] italic">
+                          Selected for its reliability and speed in your region.
+                        </p>
                       </div>
                     )}
                   </div>
@@ -696,20 +720,20 @@ function CheckoutContent() {
                 {/* Online Payment Option */}
                 <div
                   className={`group p-6 rounded-2xl border transition-all cursor-pointer relative overflow-hidden ${paymentMethod === 'online'
-                    ? 'border-neutral-900 bg-neutral-900 text-white shadow-xl'
-                    : 'border-neutral-100 bg-white hover:border-neutral-200'
+                    ? 'border-[var(--primary)] bg-[var(--primary)] text-[var(--cta-text)] shadow-xl'
+                    : 'border-[var(--border)] bg-[var(--bg-primary)] hover:border-[var(--primary)]/50 text-[var(--text-primary)]'
                     }`}
                   onClick={() => setPaymentMethod('online')}
                 >
                   <div className="flex items-center justify-between relative z-10">
                     <div className="flex items-center gap-4">
-                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'online' ? 'border-white' : 'border-neutral-200'
+                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'online' ? 'border-[var(--cta-text)]' : 'border-[var(--border)]'
                         }`}>
-                        {paymentMethod === 'online' && <div className="w-3 h-3 rounded-full bg-white" />}
+                        {paymentMethod === 'online' && <div className="w-3 h-3 rounded-full bg-[var(--cta-text)]" />}
                       </div>
                       <div>
                         <p className="font-black text-sm uppercase tracking-wider">Pay Online (Secure)</p>
-                        <p className={`text-[10px] font-bold mt-1 ${paymentMethod === 'online' ? 'text-neutral-400' : 'text-neutral-500'
+                        <p className={`text-[10px] font-bold mt-1 ${paymentMethod === 'online' ? 'opacity-70' : 'text-[var(--text-secondary)]'
                           }`}>UPI, Cards, Net Banking & Wallets</p>
                       </div>
                     </div>
@@ -723,25 +747,24 @@ function CheckoutContent() {
                 {(isPartialForced || rtoResult?.action_type === 'partial_prepaid') && (
                   <div
                     className={`p-6 rounded-2xl border transition-all relative cursor-pointer ${paymentMethod === 'partial_cod'
-                      ? 'border-indigo-600 bg-indigo-600 text-white shadow-xl'
-                      : 'border-indigo-100 bg-indigo-50/30 hover:border-indigo-200'
+                      ? 'border-[var(--primary)] bg-[var(--primary)] text-[var(--cta-text-colour)] shadow-xl'
+                      : 'border-[var(--border)] bg-[var(--bg-secondary)] hover:border-[var(--primary)]'
                       }`}
                     onClick={() => setPaymentMethod('partial_cod')}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'partial_cod' ? 'border-white' : 'border-indigo-200'
+                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'partial_cod' ? 'border-[var(--cta-text-colour)]' : 'border-[var(--border)]'
                           }`}>
-                          {paymentMethod === 'partial_cod' && <div className="w-3 h-3 rounded-full bg-white" />}
+                          {paymentMethod === 'partial_cod' && <div className="w-3 h-3 rounded-full bg-[var(--cta-text-colour)]" />}
                         </div>
                         <div>
-                          <div className="flex items-center gap-2">
-                            <p className="font-black text-sm uppercase tracking-wider">Partial COD (Verified)</p>
-                            <span className="text-[9px] font-black bg-white/20 px-1.5 py-0.5 rounded uppercase">{isPartialForced ? "Required" : "Recommended"}</span>
-                          </div>
-                          <p className={`text-[10px] font-bold mt-1 ${paymentMethod === 'partial_cod' ? 'text-indigo-100' : 'text-indigo-600'
-                            }`}>Pay ₹{partialAmount.toLocaleString()} now + ₹{(total - partialAmount).toLocaleString()} on delivery</p>
+                          <h4 className="font-black text-[var(--text-primary)] uppercase tracking-widest text-xs">Security Deposit + COD</h4>
+                          <p className="text-[10px] text-[var(--text-secondary)] font-bold">Pay ₹{partialAmount} now, ₹{total - partialAmount} on delivery</p>
                         </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-black bg-[var(--primary)]/20 text-[var(--primary)] px-2 py-1 rounded-full uppercase">{isPartialForced ? "Required" : "Recommended"}</span>
                       </div>
                     </div>
                   </div>
@@ -749,36 +772,32 @@ function CheckoutContent() {
 
                 {/* COD Option - HIDDEN if Partial is forced */}
                 {!isPartialForced && (
-                  <div
-                    className={`p-6 rounded-2xl border transition-all relative ${(!codAvailable || rtoResult?.action_type === 'prepaid_only' || rtoResult?.action_type === 'auto_cancel')
-                      ? 'opacity-40 cursor-not-allowed border-neutral-100'
-                      : paymentMethod === 'cod'
-                        ? 'border-neutral-900 bg-neutral-900 text-white shadow-xl'
-                        : 'border-neutral-100 bg-white hover:border-neutral-200 cursor-pointer'
-                      }`}
-                    onClick={() => {
-                      if (codAvailable && rtoResult?.action_type !== 'prepaid_only' && rtoResult?.action_type !== 'auto_cancel') {
-                        setPaymentMethod('cod');
-                      }
-                    }}
+                  <button
+                    onClick={() => setPaymentMethod('cod')}
+                    className={`relative w-full text-left p-6 rounded-[2.5rem] border-2 transition-all group overflow-hidden ${paymentMethod === 'cod' ? 'border-[var(--primary)] bg-[var(--bg-secondary)] shadow-xl' : 'border-[var(--border)] bg-[var(--bg-primary)] opacity-60 grayscale hover:opacity-100'}`}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'cod' ? 'border-white' : 'border-neutral-200'
-                          }`}>
-                          {paymentMethod === 'cod' && <div className="w-3 h-3 rounded-full bg-white" />}
-                        </div>
-                        <div>
-                          <p className="font-black text-sm uppercase tracking-wider">Cash on Delivery</p>
-                          <p className={`text-[10px] font-bold mt-1 ${paymentMethod === 'cod' ? 'text-neutral-400' : 'text-neutral-500'
-                            }`}>Pay ₹{total.toLocaleString()} when order arrives</p>
-                        </div>
+                    <div className="flex justify-between items-start mb-4">
+                      <div className={`p-3 rounded-2xl ${paymentMethod === 'cod' ? 'bg-[var(--primary)] text-[var(--cta-text)]' : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)]'}`}>
+                        <ShoppingBag className="h-6 w-6" />
                       </div>
-                      {!codAvailable && (
-                        <span className="text-[10px] font-black text-red-600 bg-red-50 px-2 py-1 rounded-full uppercase tracking-widest">Disabled</span>
+                      {paymentMethod === 'cod' && (
+                        <div className="h-6 w-6 rounded-full bg-[var(--primary)] text-[var(--cta-text)] flex items-center justify-center">
+                          <Check className="h-4 w-4" strokeWidth={3} />
+                        </div>
                       )}
                     </div>
-                  </div>
+
+                    <div className="space-y-1">
+                      <h4 className="font-black text-[var(--text-primary)] uppercase tracking-widest text-xs">Cash on Delivery</h4>
+                      <p className="text-[10px] text-[var(--text-secondary)] font-bold">Pay when your order arrives</p>
+
+                      <div className="mt-4 p-3 bg-[var(--bg-primary)]/50 border border-[var(--border)] rounded-2xl text-[10px] font-bold uppercase tracking-tight">
+                        <p className="text-[var(--text-secondary)] italic">
+                          Selected for its reliability and speed in your region.
+                        </p>
+                      </div>
+                    </div>
+                  </button>
                 )}
               </div>
             </div>
@@ -786,15 +805,15 @@ function CheckoutContent() {
 
           {/* RIGHT COLUMN - SUMMARY */}
           <div className="lg:col-span-5 order-1 lg:order-2">
-            <div className="bg-white p-8 rounded-[2.5rem] border border-neutral-100 shadow-sm sticky top-32 space-y-8">
-              <div className="flex items-center justify-between border-b border-neutral-50 pb-6 lg:hidden" onClick={() => setShowSummary(!showSummary)}>
+            <div className="bg-[var(--bg-primary)] p-8 rounded-[2.5rem] border border-[var(--border)] shadow-sm sticky top-32 space-y-8">
+              <div className="flex items-center justify-between border-b border-[var(--bg-secondary)] pb-6 lg:hidden" onClick={() => setShowSummary(!showSummary)}>
                 <div className="flex items-center gap-2">
-                  <ShoppingBag className="w-5 h-5" />
-                  <span className="font-black text-neutral-900 truncate">Order Summary</span>
+                  <ShoppingBag className="w-5 h-5 text-[var(--text-primary)]" />
+                  <span className="font-black text-[var(--text-primary)] truncate">Order Summary</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="font-black text-neutral-900 text-lg">₹{finalTotal().toLocaleString()}</span>
-                  {showSummary ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                  <span className="font-black text-[var(--text-primary)] text-lg">₹{finalTotal().toLocaleString()}</span>
+                  {showSummary ? <ChevronUp className="h-5 w-5 text-[var(--text-primary)]" /> : <ChevronDown className="h-5 w-5 text-[var(--text-primary)]" />}
                 </div>
               </div>
 
@@ -803,18 +822,18 @@ function CheckoutContent() {
                   {cart.map((item, i) => (
                     <div key={`${item.product_id}-${i}`} className="flex justify-between items-center gap-4">
                       <div className="flex gap-4 flex-1 items-center">
-                        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-neutral-100 bg-neutral-50">
+                        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)]">
                           <Image src={item.image || "/placeholder.png"} alt={item.title} fill className="object-cover" />
-                          <div className="absolute top-0 right-0 w-6 h-6 bg-neutral-900 border-2 border-white rounded-full flex items-center justify-center text-[10px] font-black text-white -translate-x-1 translate-y-1">
+                          <div className="absolute top-0 right-0 w-6 h-6 bg-[var(--primary)] border-2 border-[var(--bg-primary)] rounded-full flex items-center justify-center text-[10px] font-black text-[var(--cta-text)] -translate-x-1 translate-y-1">
                             {item.qty}
                           </div>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-black text-neutral-900 truncate">{item.title}</p>
-                          <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest">In Stock</p>
+                          <p className="text-sm font-black text-[var(--text-primary)] truncate">{item.title}</p>
+                          <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest">In Stock</p>
                         </div>
                       </div>
-                      <p className="text-sm font-black text-neutral-900">₹{(item.price * item.qty).toLocaleString()}</p>
+                      <p className="text-sm font-black text-[var(--text-primary)]">₹{(item.price * item.qty).toLocaleString()}</p>
                     </div>
                   ))}
                 </div>
@@ -829,8 +848,8 @@ function CheckoutContent() {
                         if (inCart) return null;
 
                         return (
-                          <div key={p.id} className="flex items-center gap-4 bg-slate-50 p-3 rounded-2xl border border-slate-100 group transition-all hover:bg-slate-100/50">
-                            <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-neutral-200 bg-white">
+                          <div key={p.id} className="flex items-center gap-4 bg-[var(--bg-secondary)] p-3 rounded-2xl border border-[var(--border)] group transition-all hover:opacity-80">
+                            <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg-primary)]">
                               <Image src={p.images?.[0] || "/placeholder.png"} alt={p.title} fill className="object-cover" />
                             </div>
                             <div className="flex-1 min-w-0">
@@ -840,7 +859,7 @@ function CheckoutContent() {
                             <Button
                               size="sm"
                               variant="ghost"
-                              className="h-8 w-8 rounded-full p-0 hover:bg-neutral-900 hover:text-white"
+                              className="h-8 w-8 rounded-full p-0 hover:bg-[var(--primary)] hover:text-[var(--cta-text)] text-[var(--text-primary)]"
                               onClick={() => {
                                 const newItem: CartItem = {
                                   product_id: p.id,
@@ -866,19 +885,19 @@ function CheckoutContent() {
                 )}
 
                 {/* DISCOUNT INPUT */}
-                <div className="pt-6 border-t border-neutral-50">
+                <div className="pt-6 border-t border-[var(--border)]">
                   <div className="flex gap-2">
                     <Input
                       placeholder="Discount Code"
                       value={discountCode}
                       onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
-                      className="h-12 rounded-xl bg-neutral-50/50 border-neutral-100 focus:ring-neutral-900 uppercase font-bold text-xs"
+                      className="h-12 rounded-xl bg-[var(--bg-secondary)] border-[var(--border)] focus:ring-[var(--primary)] uppercase font-bold text-xs text-[var(--text-primary)]"
                     />
                     <Button
                       variant="outline"
                       onClick={applyDiscount}
                       disabled={applyingDiscount || !discountCode}
-                      className="h-12 px-6 rounded-xl font-black uppercase tracking-widest text-[10px] bg-white border-neutral-200"
+                      className="h-12 px-6 rounded-xl font-black uppercase tracking-widest text-[10px] bg-[var(--bg-primary)] border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--primary)] hover:text-[var(--cta-text)]"
                     >
                       {applyingDiscount ? "..." : "Apply"}
                     </Button>
@@ -890,10 +909,10 @@ function CheckoutContent() {
                   )}
                 </div>
 
-                <div className="bg-neutral-50 p-6 rounded-2xl space-y-3">
-                  <div className="flex justify-between text-xs font-bold text-neutral-500 uppercase tracking-widest">
+                <div className="bg-[var(--bg-secondary)] p-6 rounded-2xl space-y-3">
+                  <div className="flex justify-between text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest">
                     <span>Subtotal</span>
-                    <span className="text-neutral-900">₹{subtotal.toLocaleString()}</span>
+                    <span className="text-[var(--text-primary)]">₹{subtotal.toLocaleString()}</span>
                   </div>
                   {bundleDiscount > 0 && (
                     <div className="flex justify-between text-xs font-bold text-green-600 uppercase tracking-widest">
@@ -919,19 +938,19 @@ function CheckoutContent() {
                   </div>
                 </div>
 
-                <div className="flex justify-between items-end border-t border-neutral-50 pt-6">
+                <div className="flex justify-between items-end border-t border-[var(--border)] pt-6">
                   <div>
-                    <p className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] mb-1">Total Amount</p>
-                    <p className="text-4xl font-black text-neutral-900 tracking-tighter">
+                    <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em] mb-1">Total Amount</p>
+                    <p className="text-4xl font-black text-[var(--text-primary)] tracking-tighter">
                       ₹{finalTotal().toLocaleString()}
                     </p>
                   </div>
-                  <Lock className="w-5 h-5 text-neutral-200 mb-2" />
+                  <Lock className="w-5 h-5 text-[var(--border)] mb-2" />
                 </div>
 
                 <Button
                   size="lg"
-                  className="w-full h-16 bg-neutral-900 text-white rounded-2xl text-sm font-black uppercase tracking-widest hover:bg-neutral-800 shadow-xl transition-all group mt-4"
+                  className="w-full h-16 bg-[var(--primary)] text-[var(--cta-text)] rounded-2xl text-sm font-black uppercase tracking-widest hover:bg-[var(--primary)] opacity-90 hover:opacity-100 shadow-xl transition-all group mt-4 border-none"
                   onClick={placeOrder}
                   disabled={submitting}
                 >
@@ -963,30 +982,31 @@ function CheckoutContent() {
         target="_blank"
         className="fixed bottom-8 right-8 z-[100] bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all group"
       >
-        <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
-          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-        </svg>
+        <MessageCircle className="h-6 w-6" />
+        <span className="absolute right-full mr-4 top-1/2 -translate-y-1/2 bg-[var(--text-primary)] text-[var(--bg-primary)] text-[10px] font-black px-3 py-1.5 rounded-xl uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-xl">
+          Order Help
+        </span>
       </a>
 
       {/* OTP MODAL */}
       {
         showOtpModal && (
-          <div className="fixed inset-0 bg-neutral-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-6">
-            <div className="bg-white max-w-sm w-full p-10 rounded-[2.5rem] shadow-2xl relative animate-in zoom-in-95 duration-200">
-              <button onClick={() => setShowOtpModal(false)} className="absolute top-6 right-6 text-neutral-400 hover:text-neutral-900"><X className="h-6 w-6" /></button>
+          <div className="fixed inset-0 bg-[var(--text-primary)]/60 backdrop-blur-md z-[100] flex items-center justify-center p-6">
+            <div className="bg-[var(--bg-primary)] max-w-sm w-full p-10 rounded-[2.5rem] shadow-2xl relative animate-in zoom-in-95 duration-200 border border-[var(--border)]">
+              <button onClick={() => setShowOtpModal(false)} className="absolute top-6 right-6 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"><X className="h-6 w-6" /></button>
               <div className="text-center space-y-6">
-                <div className="bg-neutral-50 w-20 h-20 rounded-[2rem] border border-neutral-100 flex items-center justify-center mx-auto shadow-sm">
-                  <Lock className="h-8 w-8 text-neutral-900" />
+                <div className="bg-[var(--bg-secondary)] w-20 h-20 rounded-[2rem] border border-[var(--border)] flex items-center justify-center mx-auto shadow-sm">
+                  <Lock className="h-8 w-8 text-[var(--text-primary)]" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-black text-neutral-900 tracking-tight">Verify Device</h2>
-                  <p className="text-[11px] text-neutral-400 font-bold uppercase tracking-widest mt-2">Entering code sent to <span className="text-neutral-900">{form.phone}</span></p>
+                  <h2 className="text-2xl font-black text-[var(--text-primary)] tracking-tight">Verify Device</h2>
+                  <p className="text-[11px] text-[var(--text-secondary)] font-bold uppercase tracking-widest mt-2">Entering code sent to <span className="text-[var(--text-primary)]">{form.phone}</span></p>
                 </div>
                 <div className="pt-4">
                   <Input
                     type="text"
                     placeholder="• • • •"
-                    className="text-center text-3xl tracking-[0.5em] font-black h-16 rounded-2xl bg-neutral-50 border-none focus:ring-2 focus:ring-neutral-900"
+                    className="text-center text-3xl tracking-[0.5em] font-black h-16 rounded-2xl bg-[var(--bg-secondary)] border-none focus:ring-2 focus:ring-[var(--primary)] text-[var(--text-primary)]"
                     maxLength={4}
                     value={otpValue}
                     onChange={(e) => { setOtpValue(e.target.value.replace(/\D/g, '')); setOtpError(""); }}
@@ -995,7 +1015,7 @@ function CheckoutContent() {
                 </div>
 
                 <Button
-                  className="w-full h-14 bg-neutral-900 text-white rounded-2xl text-sm font-black uppercase tracking-widest shadow-xl"
+                  className="w-full h-14 bg-[var(--primary)] text-[var(--cta-text)] rounded-2xl text-sm font-black uppercase tracking-widest shadow-xl border-none"
                   onClick={async () => {
                     if (otpValue.length !== 4) return;
                     setVerifyingOtp(true);

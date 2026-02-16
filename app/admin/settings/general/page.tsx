@@ -11,11 +11,14 @@ import * as z from "zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { StorePaymentSettings } from "./StorePaymentSettings";
+import { RegionalSettings } from "./RegionalSettings";
 
 const storeSchema = z.object({
     name: z.string().min(1, "Store name is required"),
     logo_url: z.string().optional().nullable(),
     about: z.string().optional().nullable(),
+    timezone: z.string().min(1),
+    country: z.string().min(2),
     social_links: z.object({
         instagram: z.string().optional(),
         facebook: z.string().optional(),
@@ -45,6 +48,8 @@ export default function GeneralSettingsPage() {
             name: "",
             logo_url: "",
             about: "",
+            timezone: "Asia/Kolkata",
+            country: "IN",
             social_links: {
                 instagram: "",
                 facebook: "",
@@ -61,7 +66,7 @@ export default function GeneralSettingsPage() {
             setStoreId(id);
             const { data, error } = await supabaseBrowser
                 .from("stores")
-                .select("name, logo_url, about, social_links")
+                .select("name, logo_url, about, timezone, country, social_links")
                 .eq("id", id)
                 .single();
 
@@ -70,6 +75,8 @@ export default function GeneralSettingsPage() {
                     name: data.name || "",
                     logo_url: data.logo_url || "",
                     about: data.about || "",
+                    timezone: data.timezone || "Asia/Kolkata",
+                    country: data.country || "IN",
                     social_links: {
                         instagram: data.social_links?.instagram || "",
                         facebook: data.social_links?.facebook || "",
@@ -92,6 +99,8 @@ export default function GeneralSettingsPage() {
                 name: data.name,
                 logo_url: data.logo_url,
                 about: data.about,
+                timezone: data.timezone,
+                country: data.country,
                 social_links: data.social_links
             })
             .eq("id", storeId);
@@ -188,6 +197,13 @@ export default function GeneralSettingsPage() {
                         />
                     </div>
                 </section>
+
+                {/* Regional Settings — timezone + country */}
+                <RegionalSettings
+                    timezone={watch("timezone") || "Asia/Kolkata"}
+                    country={watch("country") || "IN"}
+                    onChange={(field, value) => setValue(field, value, { shouldDirty: true })}
+                />
 
                 {/* Social Handles */}
                 <section className="bg-white p-8 rounded-2xl border border-neutral-200 shadow-sm">

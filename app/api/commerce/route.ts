@@ -34,7 +34,7 @@ export async function GET() {
             url: `https://${storeId}.easy-d2c.com`, // Fallback or dynamic domain
             social: store.social_links
         },
-        catalog: products.map(p => ({
+        catalog: (products ?? []).map((p: { id: string; title: string; description: string; price: number; compare_at_price: number | null; image: string | null; slug: string }) => ({
             id: p.id,
             name: p.title,
             description: p.description,

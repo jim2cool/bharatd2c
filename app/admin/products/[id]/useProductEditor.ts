@@ -29,7 +29,7 @@ export type ProductFormData = {
   review_count?: number | null
   highlights: string[]
   content_markup?: string | null
-  images: string[]
+  images: { url: string; tier: 'tier1' | 'tier2' | 'tier3' }[]
   testimonials: Testimonial[]
   seo_title?: string | null
   seo_description?: string | null
@@ -166,6 +166,10 @@ export function useProductEditor(id: string) {
     // Ensure all numeric values are clean
     const payload = {
       ...data,
+      images: data.images.map(img => ({
+        url: img.url,
+        tier: img.tier || 'tier1'
+      })),
       price: Number(data.price),
       cogs: Number(data.cogs),
       mrp: data.mrp ? Number(data.mrp) : null,

@@ -7,15 +7,15 @@ export default function TestimonialCarousel({ testimonials }: any) {
   const t = testimonials[index];
 
   return (
-    <div className="bg-[#fafafa] rounded-xl p-5 shadow-sm">
-      <p className="text-sm text-gray-800 leading-relaxed">
-        “{t.text}”
+    <div className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-[var(--radius-card)] p-5 shadow-[var(--shadow-card)]">
+      <p className="text-sm text-[var(--text-primary)] leading-relaxed">
+        "{t.text}"
       </p>
 
-      <div className="mt-4 text-sm font-medium text-gray-700">
+      <div className="mt-4 text-sm font-medium text-[var(--text-primary)]">
         {t.name || "Verified Customer"}
         {t.location && (
-          <span className="text-gray-500 font-normal">
+          <span className="text-[var(--text-secondary)] font-normal">
             {" "}
             · {t.location}
           </span>
@@ -28,9 +28,8 @@ export default function TestimonialCarousel({ testimonials }: any) {
             <button
               key={i}
               onClick={() => setIndex(i)}
-              className={`h-2 w-2 rounded-full ${
-                i === index ? "bg-black" : "bg-gray-300"
-              }`}
+              className={`h-2 w-2 rounded-[var(--radius-badge)] transition ${i === index ? "bg-[var(--primary)]" : "bg-[var(--border)]"
+                }`}
             />
           ))}
         </div>

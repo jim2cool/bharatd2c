@@ -20,26 +20,26 @@ export function QuantitySelector({ qty, onQtyChange, min = 1, max = 10 }: Quanti
     }
 
     return (
-        <div className="flex items-center gap-2 py-1.5 border-y border-gray-100">
-            <span className="text-sm font-medium text-gray-700">Quantity</span>
+        <div className="flex items-center gap-2 py-1.5 border-y border-[var(--border)]">
+            <span className="text-sm font-medium text-[var(--text-secondary)]">Quantity</span>
             <div className="flex items-center gap-2">
                 <Button
                     variant="outline"
                     size="icon"
-                    className="h-9 w-9 bg-white hover:bg-gray-50 text-gray-900 border-gray-200"
+                    className="h-9 w-9 bg-[var(--bg-primary)] hover:bg-[var(--bg-secondary)] text-[var(--text-primary)] border-[var(--border)]"
                     onClick={handleDecrease}
                     disabled={qty <= min}
                     aria-label="Decrease quantity"
                 >
                     <Minus className="h-4 w-4" />
                 </Button>
-                <span className="w-10 text-center font-semibold text-lg text-gray-900">
+                <span className="w-10 text-center font-semibold text-lg text-[var(--text-primary)]">
                     {qty}
                 </span>
                 <Button
                     variant="outline"
                     size="icon"
-                    className="h-9 w-9 bg-white hover:bg-gray-50 text-gray-900 border-gray-200"
+                    className="h-9 w-9 bg-[var(--bg-primary)] hover:bg-[var(--bg-secondary)] text-[var(--text-primary)] border-[var(--border)]"
                     onClick={handleIncrease}
                     disabled={qty >= max}
                     aria-label="Increase quantity"

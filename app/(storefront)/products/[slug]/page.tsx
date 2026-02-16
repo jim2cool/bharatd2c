@@ -101,14 +101,13 @@ export default async function ProductPage(props: {
     }
   }
 
-  const themeConfig = store.theme_config
-  const architectureId = themeConfig?.architecture || 'product-engine'
+  const architectureId = store.commerce_architecture || 'product_engine'
   const categoryConfig = {
-    category: product.category || themeConfig?.category?.category || 'multi',
-    requiredModules: themeConfig?.category?.requiredModules || [],
-    optionalModules: themeConfig?.category?.optionalModules || [],
-    imageRatio: themeConfig?.category?.imageRatio || '1:1',
-    variantSelectorType: themeConfig?.category?.variantSelectorType || 'dropdown',
+    category: store.primary_category || 'multi',
+    requiredModules: store.category_mandatory_components || [],
+    optionalModules: [], // Deprecated via architecture spec
+    imageRatio: store.image_ratio_pdp || '1:1',
+    variantSelectorType: 'dropdown',
     data: product.category_data || {}
   }
 
@@ -132,7 +131,7 @@ export default async function ProductPage(props: {
         {/* Deterministic Architecture-Based Rendering */}
         <PDPClientWrapper
           product={product}
-          architectureId={architectureId}
+          storeConfig={store as any}
           categoryConfig={categoryConfig as any}
         />
 

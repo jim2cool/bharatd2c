@@ -3,7 +3,7 @@ import { Outfit, Plus_Jakarta_Sans, Playfair_Display, JetBrains_Mono, Anton, Dan
 import "./globals.css";
 import "@/app/theme/easy-base/theme.config";
 import ThemeProvider from "@/components/ThemeProvider";
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { getActiveStore } from "@/lib/getActiveStore";
 
 const outfit = Outfit({
   variable: "--font-heading",
@@ -41,37 +41,20 @@ export const metadata: Metadata = {
   description: "Thoughtfully crafted products for everyday India.",
 };
 
-import { getActiveStoreId } from "@/lib/getActiveStore";
-import { notFound } from "next/navigation";
 
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // Demo Store ID - In production this would come from domain/subdomain
-  // const STORE_ID = "b3589f69-28a2-4831-b20c-06512f483ce4";
-  const storeId = await getActiveStoreId();
-
-  // If no storeId, we are on the Platform Landing Page
-  // Do not 404, just don't fetch store theme
-  let themeConfig = null;
-
-  if (storeId) {
-    const { data } = await supabaseAdmin
-      .from("stores")
-      .select("theme_config")
-      .eq("id", storeId)
-      .single();
-    themeConfig = data?.theme_config;
-  }
+  const storeConfig = await getActiveStore();
 
   return (
     <html lang="en-IN">
       <body
         className={`${outfit.variable} ${plusJakarta.variable} ${playfair.variable} ${jetbrains.variable} ${anton.variable} ${dancing.variable} antialiased bg-background text-foreground bg-noise`}
       >
-        <ThemeProvider themeConfig={themeConfig}>
+        <ThemeProvider storeConfig={storeConfig as any}>
           {children}
         </ThemeProvider>
       </body>

@@ -134,13 +134,21 @@ export async function getProductDataForPDP(slug: string, storeId: string, option
     }
 
     // 2. Map Media
-    const media: MediaItem[] = (product.images || []).map((url: string, index: number) => ({
-        id: `media_${index}`,
-        type: 'image' as const,
-        src: url,
-        alt: `${product.title} image ${index + 1}`,
-        aspectRatio: 'aspect-[4/5]'
-    }))
+    const imagesRaw = product.images || []
+    const media: MediaItem[] = imagesRaw.map((img: any, index: number) => {
+        const isObject = typeof img === 'object' && img !== null;
+        const url = isObject ? img.url : img;
+        const tier = isObject ? img.tier : 'tier1'; // Fallback for safety
+
+        return {
+            id: `media_${index}`,
+            type: 'image' as const,
+            src: url || '',
+            alt: `${product.title} image ${index + 1}`,
+            aspectRatio: 'aspect-[4/5]',
+            tier: tier === 'tier3' ? 'weak' : tier === 'tier2' ? 'lifestyle' : 'clean'
+        };
+    });
 
     // 3. Map Highlights
     const highlights: ProductHighlight[] = (product.highlights || []).map((text: string, index: number) => ({

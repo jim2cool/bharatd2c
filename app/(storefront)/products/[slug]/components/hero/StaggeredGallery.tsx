@@ -4,6 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { usePDP } from '@/app/(storefront)/products/[slug]/context/PDPContext';
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
 
 export function StaggeredGallery() {
     const { product } = usePDP();
@@ -50,7 +51,12 @@ export function StaggeredGallery() {
                                 ease: [0.16, 1, 0.3, 1]
                             }}
                             viewport={{ once: true }}
-                            className={`${colSpan} ${rowSpan} relative overflow-hidden rounded-[2.5rem] lg:rounded-[4rem] bg-neutral-100 group`}
+                            className={cn(
+                                colSpan,
+                                rowSpan,
+                                "relative overflow-hidden bg-secondary group",
+                                "rounded-[var(--radius-image,2.5rem)]"
+                            )}
                         >
                             <Image
                                 src={item.src}
@@ -60,12 +66,12 @@ export function StaggeredGallery() {
                                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                             />
                             {/* Decorative Grid Overlay for Editorial Vibe */}
-                            <div className="absolute inset-0 bg-neutral-900/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                            <div className="absolute inset-0 bg-[var(--ink-900)]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
                             {/* Metadata Badge (Optional Visual Detail) */}
                             {idx === 0 && (
-                                <div className="absolute top-8 left-8 p-4 backdrop-blur-xl bg-white/20 border border-white/30 rounded-[1.5rem] hidden lg:block">
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-white drop-shadow-sm">01 / Main Gallery</span>
+                                <div className="absolute top-8 left-8 p-4 backdrop-blur-xl bg-[var(--background)]/20 border border-[var(--border)]/30 rounded-[var(--radius-md,1.5rem)] hidden lg:block">
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-[var(--primary-foreground)] drop-shadow-sm">01 / Main Gallery</span>
                                 </div>
                             )}
                         </motion.div>

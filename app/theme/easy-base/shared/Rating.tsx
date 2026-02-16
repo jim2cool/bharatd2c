@@ -37,7 +37,7 @@ export default function Rating({
         <Star key={`empty-${i}`} size={size} fillPercent={0} />
       ))}
 
-      <span className="ml-1 text-sm text-muted-foreground">
+      <span className="ml-1 text-sm text-[var(--text-secondary)]">
         {value.toFixed(1)}
         {count !== undefined && ` (${count})`}
       </span>
@@ -60,7 +60,7 @@ function Star({
       {/* Empty */}
       <svg
         viewBox="0 0 24 24"
-        className="absolute inset-0 text-gray-300"
+        className="absolute inset-0 text-[var(--border)]"
         fill="currentColor"
       >
         <path d="M12 17.3l6.18 3.73-1.64-7.03L21.5 9.24l-7.19-.61L12 2 9.69 8.63 2.5 9.24l4.96 4.76L5.82 21z" />
@@ -74,7 +74,7 @@ function Star({
         >
           <svg
             viewBox="0 0 24 24"
-            className="text-yellow-500"
+            className="text-[var(--star-colour)]"
             fill="currentColor"
           >
             <path d="M12 17.3l6.18 3.73-1.64-7.03L21.5 9.24l-7.19-.61L12 2 9.69 8.63 2.5 9.24l4.96 4.76L5.82 21z" />

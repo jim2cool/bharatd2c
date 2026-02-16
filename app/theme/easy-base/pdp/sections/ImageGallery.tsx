@@ -20,7 +20,7 @@ export default function ImageGallery({
   return (
     <div className="space-y-3">
       {/* MAIN IMAGE */}
-      <div className="relative aspect-square overflow-hidden rounded-xl bg-muted">
+      <div className="relative aspect-square overflow-hidden rounded-[var(--hero-radius)] bg-[var(--bg-secondary)]">
         <img
           src={images[index]}
           alt=""
@@ -32,13 +32,13 @@ export default function ImageGallery({
           <>
             <button
               onClick={prev}
-              className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-1 lg:hidden"
+              className="absolute left-2 top-1/2 -translate-y-1/2 rounded-[var(--radius-badge)] bg-[var(--bg-primary)]/80 p-1 lg:hidden"
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
             <button
               onClick={next}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-1 lg:hidden"
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-[var(--radius-badge)] bg-[var(--bg-primary)]/80 p-1 lg:hidden"
             >
               <ChevronRight className="h-5 w-5" />
             </button>
@@ -53,9 +53,8 @@ export default function ImageGallery({
             <span
               key={i}
               onClick={() => setIndex(i)}
-              className={`h-2 w-2 rounded-full cursor-pointer ${
-                i === index ? "bg-black" : "bg-gray-300"
-              }`}
+              className={`h-2 w-2 rounded-[var(--radius-badge)] cursor-pointer transition ${i === index ? "bg-[var(--primary)]" : "bg-[var(--border)]"
+                }`}
             />
           ))}
         </div>
@@ -68,9 +67,8 @@ export default function ImageGallery({
             <div
               key={i}
               onClick={() => setIndex(i)}
-              className={`h-20 w-20 cursor-pointer overflow-hidden rounded-md border ${
-                i === index ? "ring-2 ring-black" : ""
-              }`}
+              className={`h-20 w-20 cursor-pointer overflow-hidden rounded-[var(--radius-image)] border border-[var(--border)] ${i === index ? "ring-2 ring-[var(--primary)]" : ""
+                }`}
             >
               <img
                 src={img}

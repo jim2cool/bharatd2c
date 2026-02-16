@@ -26,7 +26,7 @@ export default function CTAStack({ product }: { product: any }) {
           add();
           router.push("/checkout");
         }}
-        className="w-full btn btn-primary py-4 text-lg transition-all hover:shadow-md active:scale-[0.97]"
+        className="w-full bg-[var(--primary)] text-[var(--primary-foreground)] rounded-[var(--radius-button)] py-4 text-sm font-semibold transition-all hover:shadow-[var(--shadow-hover)] active:scale-[0.97]"
       >
         Order Now — Cash on Delivery
       </button>
@@ -37,14 +37,14 @@ export default function CTAStack({ product }: { product: any }) {
             add();
             router.push("/cart");
           }}
-          className="w-full border border-gray-300 py-3 text-sm rounded-xl hover:bg-gray-50 transition"
+          className="w-full border border-[var(--border)] text-[var(--text-primary)] py-3 text-sm rounded-[var(--radius-button)] hover:bg-[var(--bg-secondary)] transition"
         >
           Add to Cart
         </button>
       )}
 
-      <div className="text-[11px] text-gray-400 text-center">
-        Pay Online & Get Extra Discount (Coming Soon)
+      <div className="text-[11px] text-[var(--text-secondary)] text-center">
+        Pay Online &amp; Get Extra Discount (Coming Soon)
       </div>
     </div>
   );

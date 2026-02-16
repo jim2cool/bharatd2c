@@ -1,7 +1,10 @@
 import exclusionListData from './rto-data/exclusion-list.json'
 import emergingRiskData from './rto-data/emerging-risk.json'
 import { RTO_WEIGHTS, CATEGORY_RISK_MULTIPLIERS, isHighRiskStatePincode } from './rto-config'
-import { supabaseAdmin as supabase } from './supabase-admin'
+import { supabaseAdmin } from './supabase-admin'
+import { supabaseBrowser } from './supabase-browser'
+
+const supabase = supabaseAdmin || supabaseBrowser
 
 // Use Sets for O(1) lookup performance
 const exclusionList = new Set<string>(exclusionListData as string[])
@@ -22,6 +25,7 @@ export type RiskAssessmentParams = {
     session_signals?: {
         deep_scroll_reviews?: boolean
         time_on_page_seconds?: number
+        review_dwell_seconds?: number
         checkout_time_seconds?: number
         rage_clicks?: boolean
         no_reviews?: boolean
@@ -159,15 +163,28 @@ export async function calculateRiskScore(params: RiskAssessmentParams): Promise<
 
     // --- Order-Level Signals ---
 
-    // 1AM to 4AM IST check
+    // 1AM to 4AM impulse window check (Respecting Store Timezone)
     if (order_timestamp) {
         const orderDate = new Date(order_timestamp)
-        // Convert to IST
-        const istTime = new Date(orderDate.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }))
-        const hour = istTime.getHours()
-        if (hour >= 1 && hour < 4) {
-            score += RTO_WEIGHTS.TIME_1AM_4AM_IST
-            drivers.push(`Impulse Window: Order placed between 1AM-4AM IST (+${RTO_WEIGHTS.TIME_1AM_4AM_IST}).`)
+        const sellerTimezone = params.store?.timezone || 'Asia/Kolkata'
+
+        try {
+            // Convert safely regardless of server timezone
+            const formatter = new Intl.DateTimeFormat('en-US', {
+                timeZone: sellerTimezone,
+                hour: 'numeric',
+                hourCycle: 'h23'
+            })
+            const parts = formatter.formatToParts(orderDate)
+            const hourString = parts.find(p => p.type === 'hour')?.value
+            const hour = hourString ? parseInt(hourString, 10) : orderDate.getHours()
+
+            if (hour >= 1 && hour < 4) {
+                score += RTO_WEIGHTS.TIME_1AM_4AM_IST
+                drivers.push(`Impulse Window: Order placed between 1AM-4AM local time (${sellerTimezone}) (+${RTO_WEIGHTS.TIME_1AM_4AM_IST}).`)
+            }
+        } catch (e) {
+            console.warn(`Invalid timezone config: ${sellerTimezone}. Skipping impulse window check.`)
         }
     }
 
@@ -203,6 +220,11 @@ export async function calculateRiskScore(params: RiskAssessmentParams): Promise<
         if (session_signals.time_on_page_seconds && session_signals.time_on_page_seconds >= 180) {
             score += RTO_WEIGHTS.SESSION_TIME_ON_PAGE_3M
             drivers.push(`Behavioral Confidence: Real buyer pacing (> 3m time on page) (${RTO_WEIGHTS.SESSION_TIME_ON_PAGE_3M}).`)
+        }
+        if (session_signals.review_dwell_seconds && session_signals.review_dwell_seconds >= 20) {
+            // Reduction for high-intent research behavior
+            score -= 10
+            drivers.push(`Behavioral Confidence: Extensive review research (> 20s dwell) (-10).`)
         }
         if (session_signals.checkout_time_seconds && session_signals.checkout_time_seconds < 45) {
             score += RTO_WEIGHTS.SESSION_FAST_CHECKOUT_45S
@@ -263,7 +285,8 @@ export async function calculateRiskScore(params: RiskAssessmentParams): Promise<
 
     // --- Configuration State Resolution ---
     const state = resolveCapabilityState(params.store)
-    const intervention = getIntervention(score, state)
+    const automationEnabled = params.store?.rto_automation_enabled ?? true
+    const intervention = getIntervention(score, state, automationEnabled)
 
     // Overrides for specific heavy drivers
     if (previous_rtos >= 2 && intervention.action_type !== 'auto_cancel') {
@@ -302,7 +325,7 @@ export function resolveCapabilityState(store: any): CapabilityState {
     return 'STATE_D'
 }
 
-export function getIntervention(score: number, state: CapabilityState): {
+export function getIntervention(score: number, state: CapabilityState, automationEnabled: boolean = true): {
     action_type: RiskResult['action_type'],
     target_action: string,
     summary: string,
@@ -314,6 +337,17 @@ export function getIntervention(score: number, state: CapabilityState): {
     else if (score >= 70) target = 'prepaid_only'
     else if (score >= 55) target = 'partial_prepaid'
     else if (score >= 40) target = 'whatsapp_confirm'
+
+    // If automation is disabled, we always return 'none' for action_type
+    // but we keep the 'target' so the intelligence layer knows what would have happened.
+    if (!automationEnabled) {
+        return {
+            action_type: 'none',
+            target_action: target,
+            summary: 'Protection Active — Audit Only',
+            recommendation: `High-risk profile detected (${target}). Automation is disabled, so no action was taken.`
+        }
+    }
 
     // 2. Resolve based on Capability Map
     let action: RiskResult['action_type'] = 'none'

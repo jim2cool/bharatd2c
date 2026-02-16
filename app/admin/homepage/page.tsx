@@ -47,14 +47,15 @@ export default function HomepageEditor() {
             if (!id) return;
             setStoreId(id);
 
-            const { data: store } = await supabaseBrowser
-                .from("stores")
-                .select("theme_config")
-                .eq("id", id)
+            const { data: page } = await supabaseBrowser
+                .from("pg_store_pages")
+                .select("homepage_sections")
+                .eq("store_id", id)
+                .eq("page_type", "homepage")
                 .single();
 
-            if (store?.theme_config?.homepage_sections) {
-                setSections(store.theme_config.homepage_sections);
+            if (page?.homepage_sections) {
+                setSections(page.homepage_sections);
             } else {
                 // Default initial sections
                 setSections([
@@ -75,19 +76,11 @@ export default function HomepageEditor() {
         if (!storeId) return;
         setSaving(true);
 
-        const { data: store } = await supabaseBrowser
-            .from("stores")
-            .select("theme_config")
-            .eq("id", storeId)
-            .single();
-
-        const themeConfig = store?.theme_config || {};
-        const newConfig = { ...themeConfig, homepage_sections: sections };
-
         const { error } = await supabaseBrowser
-            .from("stores")
-            .update({ theme_config: newConfig })
-            .eq("id", storeId);
+            .from("pg_store_pages")
+            .update({ homepage_sections: sections })
+            .eq("store_id", storeId)
+            .eq("page_type", "homepage");
 
         setSaving(false);
         if (error) {

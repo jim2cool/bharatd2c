@@ -1,4 +1,3 @@
-
 import { getActiveStoreIdClient } from './getActiveStore.client'
 
 /**
@@ -11,23 +10,27 @@ export async function getStoreBaseUrl(supabase: any): Promise<string> {
 
     const { data: store } = await supabase
         .from('stores')
-        .select('slug, domain')
+        .select('slug, domain, custom_domain')
         .eq('id', storeId)
         .single()
 
     if (!store) return '/'
 
-    // 1. If custom domain exists, use it with https
-    if (store.domain) {
-        return `https://${store.domain}`
+    // The unique identifier for the store (some legacy stores use domain column for slug)
+    const storeIdentifier = store.slug || store.domain;
+
+    // 1. Handle Localhost (Takes precedence in dev environment)
+    if (typeof window !== 'undefined' && window.location.hostname.includes('localhost')) {
+        const port = window.location.port || '3000';
+        return `http://${storeIdentifier}.localhost:${port}`;
     }
 
-    // 2. Handle Localhost
-    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-        return `http://${store.slug}.localhost:3000`
+    // 2. If a true custom domain exists
+    const trueCustomDomain = store.custom_domain || (store.domain && store.domain.includes('.') ? store.domain : null);
+    if (trueCustomDomain) {
+        return `https://${trueCustomDomain}`;
     }
 
     // 3. Fallback to platform subdomain (v2 production)
-    // Adjust this to your actual production domain
-    return `https://${store.slug}.easy-d2c.com`
+    return `https://${storeIdentifier}.easy-d2c.com`
 }

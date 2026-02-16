@@ -40,8 +40,8 @@ export function SmartPrompts() {
         const unsubRage = subscribe('rage-click', (count: number) => {
             if (count === 1) { // On first rage-click trigger
                 toast.custom((t) => (
-                    <div className="bg-white p-4 rounded-2xl shadow-xl flex items-center gap-3 border border-neutral-100">
-                        <div className="p-2 bg-blue-50 text-blue-600 rounded-full"><Zap className="w-4 h-4" /></div>
+                    <div className="bg-card p-4 rounded-2xl shadow-xl flex items-center gap-3 border border-border">
+                        <div className="p-2 bg-blue-50 text-primary rounded-full"><Zap className="w-4 h-4" /></div>
                         <div className="text-xs font-medium">
                             Need help? <button className="underline font-bold" onClick={() => toast.dismiss(t)}>Chat with us</button>
                         </div>
@@ -66,12 +66,12 @@ export function SmartPrompts() {
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
                     className="fixed bottom-24 right-4 md:right-8 z-50 max-w-xs"
                 >
-                    <div className="bg-neutral-900 text-white p-4 rounded-2xl shadow-2xl flex items-center gap-4">
-                        <div className="p-2 bg-white/10 rounded-full animate-pulse">
+                    <div className="bg-neutral-900 text-primary-foreground p-4 rounded-2xl shadow-2xl flex items-center gap-4">
+                        <div className="p-2 bg-card/10 rounded-full animate-pulse">
                             <Tag className="w-5 h-5 text-yellow-400" />
                         </div>
                         <div>
-                            <p className="text-xs font-bold uppercase tracking-wider text-neutral-400">Limited Offer</p>
+                            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Limited Offer</p>
                             <p className="text-sm font-bold">Free Shipping active for 10m!</p>
                         </div>
                     </div>

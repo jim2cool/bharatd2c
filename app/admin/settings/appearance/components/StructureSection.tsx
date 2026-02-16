@@ -4,6 +4,7 @@ import { useFormContext } from "react-hook-form";
 import { Layout } from "lucide-react";
 import { Accordion } from "./Accordion";
 import { ThemeConfig } from "@/components/ThemeProvider";
+import { PDPArchitectureManager } from "./PDPArchitectureManager";
 
 export function StructureSection() {
     const { register, watch, setValue } = useFormContext<ThemeConfig>();
@@ -25,9 +26,9 @@ export function StructureSection() {
                                 {...register("architecture")}
                                 className="w-full px-3 py-2 bg-neutral-50 border border-neutral-100 rounded-lg text-sm font-medium focus:ring-2 focus:ring-black"
                             >
-                                <option value="product-engine">Product Engine (Standard D2C)</option>
-                                <option value="story-first">Story First (Content-Heavy)</option>
-                                <option value="catalog-first">Catalog First (High Volume)</option>
+                                <option value="product_engine">Product Engine (Standard D2C)</option>
+                                <option value="story_first">Story First (Content-Heavy)</option>
+                                <option value="catalog_first">Catalog First (High Volume)</option>
                             </select>
                             <p className="text-xs text-neutral-400 mt-2 leading-relaxed">
                                 <strong>Product Engine:</strong> Optimized for single-product or clear hero product focus.<br />
@@ -75,6 +76,12 @@ export function StructureSection() {
                             </select>
                         </div>
                     </div>
+                </div>
+            </Accordion>
+
+            <Accordion title="PDP Architecture & Sequence" icon={Layout} defaultOpen={false}>
+                <div className="py-2">
+                    <PDPArchitectureManager />
                 </div>
             </Accordion>
         </div>

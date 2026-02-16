@@ -27,7 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .eq('store_id', storeId)
         .eq('status', 'published')
 
-    const productRoutes = (products || []).map((product) => ({
+    const productRoutes = (products || []).map((product: { slug: string; updated_at: string }) => ({
         url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://easyd2c.in'}/products/${product.slug}`,
         lastModified: new Date(product.updated_at),
         changeFrequency: 'weekly' as const,
@@ -41,7 +41,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .eq('store_id', storeId)
         .eq('status', 'published')
 
-    const collectionRoutes = (collections || []).map((collection) => ({
+    const collectionRoutes = (collections || []).map((collection: { slug: string; updated_at: string }) => ({
         url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://easyd2c.in'}/collections/${collection.slug}`,
         lastModified: new Date(collection.updated_at),
         changeFrequency: 'weekly' as const,

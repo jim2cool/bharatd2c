@@ -11,8 +11,8 @@ export default function PLPCard({ product }: { product: any }) {
 
   return (
     <Link href={`/products/${product.slug}`}>
-      <div className="border rounded p-3 hover:shadow-sm transition">
-        <div className="aspect-square bg-gray-100 mb-2">
+      <div className="border border-[var(--border)] rounded-[var(--radius-card)] p-3 bg-[var(--bg-primary)] hover:shadow-[var(--shadow-hover)] transition">
+        <div className="aspect-square bg-[var(--bg-secondary)] rounded-[var(--radius-image)] mb-2 overflow-hidden">
           {image && (
             <ThemeImage
               src={image}
@@ -22,8 +22,8 @@ export default function PLPCard({ product }: { product: any }) {
           )}
         </div>
 
-        <h3 className="text-sm font-medium">{product.title}</h3>
-        <p className="text-sm font-semibold mt-1">₹{product.price}</p>
+        <h3 className="text-sm font-medium text-[var(--text-primary)]">{product.title}</h3>
+        <p className="text-sm font-semibold mt-1 text-[var(--primary)]">₹{product.price}</p>
       </div>
     </Link>
   );

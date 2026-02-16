@@ -21,13 +21,17 @@ export type OrderCreationParams = {
     transaction_id?: string
     session_signals?: any
     pincode_meta?: any
+    // RTO Intelligence Engine — enriched signals (Phase 27)
+    session_score?: number        // pre-computed net modifier from Adaptive Engine
+    device_fingerprint?: string   // lightweight browser fingerprint for fraud detection
 }
 
 export async function createOrder(params: OrderCreationParams) {
     const {
         name, phone, address, pincode, city, state, cart,
         payment_method, otp_verified = false, payment_id, transaction_id,
-        session_signals, pincode_meta
+        session_signals, pincode_meta,
+        session_score, device_fingerprint,
     } = params
 
     /* 1. Basic Validation */
@@ -62,12 +66,13 @@ export async function createOrder(params: OrderCreationParams) {
     const productIds = cart.map((i: any) => i.product_id)
     const { data: products } = await supabase
         .from('products')
-        .select('id, price, weight_grams, partial_cod_enabled, use_store_partial_settings')
+        .select('id, price, weight_grams, partial_cod_enabled, use_store_partial_settings, category')
         .in('id', productIds)
     if (!products) throw new Error('PRODUCT_LOOKUP_FAILED')
 
     const priceMap = new Map(products.map(p => [p.id, p.price]))
     const weightMap = new Map(products.map(p => [p.id, p.weight_grams || 500]))
+    const categoryMap = new Map(products.map(p => [p.id, (p as any).category as string | null]))
 
     let total_amount = 0
     let total_weight = 0
@@ -81,6 +86,24 @@ export async function createOrder(params: OrderCreationParams) {
 
         return { product_id: item.product_id, qty, price }
     })
+
+    // Resolve primary category from highest-value cart item (for RTO category multiplier)
+    const primaryCategory: string = cart
+        .map((item: any) => ({
+            product_id: item.product_id,
+            value: (priceMap.get(item.product_id) || item.price) * (item.qty || 1),
+        }))
+        .sort((a, b) => b.value - a.value)[0]
+        ?.product_id
+        ? (categoryMap.get(
+            cart
+                .map((item: any) => ({
+                    product_id: item.product_id,
+                    value: (priceMap.get(item.product_id) || item.price) * (item.qty || 1),
+                }))
+                .sort((a, b) => b.value - a.value)[0].product_id
+        ) ?? 'multi')
+        : 'multi'
 
     /* 6. Order Number Generation */
     const order_number = await generateOrderNumber(store.id, store.store_code)
@@ -160,6 +183,7 @@ export async function createOrder(params: OrderCreationParams) {
                 payment_id: payment_id || null,
                 transaction_id: transaction_id || null,
                 meta: {
+                    // ── Core fields (unchanged) ──────────────────────────────
                     name, phone, address, pincode, city, state,
                     pincode_meta,
                     otp_verified: otp_verified || isPartial,
@@ -167,7 +191,21 @@ export async function createOrder(params: OrderCreationParams) {
                     risk_drivers: riskResult.drivers,
                     partial_prepaid: isPartial || partial_gate_active,
                     paid_amount: isPartial ? effective_partial_amount : (payment_method === 'online' ? total_amount : 0),
-                    total_weight
+                    total_weight,
+
+                    // ── RTO Intelligence Engine — Phase 27 signals ───────────
+                    // Part 1: Address signals (trigger: difficult state, incomplete address)
+                    delivery_state: state ?? null,
+                    address_line: address ?? null,
+
+                    // Part 2: Session modifier (trigger: impulse/engaged buyer signals)
+                    session_score: session_score ?? 0,
+
+                    // Part 3: Device fingerprint (trigger: same-device fraud detection)
+                    device_fingerprint: device_fingerprint ?? null,
+
+                    // Part 5: Category (trigger: category risk multiplier)
+                    category: primaryCategory,
                 }
             }
         ])
@@ -201,6 +239,26 @@ export async function createOrder(params: OrderCreationParams) {
             price: item.price,
         }))
     )
+
+    /* 10. WhatsApp Confirmation Stub (Phase 27) */
+    if (store.whatsapp_status === 'connected' || store.whatsapp_status === 'pending') {
+        try {
+            const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+            // We use fetch without awaiting so that it doesn't block the order completion
+            fetch(`${baseUrl}/api/whatsapp/stub`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    orderId: order.id,
+                    customerPhone: phone,
+                    messageType: 'order_confirmation',
+                    storeId: store.id
+                })
+            }).catch(err => console.error("[WHATSAPP STUB] Background fetch failed:", err));
+        } catch (e) {
+            console.error('[WHATSAPP STUB WARNING] Failed to trigger background confirmation:', e);
+        }
+    }
 
     return order
 }

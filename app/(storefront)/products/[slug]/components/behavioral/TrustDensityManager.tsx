@@ -16,12 +16,12 @@ export function TrustDensityManager({ children, className }: TrustDensityManager
         <div className={cn(
             "transition-all duration-500",
             seller.trustDensity === 'light' && "opacity-60 scale-95 origin-left",
-            seller.trustDensity === 'heavy' && "p-6 bg-neutral-50 rounded-[2rem] border border-neutral-100",
+            seller.trustDensity === 'heavy' && "p-6 bg-muted rounded-[2rem] border border-border",
             className
         )}>
             {children}
             {seller.trustDensity === 'heavy' && (
-                <p className="mt-4 text-[9px] font-bold text-neutral-400 uppercase tracking-widest text-center border-t border-neutral-100 pt-4">
+                <p className="mt-4 text-[9px] font-bold text-muted-foreground uppercase tracking-widest text-center border-t border-border pt-4">
                     Verified Secure Merchant & Quality Guaranteed
                 </p>
             )}

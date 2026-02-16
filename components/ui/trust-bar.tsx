@@ -2,7 +2,7 @@
 
 export default function TrustBar() {
   return (
-    <section className="bg-white border-t border-gray-100">
+    <section className="bg-card border-t border-border">
       <div className="container py-8">
         <div
           className="
@@ -51,10 +51,10 @@ function TrustItem({
       <div className="text-[#1E2A5E] opacity-80">
         {icon}
       </div>
-      <p className="text-sm font-medium text-gray-900">
+      <p className="text-sm font-medium text-foreground">
         {label}
       </p>
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-muted-foreground">
         {sub}
       </p>
     </div>

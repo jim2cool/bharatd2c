@@ -1,0 +1,73 @@
+Violation Summary:
+  bg-white: 49
+  bg-black: 15
+  text-white: 37
+  text-black: 6
+  bg-blue-: 10
+  text-blue-: 14
+  bg-red-: 1
+  text-red-: 5
+  bg-green-: 3
+  text-green-: 14
+  bg-yellow-: 2
+  text-yellow-: 3
+  bg-gray-: 6
+  text-gray-: 25
+  border-gray-: 9
+  bg-slate-: 12
+  text-slate-: 4
+  border-slate-: 6
+  bg-neutral-: 29
+  text-neutral-: 49
+  border-neutral-: 14
+
+Files to fix:
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\app\(storefront)\products\[slug]\components\DebugPaymentFlags.tsx: bg-whitex1, bg-blackx1, text-whitex1, text-blackx1, text-blue-x1, text-red-x3, text-green-x3, text-yellow-x1, bg-neutral-x1, text-neutral-x3
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\components\SlideOutCart.tsx: bg-whitex2, bg-blackx1, text-red-x1, bg-green-x1, text-green-x1, bg-gray-x4, text-gray-x13, border-gray-x7
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\app\(storefront)\products\[slug]\components\behavioral\SmartPrompts.tsx: bg-whitex2, text-whitex1, bg-blue-x1, text-blue-x1, text-yellow-x1, bg-neutral-x1, text-neutral-x1, border-neutral-x1
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\components\admin\StoreSwitcher.tsx: bg-whitex2, bg-blue-x2, text-blue-x1, border-slate-x4, bg-neutral-x3, text-neutral-x6, border-neutral-x1
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\app\(storefront)\products\[slug]\components\conversion\DeliveryEstimator.tsx: bg-whitex1, bg-blackx1, text-whitex1, text-green-x3, bg-neutral-x2, text-neutral-x4, border-neutral-x2
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\app\(storefront)\products\[slug]\components\home\DimensionsSchematic.tsx: bg-whitex3, text-whitex4, bg-blue-x2, text-blue-x2, bg-neutral-x3, text-neutral-x6, border-neutral-x3
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\components\admin\Editor.tsx: bg-whitex3, bg-blue-x1, text-blue-x4, text-green-x1, bg-neutral-x6, text-neutral-x6
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\components\ui\EmptyState.tsx: bg-whitex1, text-whitex1, bg-neutral-x2, text-neutral-x3, border-neutral-x1
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\app\(storefront)\products\[slug]\components\fashion\SizeGuideModal.tsx: bg-whitex5, text-whitex3, bg-neutral-x5, text-neutral-x13, border-neutral-x4
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\components\storefront\navigation\MegaMenu.tsx: bg-whitex1, bg-gray-x1, text-gray-x6, border-gray-x1
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\components\storefront\product\QuickAddModal.tsx: bg-whitex1, bg-blackx1, bg-neutral-x2, text-neutral-x1
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\components\ui\hero-carousel.tsx: bg-whitex7, bg-blackx1, text-whitex6, text-blackx3
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\app\(storefront)\products\[slug]\components\dropshipping\DropshippingShippingTimeline.tsx: bg-whitex2, bg-blue-x3, text-blue-x4, text-neutral-x3
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\app\(storefront)\track-order\page.tsx: bg-blue-x1, text-blue-x1, bg-green-x1, text-green-x1
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\components\ui\trust-bar.tsx: bg-whitex1, text-gray-x2, border-gray-x1
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\app\(storefront)\products\[slug]\components\beauty\BeforeAfterSlider.tsx: bg-whitex3, bg-blackx2, text-whitex3
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\app\(storefront)\products\[slug]\components\behavioral\TrustDensityManager.tsx: bg-neutral-x1, text-neutral-x1, border-neutral-x2
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\app\(storefront)\products\[slug]\components\fashion\SwatchVariants.tsx: bg-blackx1, text-whitex2, text-blackx1
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\app\(storefront)\products\[slug]\components\hero\StaggeredGallery.tsx: bg-whitex1, text-whitex1, bg-neutral-x2
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\app\(storefront)\products\[slug]\components\proof\Proof.tsx: bg-slate-x1, text-slate-x4, border-slate-x1
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\app\(storefront)\products\[slug]\components\slots\SlotRenderer.tsx: bg-green-x1, text-green-x1, text-neutral-x1
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\components\ui\image-with-text.tsx: bg-blackx2, text-whitex1
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\components\ui\Skeletons.tsx: bg-slate-x11, border-slate-x1
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\components\ui\testimonial-card.tsx: bg-gray-x1, text-gray-x4
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\app\(storefront)\cart\page.tsx: text-green-x3, text-neutral-x1
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\app\(storefront)\products\[slug]\page.tsx: bg-yellow-x2, text-yellow-x1
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\app\(storefront)\products\[slug]\components\ArchitectureRenderer.tsx: bg-whitex1, bg-neutral-x1
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\app\(storefront)\products\[slug]\components\beauty\RoutineBuilder.tsx: bg-whitex1, text-whitex1
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\app\(storefront)\products\[slug]\components\content\BrandNarrativeBlocks.tsx: bg-whitex1, text-whitex2
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\app\(storefront)\products\[slug]\components\conversion\VariantDebugger.tsx: bg-red-x1, text-red-x1
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\app\(storefront)\products\[slug]\components\health\SubscriptionOption.tsx: bg-whitex2, text-whitex2
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\components\Carousel.legacy.tsx: bg-whitex2
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\components\homepage\blocks\CategoryPillsBlock.tsx: text-whitex1
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\components\homepage\blocks\TestimonialCarouselBlock.tsx: text-whitex1
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\components\storefront\catalog\MandatoryFilterSystem.tsx: bg-blackx1
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\components\ui\badge.tsx: text-whitex1
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\components\ui\button.tsx: text-whitex1
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\components\ui\carousel-v1.tsx: bg-whitex2
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\components\ui\collection-grid.tsx: bg-blackx2
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\components\ui\dialog.tsx: bg-blackx1
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\components\ui\sheet.tsx: bg-blackx1
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\components\ui\testimonial-slider.tsx: text-blackx1
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\app\(storefront)\products\[slug]\components\conversion\BundleSelector.tsx: text-green-x1
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\app\(storefront)\products\[slug]\components\conversion\DeliveryPromiseBlock.tsx: text-whitex1
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\app\(storefront)\products\[slug]\components\food\FSSAIComplianceBlock.tsx: bg-whitex1
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\app\(storefront)\products\[slug]\components\hero\MediaGallery.tsx: bg-whitex2
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\app\(storefront)\products\[slug]\components\spiritual\AuthenticityNarrative.tsx: text-whitex2
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\app\(storefront)\products\[slug]\components\spiritual\RitualGuide.tsx: bg-whitex1
+  c:\Users\shash\Documents\AG Workspace\Easy D2C\app\(storefront)\products\[slug]\components\tech\SpecsTable.tsx: text-whitex1

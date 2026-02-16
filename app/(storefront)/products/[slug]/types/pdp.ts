@@ -4,6 +4,7 @@ export interface MediaItem {
     src: string;
     alt: string;
     aspectRatio?: string; // e.g. "aspect-square", "aspect-[4/5]"
+    tier?: 'clean' | 'lifestyle' | 'weak';
 }
 
 import { SellerModifier, CategoryType } from '@/types/architecture';
@@ -134,6 +135,7 @@ export interface ProductData {
     // Phase 17: Admin Alignment
     category: CategoryType;
     has_variants?: boolean;
+    show_quantity_selector?: boolean;
     variant_options?: { name: string; values: string[] }[];
     variants?: {
         id: string;

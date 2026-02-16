@@ -65,16 +65,16 @@ export default function StoreSwitcher() {
         className="
           flex items-center justify-between
           text-[11px] font-bold uppercase tracking-[0.1em]
-          border border-slate-200 rounded-xl
-          pl-5 pr-4 py-2.5 bg-white
-          hover:bg-neutral-50 hover:border-slate-300 transition-all
+          border border-border rounded-xl
+          pl-5 pr-4 py-2.5 bg-card
+          hover:bg-muted hover:border-border transition-all
           w-full sm:w-[220px]
           shadow-sm
           active:scale-[0.98]
         "
       >
-        <span className="truncate mr-2 text-neutral-600">{activeStore?.name || 'Select Store'}</span>
-        <ChevronDown className={`w-4 h-4 text-neutral-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+        <span className="truncate mr-2 text-muted-foreground">{activeStore?.name || 'Select Store'}</span>
+        <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       <AnimatePresence>
@@ -88,13 +88,13 @@ export default function StoreSwitcher() {
               transition={{ duration: 0.2, ease: "easeOut" }}
               className="
                 absolute right-0 top-full mt-2 z-50
-                w-full sm:w-[240px] bg-white border border-slate-200
+                w-full sm:w-[240px] bg-card border border-border
                 rounded-2xl shadow-xl shadow-slate-200/50
                 overflow-hidden p-1.5
               "
             >
               <div className="p-3 border-b border-slate-50 mb-1">
-                <p className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest">Switch Store</p>
+                <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Switch Store</p>
               </div>
               <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
                 {stores.map(store => (
@@ -105,21 +105,21 @@ export default function StoreSwitcher() {
                       w-full flex items-center justify-between px-4 py-3 rounded-xl
                       text-[11px] font-bold uppercase tracking-wider text-left
                       transition-all duration-200 group
-                      ${active === store.id ? 'bg-blue-50 text-blue-600' : 'hover:bg-neutral-50 text-neutral-600'}
+                      ${active === store.id ? 'bg-blue-50 text-primary' : 'hover:bg-muted text-muted-foreground'}
                     `}
                   >
                     <span className="truncate">{store.name}</span>
                     {active === store.id && <Check className="w-3.5 h-3.5" />}
                     {active !== store.id && (
-                      <div className="w-1.5 h-1.5 rounded-full bg-neutral-200 group-hover:bg-blue-400 transition-colors" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-accent group-hover:bg-blue-400 transition-colors" />
                     )}
                   </button>
                 ))}
               </div>
-              <div className="p-2 mt-2 border-t border-neutral-100">
+              <div className="p-2 mt-2 border-t border-border">
                 <button
                   onClick={() => window.location.href = '/admin/stores'}
-                  className="w-full py-2.5 text-[10px] font-black uppercase text-center text-neutral-400 hover:text-neutral-900 transition-colors"
+                  className="w-full py-2.5 text-[10px] font-black uppercase text-center text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Manage All Stores
                 </button>

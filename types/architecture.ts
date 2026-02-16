@@ -1,4 +1,5 @@
-export type CommerceArchitecture = 'product-engine' | 'story-first' | 'catalog-first';
+// C1 fix: DB stores underscores, not hyphens (2026-02-26)
+export type CommerceArchitecture = 'product_engine' | 'story_first' | 'catalog_first';
 
 export type CategoryType =
     | 'fashion'
@@ -6,15 +7,53 @@ export type CategoryType =
     | 'electronics'
     | 'home'
     | 'health'
-    | 'spiritual'
+    | 'spiritual'  // The "Seer" persona (Gurus, Sage, Traditional Rituals)
     | 'furniture'
     | 'food'
     | 'dropshipping'
     | 'marketplace'
-    | 'multi';
+    | 'multi'
+    // C4 fix: 5 missing categories added (2026-02-26)
+    | 'jewellery'
+    | 'art'
+    | 'pets'
+    | 'baby'
+    | 'stationery'
+    // C6 fix: Adding remaining categories to reach 24 (2026-02-27)
+    | 'automotive'
+    | 'sports'
+    | 'gardening'
+    | 'b2b'
+    // C5 fix: 4 future/digital categories added (2026-02-27)
+    | 'digital'
+    | 'experience'
+    | 'renewed'
+    | 'consultation';
+
+// G1 fix: StylePreset.id must use EXACT DB primary keys from ob_design_tokens (title case + spaces)
+// DB-verified 2026-02-26: "Saaf Suthra", "Dhamaka", etc. — NOT slug format
+export type MoodCardKey =
+    | 'Minimal'
+    | 'Bold'
+    | 'Heritage'
+    | 'Luxury'
+    | 'Organic'
+    | 'Fresh'
+    | 'Professional'
+    | 'Serene'
+    | 'Gourmet'
+    | 'Sleek'
+    | 'Zen'
+    | 'Vibrant'
+    | 'Playful'
+    | 'Industrial'
+    | 'Urban'
+    | 'Earth'
+    | 'Clinical'
+    | 'Quiet Luxury';
 
 export interface StylePreset {
-    id: 'minimal' | 'bold' | 'organic' | 'tech' | 'premium' | 'marketplace' | 'feminine' | 'gen-z' | 'cro';
+    id: MoodCardKey;
     colors: {
         background: string;
         surface: string;
@@ -51,7 +90,7 @@ export interface StylePreset {
 }
 
 export interface SellerModifier {
-    urgencyLevel: 'low' | 'medium' | 'high';
+    urgencyLevel: 'none' | 'low' | 'medium' | 'high'; // C3 fix: `none` added (2026-02-26)
     socialProofWeight: 'light' | 'medium' | 'heavy';
     trustDensity: 'light' | 'medium' | 'heavy';
     ctaProminence: 'balanced' | 'dominant';

@@ -59,12 +59,12 @@ export function VariantSelector({ options, variants, onVariantSelect }: VariantS
     }
 
     return (
-        <div className="space-y-4 py-4 border-t border-border">
+        <div className="border-t flex flex-col" style={{ paddingTop: 'var(--component-gap)', gap: 'var(--component-gap)' }}>
             {options.map((option) => (
-                <div key={option.name} className="space-y-3">
+                <div key={option.name} className="flex flex-col" style={{ gap: 'calc(var(--component-gap) * 0.5)' }}>
                     <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                            {option.name}: <span className="text-foreground">{selectedOptions[option.name]}</span>
+                        <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest">
+                            {option.name}: <span className="text-[var(--text-primary)]">{selectedOptions[option.name]}</span>
                         </span>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -80,16 +80,16 @@ export function VariantSelector({ options, variants, onVariantSelect }: VariantS
                                         className={cn(
                                             "relative h-10 min-w-[3rem] px-4 flex items-center justify-center rounded-[var(--radius-md)] text-sm font-bold border transition-all duration-300",
                                             isSelected
-                                                ? "bg-primary text-primary-foreground border-primary shadow-[var(--shadow-elevation)]"
-                                                : "bg-surface text-foreground border-border hover:border-foreground/30 hover:bg-surface-hover",
-                                            !available && "opacity-40 cursor-not-allowed bg-muted text-muted-foreground border-transparent line-through"
+                                                ? "bg-[var(--primary)] text-[var(--primary-foreground)] border-[var(--primary)] shadow-sm"
+                                                : "bg-[var(--bg-primary)] text-[var(--text-primary)] border-[var(--border)] hover:border-[var(--text-primary)]/30 hover:bg-[var(--bg-secondary)]",
+                                            !available && "opacity-40 cursor-not-allowed bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-transparent line-through"
                                         )}
                                     >
                                         {value}
                                         {isSelected && (
                                             <motion.div
                                                 layoutId={`active-${option.name}`}
-                                                className="absolute inset-0 border-2 border-primary z-10 rounded-[var(--radius-md)]"
+                                                className="absolute inset-0 border-2 border-[var(--primary)] z-10 rounded-[var(--radius-md)]"
                                                 transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                                             />
                                         )}

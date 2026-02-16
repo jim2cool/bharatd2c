@@ -13,14 +13,42 @@ const InteractionContext = createContext<InteractionContextType | undefined>(und
 export function InteractionProvider({ children }: { children: React.ReactNode }) {
     const [reducedMotion, setReducedMotion] = useState(false);
 
-    // Auto-detect system preference
+    // Auto-detect system preference and Behavioral Signals
     useEffect(() => {
+        // 1. System Preference
         const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-        setReducedMotion(mediaQuery.matches);
+        let baseReducedMotion = mediaQuery.matches;
 
-        const handleChange = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
+        // 2. Adaptive Engine Signal Overrides
+        const handleAdaptivePulse = () => {
+            const signals = localStorage.getItem('easy_d2c_session_signals');
+            if (signals) {
+                try {
+                    const parsed = JSON.parse(signals);
+                    // Mute animations immediately if user is exhibiting high-friction behavior
+                    if (parsed.rage_clicks) {
+                        baseReducedMotion = true;
+                    }
+                } catch (e) { }
+            }
+            setReducedMotion(baseReducedMotion);
+        };
+
+        handleAdaptivePulse(); // Initial check
+
+        // We could poll or listen for storage events, but simple re-eval on mount/changes is the safest starting point for Phase 1.
+        window.addEventListener('storage', handleAdaptivePulse);
+
+        const handleChange = (e: MediaQueryListEvent) => {
+            baseReducedMotion = e.matches;
+            handleAdaptivePulse(); // Re-apply overrides on top of system change
+        };
+
         mediaQuery.addEventListener('change', handleChange);
-        return () => mediaQuery.removeEventListener('change', handleChange);
+        return () => {
+            mediaQuery.removeEventListener('change', handleChange);
+            window.removeEventListener('storage', handleAdaptivePulse);
+        };
     }, []);
 
     return (

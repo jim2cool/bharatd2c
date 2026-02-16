@@ -20,7 +20,7 @@ export const PRESETS: any[] = [
         presetId: "minimal-editorial",
         name: "Minimal / Editorial Luxury",
         description: "Serif headings, high contrast, airy",
-        architecture: "product-engine",
+        architecture: "product_engine",
         seller: {
             urgencyLevel: 'medium', socialProofWeight: 'medium', trustDensity: 'medium',
             ctaProminence: 'balanced', densityScale: 'balanced', codBias: true
@@ -61,7 +61,7 @@ export const PRESETS: any[] = [
         presetId: "performance-cro",
         name: "Performance CRO",
         description: "Standard Blue/Red, compact, trust-focused",
-        architecture: "product-engine",
+        architecture: "product_engine",
         seller: {
             urgencyLevel: 'high', socialProofWeight: 'heavy', trustDensity: 'high',
             ctaProminence: 'dominant', densityScale: 'compact', codBias: true

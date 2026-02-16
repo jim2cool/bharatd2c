@@ -7,7 +7,6 @@ import { Truck, Package, Globe, ExternalLink, ShieldCheck, Save, Loader2 } from 
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { supabaseAdmin } from "@/lib/supabase-admin"
 import { supabaseBrowser } from "@/lib/supabase-browser"
 import { toast } from "sonner"
 import {

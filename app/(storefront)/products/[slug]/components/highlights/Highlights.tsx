@@ -8,8 +8,8 @@ export function Highlights({ highlights }: HighlightsProps) {
     if (!highlights || highlights.length < 3) return null;
 
     return (
-        <section data-cluster="highlights" className="px-4 md:px-0 py-2">
-            <ul className="space-y-1">
+        <section data-cluster="highlights" className="px-4 md:px-0">
+            <ul className="flex flex-col gap-1">
                 {highlights.map((item) => (
                     <li key={item.id} className="flex items-start gap-2 text-sm text-muted-foreground leading-relaxed">
                         <span className="text-foreground/40 mt-0.5">•</span>

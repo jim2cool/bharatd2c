@@ -37,7 +37,7 @@ export interface ArchitectureSchema {
 }
 
 export const ARCHITECTURE_REGISTRY: Record<string, ArchitectureSchema> = {
-    'product-engine': {
+    'product_engine': {
         layout: 'standard',
         style: PRESET_REGISTRY.minimal,
         zones: {
@@ -59,7 +59,7 @@ export const ARCHITECTURE_REGISTRY: Record<string, ArchitectureSchema> = {
             crossSell: ['cross-sell']
         }
     },
-    'story-first': {
+    'story_first': {
         layout: 'story',
         style: PRESET_REGISTRY.premium,
         zones: {
@@ -82,7 +82,7 @@ export const ARCHITECTURE_REGISTRY: Record<string, ArchitectureSchema> = {
             crossSell: ['cross-sell']
         }
     },
-    'catalog-first': {
+    'catalog_first': {
         layout: 'catalog',
         style: PRESET_REGISTRY.marketplace,
         zones: {

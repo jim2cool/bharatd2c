@@ -6,7 +6,10 @@ import { addToCart } from "@/lib/cart";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
+import { ScaleTap } from "@/components/motion/ScaleTap";
+
 export default function ProductCard({ product, priority = false, onQuickAdd }: { product: any, priority?: boolean, onQuickAdd?: (e: React.MouseEvent) => void }) {
+  // ... existing destructuring ...
   const {
     id,
     title,
@@ -19,11 +22,9 @@ export default function ProductCard({ product, priority = false, onQuickAdd }: {
 
   /* ---------- IMAGE SAFETY ---------- */
   const PLACEHOLDER = "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1999&auto=format&fit=crop";
-  const imageList = Array.isArray(images) ? images : [];
-  const primaryImage =
-    imageList.length > 0 && imageList[0] ? imageList[0] : PLACEHOLDER;
-  const secondaryImage =
-    imageList.length > 1 && imageList[1] ? imageList[1] : null;
+  const imageList = Array.isArray(images) ? images.filter(img => typeof img === 'string' && img.trim() !== '') : [];
+  const primaryImage = imageList.length > 0 ? imageList[0] : PLACEHOLDER;
+  const secondaryImage = imageList.length > 1 ? imageList[1] : null;
 
   /* ---------- PRICE ---------- */
   const finalPrice = sellingPrice ?? price;
@@ -55,9 +56,9 @@ export default function ProductCard({ product, priority = false, onQuickAdd }: {
   };
 
   return (
-    <div className="group relative flex flex-col gap-6 w-full animate-in fade-in duration-700">
+    <ScaleTap className="group relative flex flex-col gap-6 w-full animate-in fade-in duration-700">
       {/* IMAGE CONTAINER - Editorial 3:4 Aspect Ratio */}
-      <div className="relative aspect-[3/4] overflow-hidden bg-[#F6F6F6] transition-all duration-700">
+      <div className="relative aspect-[3/4] overflow-hidden bg-[var(--bg-secondary)] transition-all duration-700 border border-[var(--border)] rounded-[var(--radius-card)]">
         <Link href={`/products/${slug}`} className="block w-full h-full">
           {/* Primary Image */}
           <Image
@@ -82,7 +83,7 @@ export default function ProductCard({ product, priority = false, onQuickAdd }: {
 
         {/* BADGES - Minimalist Saffron Ribbon */}
         {hasDiscount && (
-          <div className="absolute top-4 left-4 bg-[#e26a00] text-white text-[9px] font-bold px-3 py-1.5 uppercase tracking-widest shadow-lg z-10">
+          <div className="absolute top-4 left-4 bg-[var(--primary)] text-[var(--cta-text)] text-[9px] font-bold px-3 py-1.5 uppercase tracking-widest shadow-lg z-10">
             {discountPercent}% Off
           </div>
         )}
@@ -92,7 +93,7 @@ export default function ProductCard({ product, priority = false, onQuickAdd }: {
           <Button
             variant="default"
             size="lg"
-            className="w-full rounded-none bg-white/90 backdrop-blur-md text-black hover:bg-black hover:text-white shadow-xl uppercase tracking-[0.2em] text-[9px] font-bold h-12 border-0"
+            className="w-full rounded-[var(--radius-button)] bg-[var(--bg-primary)]/90 backdrop-blur-md text-[var(--text-primary)] hover:bg-[var(--primary)] hover:text-[var(--cta-text)] shadow-xl uppercase tracking-[0.2em] text-[9px] font-black h-12 border-0"
             onClick={handleQuickAdd}
           >
             Quick Add
@@ -102,21 +103,21 @@ export default function ProductCard({ product, priority = false, onQuickAdd }: {
 
       {/* INFO - Minimalist Typography */}
       <div className="flex flex-col gap-2 items-center text-center px-2">
-        <h3 className="text-lg md:text-xl font-serif font-normal text-charcoal-900 leading-tight group-hover:text-charcoal-700 transition-colors">
+        <h3 className="text-lg md:text-xl font-[var(--font-weight-display)] text-[var(--text-primary)] leading-tight group-hover:opacity-70 transition-opacity" style={{ fontFamily: 'var(--heading-font)' }}>
           <Link href={`/products/${slug}`}>
             {title}
           </Link>
         </h3>
 
         <div className="flex items-center gap-3 text-sm">
-          <span className="font-sans font-medium text-charcoal-900">₹{finalPrice}</span>
+          <span className="font-bold text-[var(--text-primary)]">₹{finalPrice}</span>
           {hasDiscount && (
-            <span className="text-gray-400 line-through text-xs font-light">
+            <span className="text-[var(--text-secondary)] line-through text-xs font-medium opacity-50">
               ₹{comparePrice}
             </span>
           )}
         </div>
       </div>
-    </div>
+    </ScaleTap>
   );
 }

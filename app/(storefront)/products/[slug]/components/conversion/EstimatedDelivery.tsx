@@ -76,76 +76,82 @@ export function EstimatedDelivery({ settings }: EstimatedDeliveryProps) {
         : "Free Delivery on all orders today"
 
     return isCompact ? (
-        <div className="bg-neutral-50 rounded-lg p-4 border border-neutral-100 mt-4 animate-in fade-in duration-500">
+        <div className="p-4 border mt-4 animate-in fade-in duration-500"
+            style={{ background: 'var(--callout-bg)', borderColor: 'var(--callout-border)', borderRadius: 'var(--radius-card)' }}>
             <div className="flex items-start gap-3">
-                <div className="p-1.5 bg-white border border-neutral-200 rounded-md shadow-sm">
-                    <Truck className="w-4 h-4 text-neutral-900" />
+                <div className="p-1.5 border shadow-sm" style={{ background: 'var(--bg-primary)', borderColor: 'var(--border)', borderRadius: 'var(--radius-input)' }}>
+                    <Truck className="w-4 h-4" style={{ color: 'var(--text-primary)' }} />
                 </div>
                 <div>
-                    <p className="text-sm font-bold text-neutral-900 leading-tight">
-                        Order now to get it by <span className="text-green-600">{dates.estimate}</span>
+                    <p className="text-sm font-semibold leading-tight" style={{ color: 'var(--text-primary)' }}>
+                        Order now to get it by <span style={{ color: 'var(--primary)' }}>{dates.estimate}</span>
                     </p>
-                    <p className="text-[10px] text-neutral-500 mt-1 font-medium flex items-center gap-1">
-                        <Check className="w-3 h-3 text-green-500" />
+                    <p className="text-[10px] mt-1 font-medium flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}>
+                        <Check className="w-3 h-3" style={{ color: 'var(--primary)' }} />
                         {freeShippingText}
                     </p>
                 </div>
             </div>
         </div>
     ) : (
-        <div className="bg-white rounded-xl p-5 border border-neutral-100 shadow-sm mt-4 animate-in fade-in duration-700">
+        <div className="p-5 border shadow-[var(--shadow-card)] mt-4 animate-in fade-in duration-700"
+            style={{ background: 'var(--bg-primary)', borderColor: 'var(--border)', borderRadius: 'var(--radius-card)' }}>
             {/* Header */}
-            <div className="flex items-center justify-center gap-2 mb-6 bg-red-50 py-2 rounded-lg border border-red-100">
-                <Package className="w-4 h-4 text-red-500" />
-                <span className="text-xs font-bold text-neutral-800">
-                    Estimated Delivery <span className="text-neutral-900">{dates.estimate}</span>
+            <div className="flex items-center justify-center gap-2 mb-6 py-2 border"
+                style={{ background: 'var(--callout-bg)', borderColor: 'var(--callout-border)', borderRadius: 'var(--radius-input)' }}>
+                <Package className="w-4 h-4" style={{ color: 'var(--primary)' }} />
+                <span className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>
+                    Estimated Delivery <span style={{ color: 'var(--primary)' }}>{dates.estimate}</span>
                 </span>
             </div>
 
             {/* Visual Timeline */}
             <div className="relative px-2">
                 {/* Connecting Line */}
-                <div className="absolute top-[16px] left-8 right-8 h-1 bg-neutral-100 rounded-full"></div>
+                <div className="absolute top-[16px] left-8 right-8 h-1" style={{ background: 'var(--border)', borderRadius: 'var(--radius-badge)' }}></div>
 
                 <div className="relative flex justify-between text-center">
-                    {/* Step 1: Ordered */}
+                    {/* Step 1: Ordered — active (primary tint) */}
                     <div className="flex flex-col items-center gap-2 z-10 w-20">
-                        <div className="w-8 h-8 rounded-full bg-yellow-100 border border-yellow-200 flex items-center justify-center shadow-sm">
-                            <FileText className="w-4 h-4 text-neutral-800" />
+                        <div className="w-8 h-8 flex items-center justify-center shadow-sm border"
+                            style={{ background: 'var(--callout-bg)', borderColor: 'var(--primary)', borderRadius: 'var(--radius-badge)' }}>
+                            <FileText className="w-4 h-4" style={{ color: 'var(--text-primary)' }} />
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-wide">Ordered</span>
-                            <span className="text-xs font-black text-neutral-900">{dates.orderedDate}</span>
+                            <span className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: 'var(--text-secondary)' }}>Ordered</span>
+                            <span className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>{dates.orderedDate}</span>
                         </div>
                     </div>
 
-                    {/* Step 2: Shipped */}
+                    {/* Step 2: Shipped — pending */}
                     <div className="flex flex-col items-center gap-2 z-10 w-20">
-                        <div className="w-8 h-8 rounded-full bg-white border border-neutral-200 flex items-center justify-center shadow-sm">
-                            <Truck className="w-4 h-4 text-neutral-400" />
+                        <div className="w-8 h-8 flex items-center justify-center shadow-sm border"
+                            style={{ background: 'var(--bg-primary)', borderColor: 'var(--border)', borderRadius: 'var(--radius-badge)' }}>
+                            <Truck className="w-4 h-4" style={{ color: 'var(--text-secondary)' }} />
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wide">Ships</span>
-                            <span className="text-xs font-bold text-neutral-500">{dates.shippedDate}</span>
+                            <span className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: 'var(--text-secondary)' }}>Ships</span>
+                            <span className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>{dates.shippedDate}</span>
                         </div>
                     </div>
 
                     {/* Step 3: Delivery */}
                     <div className="flex flex-col items-center gap-2 z-10 w-20">
-                        <div className="w-8 h-8 rounded-full bg-white border border-neutral-200 flex items-center justify-center shadow-sm">
-                            <Package className="w-4 h-4 text-neutral-400" />
+                        <div className="w-8 h-8 flex items-center justify-center shadow-sm border"
+                            style={{ background: 'var(--bg-primary)', borderColor: 'var(--border)', borderRadius: 'var(--radius-badge)' }}>
+                            <Package className="w-4 h-4" style={{ color: 'var(--text-secondary)' }} />
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wide">Delivery</span>
-                            <span className="text-xs font-bold text-neutral-500 leading-tight">{dates.deliveryEnd}</span>
+                            <span className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: 'var(--text-secondary)' }}>Delivery</span>
+                            <span className="text-xs font-semibold leading-tight" style={{ color: 'var(--text-secondary)' }}>{dates.deliveryEnd}</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="mt-5 pt-3 border-t border-neutral-100/50 text-center">
-                <p className="text-[10px] text-neutral-400 font-medium inline-flex items-center gap-1.5">
-                    <Check className="w-3 h-3 text-green-500" />
+            <div className="mt-5 pt-3 text-center" style={{ borderTop: '1px solid var(--border)' }}>
+                <p className="text-[10px] font-medium inline-flex items-center gap-1.5" style={{ color: 'var(--text-secondary)' }}>
+                    <Check className="w-3 h-3" style={{ color: 'var(--primary)' }} />
                     {freeShippingText}
                 </p>
             </div>

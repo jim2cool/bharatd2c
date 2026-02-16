@@ -49,17 +49,17 @@ export function SlideOutCart({ open, onClose }: SlideOutCartProps) {
     return (
         <Drawer.Root open={open} onOpenChange={(isOpen) => !isOpen && onClose()} direction="right">
             <Drawer.Portal>
-                <Drawer.Overlay className="fixed inset-0 bg-black/40 z-50" />
-                <Drawer.Content className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white z-50 flex flex-col shadow-xl">
+                <Drawer.Overlay className="fixed inset-0 bg-foreground/40 z-50" />
+                <Drawer.Content className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-card z-50 flex flex-col shadow-xl">
                     {/* Header */}
-                    <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                    <div className="flex items-center justify-between p-6 border-b border-border">
                         <div className="flex items-center gap-2">
                             <ShoppingBag className="w-5 h-5" />
                             <Drawer.Title className="text-lg font-semibold">Shopping Cart ({cart.length})</Drawer.Title>
                         </div>
                         <button
                             onClick={onClose}
-                            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                            className="p-2 hover:bg-secondary rounded-full transition-colors"
                             aria-label="Close cart"
                         >
                             <X className="w-5 h-5" />
@@ -69,10 +69,10 @@ export function SlideOutCart({ open, onClose }: SlideOutCartProps) {
                     {/* Free Shipping Progress */}
                     {subtotal > 0 && subtotal < freeShippingThreshold && (
                         <div className="px-6 py-4 bg-saffron-100 border-b border-saffron-200">
-                            <p className="text-sm text-gray-700 mb-2">
+                            <p className="text-sm text-foreground mb-2">
                                 Add <span className="font-semibold">₹{remainingForFreeShipping}</span> more for <span className="font-semibold">FREE SHIPPING</span>
                             </p>
-                            <div className="w-full bg-white rounded-full h-2 overflow-hidden">
+                            <div className="w-full bg-card rounded-full h-2 overflow-hidden">
                                 <div
                                     className="h-full bg-saffron-500 transition-all duration-500"
                                     style={{ width: `${shippingProgress}%` }}
@@ -95,8 +95,8 @@ export function SlideOutCart({ open, onClose }: SlideOutCartProps) {
                         {cart.length === 0 ? (
                             <div className="flex flex-col items-center justify-center h-full text-center py-12">
                                 <ShoppingBag className="w-16 h-16 text-gray-300 mb-4" />
-                                <h3 className="text-lg font-medium text-gray-900 mb-2">Your cart is empty</h3>
-                                <p className="text-sm text-gray-500 mb-6">Add items to get started</p>
+                                <h3 className="text-lg font-medium text-foreground mb-2">Your cart is empty</h3>
+                                <p className="text-sm text-muted-foreground mb-6">Add items to get started</p>
                                 <Link
                                     href="/products"
                                     onClick={onClose}
@@ -108,9 +108,9 @@ export function SlideOutCart({ open, onClose }: SlideOutCartProps) {
                         ) : (
                             <div className="space-y-4">
                                 {cart.map((item) => (
-                                    <div key={item.product_id} className="flex gap-4 pb-4 border-b border-gray-100 last:border-0">
+                                    <div key={item.product_id} className="flex gap-4 pb-4 border-b border-border last:border-0">
                                         {/* Product Image */}
-                                        <div className="relative w-20 h-20 flex-shrink-0 bg-gray-100 rounded-md overflow-hidden">
+                                        <div className="relative w-20 h-20 flex-shrink-0 bg-secondary rounded-md overflow-hidden">
                                             <Image
                                                 src={item.image || "/placeholder.png"}
                                                 alt={item.title}
@@ -121,10 +121,10 @@ export function SlideOutCart({ open, onClose }: SlideOutCartProps) {
 
                                         {/* Product Details */}
                                         <div className="flex-1 min-w-0">
-                                            <h3 className="text-sm font-medium text-gray-900 mb-1 line-clamp-2">
+                                            <h3 className="text-sm font-medium text-foreground mb-1 line-clamp-2">
                                                 {item.title}
                                             </h3>
-                                            <p className="text-sm font-semibold text-gray-900 mb-2">
+                                            <p className="text-sm font-semibold text-foreground mb-2">
                                                 ₹{item.price.toLocaleString()}
                                             </p>
 
@@ -133,7 +133,7 @@ export function SlideOutCart({ open, onClose }: SlideOutCartProps) {
                                                 <button
                                                     onClick={() => handleUpdateQty(item.product_id, item.qty - 1)}
                                                     disabled={item.qty <= 1}
-                                                    className="p-1 border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                                    className="p-1 border border-border rounded hover:bg-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                                     aria-label="Decrease quantity"
                                                 >
                                                     <Minus className="w-3 h-3" />
@@ -141,7 +141,7 @@ export function SlideOutCart({ open, onClose }: SlideOutCartProps) {
                                                 <span className="text-sm font-medium w-8 text-center">{item.qty}</span>
                                                 <button
                                                     onClick={() => handleUpdateQty(item.product_id, item.qty + 1)}
-                                                    className="p-1 border border-gray-300 rounded hover:bg-gray-100 transition-colors"
+                                                    className="p-1 border border-border rounded hover:bg-secondary transition-colors"
                                                     aria-label="Increase quantity"
                                                 >
                                                     <Plus className="w-3 h-3" />
@@ -152,7 +152,7 @@ export function SlideOutCart({ open, onClose }: SlideOutCartProps) {
                                         {/* Remove Button */}
                                         <button
                                             onClick={() => handleRemove(item.product_id)}
-                                            className="p-2 text-gray-400 hover:text-red-500 transition-colors self-start"
+                                            className="p-2 text-muted-foreground hover:text-destructive transition-colors self-start"
                                             aria-label="Remove item"
                                         >
                                             <Trash2 className="w-4 h-4" />
@@ -165,7 +165,7 @@ export function SlideOutCart({ open, onClose }: SlideOutCartProps) {
 
                     {/* Footer */}
                     {cart.length > 0 && (
-                        <div className="border-t border-gray-200 p-6 space-y-4">
+                        <div className="border-t border-border p-6 space-y-4">
                             {/* Subtotal */}
                             <div className="flex items-center justify-between text-lg">
                                 <span className="font-medium">Subtotal</span>
@@ -173,18 +173,18 @@ export function SlideOutCart({ open, onClose }: SlideOutCartProps) {
                             </div>
 
                             {/* Trust Signals */}
-                            <div className="grid grid-cols-3 gap-2 text-xs text-gray-600 py-3 border-y border-gray-100">
+                            <div className="grid grid-cols-3 gap-2 text-xs text-muted-foreground py-3 border-y border-border">
                                 <div className="text-center">
                                     <div className="font-medium">COD Available</div>
-                                    <div className="text-gray-500">Pay on delivery</div>
+                                    <div className="text-muted-foreground">Pay on delivery</div>
                                 </div>
-                                <div className="text-center border-x border-gray-100">
+                                <div className="text-center border-x border-border">
                                     <div className="font-medium">7-Day Returns</div>
-                                    <div className="text-gray-500">Hassle-free</div>
+                                    <div className="text-muted-foreground">Hassle-free</div>
                                 </div>
                                 <div className="text-center">
                                     <div className="font-medium">100% Genuine</div>
-                                    <div className="text-gray-500">Direct from brand</div>
+                                    <div className="text-muted-foreground">Direct from brand</div>
                                 </div>
                             </div>
 
@@ -200,7 +200,7 @@ export function SlideOutCart({ open, onClose }: SlideOutCartProps) {
                             {/* Continue Shopping */}
                             <button
                                 onClick={onClose}
-                                className="w-full text-center text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                                className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors"
                             >
                                 Continue Shopping
                             </button>

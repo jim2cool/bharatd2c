@@ -29,11 +29,11 @@ const MenuBar = ({ editor }: { editor: any }) => {
 
     const btnClass = (isActive = false) => `
         p-2 rounded-lg transition-all
-        ${isActive ? 'bg-blue-50 text-blue-600' : 'hover:bg-neutral-100 text-neutral-500'}
+        ${isActive ? 'bg-blue-50 text-primary' : 'hover:bg-secondary text-muted-foreground'}
     `
 
     return (
-        <div className="flex flex-wrap gap-1 p-2 border-b bg-neutral-50 rounded-t-2xl">
+        <div className="flex flex-wrap gap-1 p-2 border-b bg-muted rounded-t-2xl">
             <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={btnClass(editor.isActive('bold'))}>
                 <Bold className="w-4 h-4" />
             </button>
@@ -43,14 +43,14 @@ const MenuBar = ({ editor }: { editor: any }) => {
             <button type="button" onClick={() => editor.chain().focus().toggleUnderline().run()} className={btnClass(editor.isActive('underline'))}>
                 <UnderlineIcon className="w-4 h-4" />
             </button>
-            <div className="w-px h-6 bg-neutral-200 mx-1 self-center" />
+            <div className="w-px h-6 bg-accent mx-1 self-center" />
             <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className={btnClass(editor.isActive('heading', { level: 1 }))}>
                 <Heading1 className="w-4 h-4" />
             </button>
             <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={btnClass(editor.isActive('heading', { level: 2 }))}>
                 <Heading2 className="w-4 h-4" />
             </button>
-            <div className="w-px h-6 bg-neutral-200 mx-1 self-center" />
+            <div className="w-px h-6 bg-accent mx-1 self-center" />
             <button type="button" onClick={() => editor.chain().focus().toggleBulletList().run()} className={btnClass(editor.isActive('bulletList'))}>
                 <List className="w-4 h-4" />
             </button>
@@ -81,7 +81,7 @@ export function Editor({ value, onChange, placeholder }: EditorProps) {
             Link.configure({
                 openOnClick: false,
                 HTMLAttributes: {
-                    class: 'text-blue-600 underline cursor-pointer'
+                    class: 'text-primary underline cursor-pointer'
                 }
             }),
             Image.configure({
@@ -110,25 +110,25 @@ export function Editor({ value, onChange, placeholder }: EditorProps) {
     }, [value, editor])
 
     return (
-        <div className="border rounded-2xl overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 transition-all bg-white">
-            <div className="flex items-center justify-between bg-neutral-50 px-4 py-1 border-b">
+        <div className="border rounded-2xl overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 transition-all bg-card">
+            <div className="flex items-center justify-between bg-muted px-4 py-1 border-b">
                 <div className="flex gap-2">
                     <button
                         type="button"
                         onClick={() => setIsCodeMode(false)}
-                        className={`text-[10px] font-black uppercase tracking-widest px-3 py-2 rounded-t-lg transition-all ${!isCodeMode ? 'bg-white border-x border-t -mb-[1px] text-blue-600' : 'text-neutral-400 hover:text-neutral-600'}`}
+                        className={`text-[10px] font-black uppercase tracking-widest px-3 py-2 rounded-t-lg transition-all ${!isCodeMode ? 'bg-card border-x border-t -mb-[1px] text-primary' : 'text-muted-foreground hover:text-muted-foreground'}`}
                     >
                         Visual
                     </button>
                     <button
                         type="button"
                         onClick={() => setIsCodeMode(true)}
-                        className={`text-[10px] font-black uppercase tracking-widest px-3 py-2 rounded-t-lg transition-all ${isCodeMode ? 'bg-white border-x border-t -mb-[1px] text-blue-600' : 'text-neutral-400 hover:text-neutral-600'}`}
+                        className={`text-[10px] font-black uppercase tracking-widest px-3 py-2 rounded-t-lg transition-all ${isCodeMode ? 'bg-card border-x border-t -mb-[1px] text-primary' : 'text-muted-foreground hover:text-muted-foreground'}`}
                     >
                         Code
                     </button>
                 </div>
-                <div className="text-[9px] font-bold text-neutral-400 uppercase tracking-tight">
+                <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight">
                     {isCodeMode ? 'Direct HTML Editing' : 'WYSIWYG Editor'}
                 </div>
             </div>

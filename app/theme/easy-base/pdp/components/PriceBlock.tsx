@@ -11,26 +11,26 @@ export default function PriceBlock({
       : null;
 
   return (
-    <div className="mt-4 bg-[#f8f8f8] rounded-xl p-4 shadow-sm">
+    <div className="mt-4 bg-[var(--bg-secondary)] rounded-[var(--radius-card)] p-4 shadow-[var(--shadow-card)]">
       <div className="flex items-baseline gap-3 flex-wrap">
-        <span className="text-3xl font-bold text-black">
+        <span className="text-3xl font-bold text-[var(--primary)]">
           ₹{price}
         </span>
 
         {mrp && (
-          <span className="text-sm text-gray-500 line-through">
+          <span className="text-sm text-[var(--text-secondary)] line-through">
             ₹{mrp}
           </span>
         )}
 
         {discount && (
-          <span className="text-xs font-semibold text-green-700">
+          <span className="text-xs font-semibold bg-green-50 text-green-700 rounded-[var(--radius-badge)] px-2 py-0.5">
             {discount}% off
           </span>
         )}
       </div>
 
-      <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-gray-700 mt-3">
+      <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-[var(--text-secondary)] mt-3">
         <span>✔ Cash on Delivery</span>
         <span>✔ Fast Shipping</span>
         <span>✔ Easy Returns</span>

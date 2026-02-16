@@ -27,13 +27,13 @@ export default function StickyCTA({
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-background border-t shadow-lg px-4 py-3">
+    <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-[var(--bg-primary)] border-t border-[var(--border)] shadow-[var(--shadow-hover)] px-4 py-3">
       <div className="flex items-center gap-3">
         <div className="flex-1 min-w-0">
           <div className="text-sm font-medium truncate">
             {title}
           </div>
-          <div className="text-base font-bold">
+          <div className="text-base font-semibold text-[var(--primary)]">
             ₹{price}
           </div>
         </div>

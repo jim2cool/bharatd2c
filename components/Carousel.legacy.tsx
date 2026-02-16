@@ -25,7 +25,7 @@ export default function Carousel({
       <button
         onClick={() => scroll("left")}
         className="absolute left-[-16px] top-1/2 -translate-y-1/2
-        z-10 h-8 w-8 rounded-full bg-white shadow
+        z-10 h-8 w-8 rounded-full bg-card shadow
         text-lg flex items-center justify-center"
       >
         ‹
@@ -35,7 +35,7 @@ export default function Carousel({
       <button
         onClick={() => scroll("right")}
         className="absolute right-[-16px] top-1/2 -translate-y-1/2
-        z-10 h-8 w-8 rounded-full bg-white shadow
+        z-10 h-8 w-8 rounded-full bg-card shadow
         text-lg flex items-center justify-center"
       >
         ›

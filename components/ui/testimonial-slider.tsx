@@ -59,7 +59,7 @@ export default function TestimonialSlider({
                         {testimonials.map((t, i) => (
                             <CarouselItem key={i} className="pl-4 md:basis-2/3 lg:basis-1/2">
                                 <div className="h-full p-8 md:p-12 lg:p-16 flex flex-col items-center text-center gap-6 md:gap-8 bg-background border border-border/40 shadow-sm hover:shadow-md transition-all duration-500">
-                                    <div className="flex gap-1 text-black">
+                                    <div className="flex gap-1 text-foreground">
                                         {[1, 2, 3, 4, 5].map((s) => (
                                             <Star key={s} className="w-4 h-4 md:w-5 md:h-5 fill-current" />
                                         ))}

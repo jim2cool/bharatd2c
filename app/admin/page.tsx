@@ -255,7 +255,7 @@ export default function AdminDashboard() {
         .eq('store_id', activeStoreId),
       supabaseBrowser
         .from('stores')
-        .select('domain, theme_config')
+        .select('domain')
         .eq('id', activeStoreId)
         .single()
     ]);
@@ -271,7 +271,7 @@ export default function AdminDashboard() {
       hasProducts,
       hasDomain: !!store?.domain,
       hasPages: pagesCount > 0,
-      hasTheme: !!store?.theme_config && Object.keys(store.theme_config).length > 0,
+      hasTheme: true, // Intelligence layer auto-configures theme at store creation
       hasShipping: false, // Placeholder
     })
 

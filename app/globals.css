@@ -37,6 +37,7 @@
   --conversion: #2563EB;
   --conversion-hover: #1D4ED8;
   --conversion-foreground: #FFFFFF;
+  --color-primary-rgb: 37, 99, 235;
 
   /* Mappings to generic variables for compatibility */
   --background: var(--canvas);
@@ -321,6 +322,55 @@ textarea:focus {
       transform: skewX(-20deg) translateX(150%);
     }
   }
+
+  /* =========================================================
+     MOTION & INTERACTION SYSTEM
+     ========================================================= */
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  .shimmer {
+    background: linear-gradient(90deg,
+        var(--shimmer-base, var(--surface)) 25%,
+        var(--shimmer-highlight, var(--white)) 50%,
+        var(--shimmer-base, var(--surface)) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+  }
+
+  /* Alias used by ShimmerSkeleton component */
+  .shimmer-skeleton {
+    background: linear-gradient(90deg,
+        var(--shimmer-base, #f1f5f9) 25%,
+        var(--shimmer-highlight, #ffffff) 50%,
+        var(--shimmer-base, #f1f5f9) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+
+  /* One-time CTA shimmer — Dhamaka + Taza only */
+  @keyframes shimmer-cta-once {
+    0%   { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .shimmer-cta-once {
+    background: linear-gradient(90deg,
+        transparent 30%,
+        rgba(255,255,255,0.35) 50%,
+        transparent 70%);
+    background-size: 200% 100%;
+    animation: shimmer-cta-once 0.7s ease-out forwards;
+  }
+
+  /* --motion-y-offset default (overridden per mood card via ThemeProvider) */
+  :root { --motion-y-offset: 12px; }
 
   .bg-noise {
     position: relative;

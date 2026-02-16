@@ -39,7 +39,10 @@ const productSchema = z.object({
   highlights: z.array(z.string()),
   content_markup: z.string().optional().nullable(),
 
-  images: z.array(z.string()),
+  images: z.array(z.object({
+    url: z.string(),
+    tier: z.enum(['tier1', 'tier2', 'tier3']).optional().default('tier1')
+  })),
 
   // Testimonials should be a required array (can be empty)
   testimonials: z.array(z.any()),
@@ -119,7 +122,7 @@ export default function EditProductPage() {
   }, [])
 
   const methods = useForm<ProductFormData>({
-    resolver: zodResolver(productSchema),
+    resolver: zodResolver(productSchema) as any,
     defaultValues: {
       category: 'multi',
       highlights: [],
@@ -165,7 +168,10 @@ export default function EditProductPage() {
         review_count: product.review_count,
         highlights: product.highlights || [],
         content_markup: product.content_markup,
-        images: product.images || [],
+        images: (product.images || []).map((img: any) => {
+          if (typeof img === 'string') return { url: img, tier: 'tier1' };
+          return { url: img.url, tier: img.tier || 'tier1' };
+        }),
         testimonials: product.testimonials || [],
         shipping_cost_estimate: product.shipping_cost_estimate || 0,
         gateway_fee: product.gateway_fee || 0,
@@ -328,6 +334,8 @@ export default function EditProductPage() {
                   setImages={field.onChange}
                   productId={id}
                   productTitle={watch('title')}
+                  moodCard={product?.stores?.mood_card_selected || 'Minimal'}
+                  category={watch('category')}
                 />
               </Card>
             )}

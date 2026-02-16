@@ -162,7 +162,7 @@ export default function CartPage() {
                 <span>₹{subtotal.toLocaleString()}</span>
               </div>
 
-              <p className="text-[10px] font-black text-neutral-400 text-center uppercase tracking-widest pt-2">
+              <p className="text-[10px] font-black text-muted-foreground text-center uppercase tracking-widest pt-2">
                 Secure checkout • COD available
               </p>
 

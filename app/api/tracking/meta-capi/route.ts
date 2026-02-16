@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
 
         // 2. Format User Data according to Meta specs (hashed)
         const formattedUserData: any = {
-            client_ip_address: req.headers.get("x-forwarded-for") || req.ip,
+            client_ip_address: req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown",
             client_user_agent: req.headers.get("user-agent"),
         };
 

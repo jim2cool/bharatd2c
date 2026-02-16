@@ -66,7 +66,11 @@ export default async function middleware(request: NextRequest) {
         },
     })
 
-    if (isAdminSubdomain) {
+    const normalizedPath = url.pathname.replace(/\/$/, "") || "/";
+    const pathSegments = normalizedPath.split('/');
+    const isLoginPath = pathSegments.includes("login");
+
+    if (isAdminSubdomain && !isLoginPath) {
         const path = url.pathname.startsWith('/admin') ? url.pathname : `/admin${url.pathname}`
         response = NextResponse.rewrite(new URL(`${path}${url.search}`, request.url), {
             request: { headers: requestHeaders }
@@ -131,9 +135,6 @@ export default async function middleware(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser()
 
-    const normalizedPath = url.pathname.replace(/\/$/, "") || "/";
-    const pathSegments = normalizedPath.split('/');
-    const isLoginPath = pathSegments.includes("login");
 
     if (isLoginPath) {
         return response;

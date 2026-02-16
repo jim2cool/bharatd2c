@@ -36,28 +36,30 @@ export function DropshippingSalesPulse({ className }: DropshippingSalesPulseProp
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     exit={{ y: -20, opacity: 0 }}
-                    className="absolute inset-0 p-4 bg-neutral-900 text-white rounded-[1.5rem] shadow-2xl flex items-center gap-4 border border-white/5"
+                    className="absolute inset-0 p-4 bg-[var(--callout-bg)] border border-[var(--callout-border)] rounded-[var(--radius-card)] shadow-[var(--shadow-card)] flex items-center gap-4"
                 >
-                    <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center relative overflow-hidden group">
-                        <ShoppingBag className="w-5 h-5 text-primary" />
-                        <div className="absolute inset-0 bg-primary/20 blur-xl animate-pulse" />
+                    <div className="w-10 h-10 bg-[var(--badge-bg)] rounded-[var(--radius-image)] flex items-center justify-center relative overflow-hidden">
+                        <ShoppingBag className="w-5 h-5 text-[var(--badge-text)]" />
+                        <div className="absolute inset-0 bg-[var(--primary)]/10 blur-xl animate-pulse" />
                     </div>
 
                     <div className="flex flex-col">
                         <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">{sale.name}</span>
+                            <span className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-widest">{sale.name}</span>
                             <div className="flex gap-0.5">
-                                {[1, 2, 3, 4, 5].map(i => <Star key={i} className="w-2 h-2 fill-primary text-primary" />)}
+                                {[1, 2, 3, 4, 5].map(i => (
+                                    <Star key={i} className="w-2 h-2" style={{ fill: 'var(--star-colour)', color: 'var(--star-colour)' }} />
+                                ))}
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
-                            <span className="text-[11px] font-black uppercase tracking-tight text-white">Just purchased {sale.product}!</span>
-                            <span className="text-[9px] font-medium text-neutral-500">{sale.time}</span>
+                            <span className="text-[11px] font-semibold uppercase tracking-tight text-[var(--text-primary)]">Just purchased {sale.product}!</span>
+                            <span className="text-[9px] font-medium text-[var(--text-secondary)]">{sale.time}</span>
                         </div>
                     </div>
 
                     <div className="ml-auto">
-                        <CheckCircle2 className="w-4 h-4 text-green-500" />
+                        <CheckCircle2 className="w-4 h-4 text-[var(--primary)]" />
                     </div>
                 </motion.div>
             </AnimatePresence>

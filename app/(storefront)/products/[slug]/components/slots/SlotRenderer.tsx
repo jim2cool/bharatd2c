@@ -11,6 +11,7 @@ import { QuantityBreaks } from '@/app/(storefront)/products/[slug]/components/co
 import { BundleSelector } from '@/app/(storefront)/products/[slug]/components/conversion/BundleSelector';
 import { EstimatedDelivery } from '@/app/(storefront)/products/[slug]/components/conversion/EstimatedDelivery';
 import { CTAGroup } from '@/app/(storefront)/products/[slug]/components/conversion/CTAGroup';
+import { ConversionNucleus } from '@/app/(storefront)/products/[slug]/components/conversion/ConversionNucleus';
 import { TrustStrip } from '@/app/(storefront)/products/[slug]/components/conversion/TrustStrip';
 import { Highlights } from '@/app/(storefront)/products/[slug]/components/highlights/Highlights';
 import { MediaGallery } from '@/app/(storefront)/products/[slug]/components/hero/MediaGallery';
@@ -43,6 +44,16 @@ const BeforeAfterSlider = dynamic(() => import('@/app/(storefront)/products/[slu
 const SizeGuideModule = dynamic(() => import('@/app/(storefront)/products/[slug]/components/fashion/SizeGuideModule').then(mod => mod.SizeGuideModule), { loading: () => <SlotSkeleton height="300px" /> });
 const FabricDetailsModule = dynamic(() => import('@/app/(storefront)/products/[slug]/components/fashion/FabricDetailsModule').then(mod => mod.FabricDetailsModule), { loading: () => <SlotSkeleton height="150px" /> });
 const CertificationsModule = dynamic(() => import('@/app/(storefront)/products/[slug]/components/proof/CertificationsModule').then(mod => mod.CertificationsModule), { loading: () => <SlotSkeleton height="50px" /> });
+const SubscriptionOption = dynamic(() => import('@/app/(storefront)/products/[slug]/components/health/SubscriptionOption').then(mod => mod.SubscriptionOption), { loading: () => <SlotSkeleton height="150px" /> });
+const SellerInfo = dynamic(() => import('@/app/(storefront)/products/[slug]/components/marketplace/SellerInfo').then(mod => mod.SellerInfo), { loading: () => <SlotSkeleton height="150px" /> });
+const SwatchVariants = dynamic(() => import('@/app/(storefront)/products/[slug]/components/fashion/SwatchVariants').then(mod => mod.SwatchVariants), { loading: () => <SlotSkeleton height="100px" /> });
+const TestimonialsSection = dynamic(() => import('@/app/(storefront)/products/[slug]/components/social/TestimonialsSection').then(mod => mod.TestimonialsSection), { loading: () => <SlotSkeleton height="400px" /> });
+const EmotionalStoryBlock = dynamic(() => import('@/app/(storefront)/products/[slug]/components/brand/EmotionalStoryBlock').then(mod => mod.EmotionalStoryBlock), { loading: () => <SlotSkeleton height="500px" /> });
+const ExchangeTrustBlock = dynamic(() => import('@/app/(storefront)/products/[slug]/components/fashion/ExchangeTrustBlock').then(mod => mod.ExchangeTrustBlock), { loading: () => <SlotSkeleton height="150px" /> });
+const DeliveryPromiseBlock = dynamic(() => import('@/app/(storefront)/products/[slug]/components/conversion/DeliveryPromiseBlock').then(mod => mod.DeliveryPromiseBlock), { loading: () => <SlotSkeleton height="100px" /> });
+const RoutineBuilder = dynamic(() => import('@/app/(storefront)/products/[slug]/components/beauty/RoutineBuilder').then(mod => mod.RoutineBuilder), { loading: () => <SlotSkeleton height="400px" /> });
+const TrustBar = dynamic(() => import('@/app/(storefront)/products/[slug]/components/trust/TrustBar').then(mod => mod.TrustBar), { loading: () => <SlotSkeleton height="60px" /> });
+const FeaturesSection = dynamic(() => import('@/app/(storefront)/products/[slug]/components/sections/FeaturesSection').then(mod => mod.FeaturesSection), { loading: () => <SlotSkeleton height="300px" /> });
 import { CheckCircle2, Zap, Sparkles, Layout, Shirt, Globe, Layers } from 'lucide-react';
 
 // Lazy Loaded Components
@@ -60,12 +71,14 @@ const PeopleAlsoBought = dynamic(() => import('@/app/(storefront)/products/[slug
 
 // Skeleton Helper
 const SlotSkeleton = ({ height }: { height: string }) => (
-    <div className="w-full bg-neutral-100 animate-pulse rounded-2xl" style={{ height }} />
+    <div className="w-full bg-[var(--bg-secondary)] animate-pulse rounded-[var(--radius-card)]" style={{ height }} />
 );
 
 export const SlotRenderer = ({ name }: { name: string }) => {
     const {
         product,
+        categoryConfig,
+        storeConfig,
         selectedVariant,
         setSelectedVariant,
         qty,
@@ -92,6 +105,9 @@ export const SlotRenderer = ({ name }: { name: string }) => {
 
         case 'product-header':
             return <ProductInfo product={product} />;
+
+        case 'conversion-nucleus':
+            return <ConversionNucleus />;
 
         case 'price-display':
             return (
@@ -179,13 +195,7 @@ export const SlotRenderer = ({ name }: { name: string }) => {
             return null;
 
         case 'trust-bar':
-            return (
-                <div className="flex items-center justify-between py-4 border-y text-[10px] font-bold uppercase tracking-widest text-neutral-500">
-                    <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-green-500" /> SECURE CHECKOUT</span>
-                    <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-green-500" /> QUALITY GUARANTEED</span>
-                    <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-green-500" /> FAST SHIPPING</span>
-                </div>
-            );
+            return <TrustBar />;
 
         case 'story-section':
             return <StorySection />;
@@ -194,31 +204,25 @@ export const SlotRenderer = ({ name }: { name: string }) => {
             return <BrandNarrativeBlocks />;
 
         case 'features-section':
-            return (
-                <div className="grid grid-cols-2 gap-4">
-                    {product.highlights.map((h, i) => (
-                        <div key={i} className="p-6 bg-neutral-50 rounded-2xl border aspect-square flex flex-col justify-center items-center text-center gap-3">
-                            <div className="p-3 bg-white rounded-full shadow-sm"><Zap className="w-6 h-6 text-primary" /></div>
-                            <span className="text-xs font-black uppercase tracking-wider leading-tight">{h.text}</span>
-                        </div>
-                    ))}
-                </div>
-            );
+            return <FeaturesSection highlights={product.highlights} />;
 
         case 'faq-section':
             return <ContentAccordions sections={product.content} />;
 
         case 'testimonials-section':
-            return <Proof rating={product.rating} reviewCount={product.reviewCount} reviews={product.reviews} />;
-
-        case 'accordions':
-            return <ContentAccordions sections={product.content} intro={product.description_intro} />;
+            return <TestimonialsSection />;
 
         case 'reviews':
             return <Proof rating={product.rating} reviewCount={product.reviewCount} reviews={product.reviews} />;
 
-        case 'cross-sell':
-            return <PeopleAlsoBought products={product.relatedProducts} title={product.related_products_title || "People Also Bought"} />;
+        case 'swatch-variants':
+            return <SwatchVariants swatches={[]} />;
+
+        case 'subscription-option':
+            return <SubscriptionOption oneTimePrice={currentPrice} subscriptionPrice={currentPrice * 0.85} />;
+
+        case 'seller-info':
+            return <SellerInfo sellerName={storeConfig.store_name} rating={4.9} reviewCount={1240} location="New Delhi, India" />;
 
         case 'category-modules':
             return <CategoryModuleDistributor />;
@@ -229,11 +233,11 @@ export const SlotRenderer = ({ name }: { name: string }) => {
 };
 
 const CategoryModuleDistributor = () => {
-    const { activeModules, setIsSizeGuideOpen, currentPrice, categoryConfig } = usePDP();
+    const { activeModules, setIsSizeGuideOpen, currentPrice, categoryConfig, product } = usePDP();
     const data = categoryConfig?.data || {};
 
     return (
-        <div className="space-y-6">
+        <div className="flex flex-col" style={{ gap: 'var(--component-gap)' }}>
             {activeModules.map(module => {
                 switch (module) {
                     case 'size-guide':
@@ -296,25 +300,23 @@ const CategoryModuleDistributor = () => {
                         return <RitualGuide key={module} ritual={data.ritual} />;
                     case 'authenticity-block':
                     case 'emotional-story-block':
-                        return <AuthenticityNarrative key={module} />;
+                        return <EmotionalStoryBlock key={module} />;
                     case 'how-to-use-section':
                     case 'routine-builder':
                     case 'usage-instructions':
                     case 'dosage-instructions':
-                        return <UsageProtocol key={module} usage={data.usage} />;
+                        return <RoutineBuilder key={module} />;
                     case 'before-after-slider':
                         return <BeforeAfterSlider key={module} />;
-                    case 'demo-gallery':
-                    case 'dimension-schematic':
-                        return <VisualProofModule key={module} />;
-                    case 'comparison-toggle':
-                        return <EMICalculator key={module} price={currentPrice} />;
-                    case 'feature-icon-grid':
                     case 'delivery-emphasis-block':
+                        return <DeliveryPromiseBlock key={module} />;
+                    case 'exchange-trust-messaging':
+                        return <ExchangeTrustBlock key={module} />;
+                    case 'feature-icon-grid':
                     case 'nutritional-table':
                     case 'shelf-life-display':
                     case 'storage-instructions':
-                        return <HighlightsGridModule key={module} />;
+                        return <FeaturesSection key={module} highlights={product.highlights} />;
                     case 'mega-menu':
                     case 'advanced-filters':
                     case 'category-banners':
@@ -323,9 +325,9 @@ const CategoryModuleDistributor = () => {
                     // Pass-through for other modules as simple stubs
                     default:
                         return (
-                            <div key={module} className="p-4 border border-dashed rounded-2xl bg-neutral-50 flex items-center gap-3">
-                                <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-                                <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Vertical Module: {module}</span>
+                            <div key={module} className="p-4 border border-dashed rounded-[var(--radius-card)] bg-[var(--bg-secondary)] flex items-center gap-3">
+                                <div className="w-2 h-2 rounded-full bg-[var(--primary)] animate-pulse" />
+                                <span className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] opacity-40">Vertical Module: {module}</span>
                             </div>
                         );
                 }
@@ -339,17 +341,17 @@ const CategoryModuleDistributor = () => {
 const VisualProofModule = () => (
     <div className="space-y-4">
         <div className="flex justify-between items-end">
-            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400 ml-1">Transformation Gallery</h3>
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Transformation Gallery</h3>
             <span className="text-[9px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full uppercase">Verified Results</span>
         </div>
         <div className="grid grid-cols-2 gap-3">
-            <div className="aspect-[4/5] bg-neutral-100 rounded-[2rem] relative overflow-hidden flex items-center justify-center grayscale">
+            <div className="aspect-[4/5] bg-[var(--bg-secondary)] rounded-[var(--radius-card)] relative overflow-hidden flex items-center justify-center grayscale">
                 <span className="text-[8px] font-black uppercase opacity-20">Before_Shot.jpg</span>
-                <div className="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full text-[9px] font-black text-white text-center">BEFORE</div>
+                <div className="absolute bottom-4 left-4 right-4 bg-[var(--bg-secondary)]/60 backdrop-blur-md px-3 py-1.5 rounded-full text-[9px] font-black text-[var(--text-primary)] text-center">BEFORE</div>
             </div>
-            <div className="aspect-[4/5] bg-neutral-200 rounded-[3rem] relative overflow-hidden flex items-center justify-center">
+            <div className="aspect-[4/5] bg-[var(--bg-secondary)] rounded-[var(--radius-card)] relative overflow-hidden flex items-center justify-center">
                 <span className="text-[8px] font-black uppercase opacity-20">After_Shot.jpg</span>
-                <div className="absolute bottom-4 left-4 right-4 bg-primary px-3 py-1.5 rounded-full text-[9px] font-black text-white text-center">AFTER</div>
+                <div className="absolute bottom-4 left-4 right-4 bg-[var(--primary)] px-3 py-1.5 rounded-full text-[9px] font-black text-[var(--cta-text)] text-center">AFTER</div>
             </div>
         </div>
     </div>
@@ -363,8 +365,8 @@ const HighlightsGridModule = () => (
             { label: 'Sustainably Made', icon: <Shirt className="w-4 h-4" /> },
             { label: 'Global Standard', icon: <Globe className="w-4 h-4" /> }
         ].map((h) => (
-            <div key={h.label} className="p-4 bg-white border border-neutral-100 rounded-[1.5rem] flex flex-col gap-3 items-center text-center shadow-sm">
-                <div className="w-8 h-8 bg-neutral-50 rounded-lg flex items-center justify-center text-neutral-400">
+            <div key={h.label} className="p-4 bg-[var(--bg-primary)] border border-[var(--border)] rounded-[var(--radius-card)] flex flex-col gap-3 items-center text-center shadow-sm">
+                <div className="w-8 h-8 bg-[var(--bg-secondary)] rounded-lg flex items-center justify-center text-[var(--text-secondary)]">
                     {h.icon}
                 </div>
                 <span className="text-[10px] font-black uppercase tracking-tight leading-tight">{h.label}</span>
@@ -374,14 +376,14 @@ const HighlightsGridModule = () => (
 );
 
 const CatalogManagementModule = () => (
-    <div className="p-5 bg-neutral-100 border rounded-[2rem] flex flex-col gap-4">
+    <div className="p-5 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-[var(--radius-card)] flex flex-col gap-4">
         <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-neutral-900" />
-            <h3 className="text-[11px] font-black uppercase tracking-widest">Catalog Intelligence</h3>
+            <Layers className="w-4 h-4 text-[var(--text-primary)]" />
+            <h3 className="text-[11px] font-black uppercase tracking-widest text-[var(--text-primary)]">Catalog Intelligence</h3>
         </div>
         <div className="grid grid-cols-1 gap-2">
-            <div className="p-4 bg-white rounded-xl text-xs font-bold text-neutral-400 italic">Advanced filtering logic initialized...</div>
-            <div className="p-4 bg-white rounded-xl text-xs font-bold text-neutral-400 italic">Mega-menu hierarchy ready.</div>
+            <div className="p-4 bg-[var(--bg-primary)] rounded-[var(--radius-button)] text-xs font-bold text-[var(--text-secondary)] italic">Advanced filtering logic initialized...</div>
+            <div className="p-4 bg-[var(--bg-primary)] rounded-[var(--radius-button)] text-xs font-bold text-[var(--text-secondary)] italic">Mega-menu hierarchy ready.</div>
         </div>
     </div>
 );

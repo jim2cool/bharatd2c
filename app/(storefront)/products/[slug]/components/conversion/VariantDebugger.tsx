@@ -19,7 +19,7 @@ export function VariantDebugger({ product }: { product: ProductData }) {
     }, [product])
 
     return (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-xs font-mono text-red-800 my-4">
+        <div className="p-4 bg-destructive/10 border border-red-200 rounded-lg text-xs font-mono text-red-800 my-4">
             <p className="font-bold">Variant Debugger Active (Check Console)</p>
             <p>Variants Count: {product.variants?.length || 0}</p>
             <div className="mt-2 max-h-40 overflow-auto whitespace-pre">

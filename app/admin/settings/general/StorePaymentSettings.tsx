@@ -7,6 +7,7 @@ import { CreditCard, Banknote, ShoppingCart, Percent, AlertCircle, Zap, ArrowUpF
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { GatewayCredentials } from "./GatewayCredentials";
 
 export function StorePaymentSettings() {
     const [loading, setLoading] = useState(true);
@@ -342,6 +343,8 @@ export function StorePaymentSettings() {
                     </div>
                 </div>
             </div>
+
+            <GatewayCredentials />
         </section>
     );
 }

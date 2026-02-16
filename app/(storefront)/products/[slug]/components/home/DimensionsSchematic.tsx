@@ -42,15 +42,15 @@ export function DimensionsSchematic({
             <div className="flex flex-col lg:flex-row gap-12 relative z-10">
                 <div className="flex-1 space-y-8">
                     <div className="space-y-4">
-                        <div className="inline-flex items-center gap-2 px-4 py-1 bg-white/5 rounded-full border border-white/10">
+                        <div className="inline-flex items-center gap-2 px-4 py-1 bg-card/5 rounded-full border border-white/10">
                             <Ruler className="w-3.5 h-3.5 text-blue-400" />
                             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400">Technical Schematic</span>
                         </div>
-                        <h2 className="text-4xl font-black tracking-tighter text-white leading-none">
+                        <h2 className="text-4xl font-black tracking-tighter text-primary-foreground leading-none">
                             Precision <br />
-                            <span className="text-neutral-500 italic font-medium">Dimensions.</span>
+                            <span className="text-muted-foreground italic font-medium">Dimensions.</span>
                         </h2>
-                        <p className="text-xs font-bold text-neutral-400 uppercase tracking-widest leading-relaxed max-w-xs">
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest leading-relaxed max-w-xs">
                             Measured to 0.1mm tolerance for perfect structural integration.
                         </p>
                     </div>
@@ -64,8 +64,8 @@ export function DimensionsSchematic({
                                 className={cn(
                                     "p-6 rounded-3xl border transition-all duration-500 cursor-help",
                                     hoveredId === dim.id
-                                        ? "bg-blue-500 border-blue-400 text-white shadow-xl shadow-blue-500/20"
-                                        : "bg-white/5 border-white/5 text-neutral-400"
+                                        ? "bg-primary border-blue-400 text-primary-foreground shadow-xl shadow-blue-500/20"
+                                        : "bg-card/5 border-white/5 text-muted-foreground"
                                 )}
                             >
                                 <span className="block text-[10px] font-black uppercase tracking-[0.2em] mb-1 opacity-60">{dim.label}</span>
@@ -74,14 +74,14 @@ export function DimensionsSchematic({
                         ))}
                     </div>
 
-                    <div className="p-6 bg-white shadow-2xl rounded-[2.5rem] flex items-center justify-between">
+                    <div className="p-6 bg-card shadow-2xl rounded-[2.5rem] flex items-center justify-between">
                         <div className="flex items-center gap-4">
                             <div className="w-10 h-10 rounded-2xl bg-neutral-900 flex items-center justify-center">
-                                <Maximize2 className="w-5 h-5 text-white" />
+                                <Maximize2 className="w-5 h-5 text-primary-foreground" />
                             </div>
                             <div>
-                                <span className="block text-[9px] font-black uppercase tracking-widest text-neutral-400">Smart Check</span>
-                                <p className="text-xs font-black text-neutral-900 uppercase">Fits standard 60cm counters</p>
+                                <span className="block text-[9px] font-black uppercase tracking-widest text-muted-foreground">Smart Check</span>
+                                <p className="text-xs font-black text-foreground uppercase">Fits standard 60cm counters</p>
                             </div>
                         </div>
                         <HelpCircle className="w-5 h-5 text-neutral-200" />
@@ -118,7 +118,7 @@ export function DimensionsSchematic({
                                                 initial={{ opacity: 0, scale: 0.8, x: -20 }}
                                                 animate={{ opacity: 1, scale: 1, x: 10 }}
                                                 exit={{ opacity: 0, scale: 0.8, x: -20 }}
-                                                className="absolute top-1/2 left-full -translate-y-1/2 ml-4 px-4 py-2 bg-blue-500 text-white rounded-xl shadow-2xl z-30 flex items-center gap-2 whitespace-nowrap"
+                                                className="absolute top-1/2 left-full -translate-y-1/2 ml-4 px-4 py-2 bg-primary text-primary-foreground rounded-xl shadow-2xl z-30 flex items-center gap-2 whitespace-nowrap"
                                             >
                                                 <span className="text-[10px] font-black uppercase tracking-widest">{dim.label}:</span>
                                                 <span className="text-sm font-black tabular-nums">{dim.value}</span>

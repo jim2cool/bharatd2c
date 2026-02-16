@@ -22,18 +22,18 @@ export default async function StorefrontLayout({
   return (
     <>
       {/* Global Theme Variables */}
-      <ThemeProvider themeConfig={store.theme_config as any}>
+      <ThemeProvider storeConfig={store as any}>
         {/* Marketing & Tracking Scripts */}
         <MarketingScripts storeId={store.id} />
 
         {/* Announcement Bar */}
-        {store.theme_config?.announcementBar?.enabled && (
+        {(store as any).resolved_active_components?.includes('announcement_bar') && (
           <div className="relative z-50">
             <AnnouncementBar config={{
-              text: store.theme_config.announcementBar.text,
-              style: store.theme_config.announcementBar.style,
-              background: store.theme_config.announcementBar.background,
-              text_color: store.theme_config.announcementBar.text_color,
+              text: (store as any).announcement_text || "Free shipping on orders over ₹999",
+              style: "static",
+              background: (store as any).urgency_bg || "#111",
+              text_color: (store as any).urgency_text || "#fff",
             }} />
           </div>
         )}

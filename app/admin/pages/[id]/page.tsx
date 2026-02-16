@@ -5,8 +5,11 @@ import { useParams, useRouter } from 'next/navigation'
 import { supabaseBrowser } from '@/lib/supabase-browser'
 import { getActiveStoreIdClient } from '@/lib/getActiveStore.client'
 import SEOBlock from '../../components/SEOBlock'
-import { ArrowLeft, Save, Trash2, Globe } from 'lucide-react'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { RotateCcw, Trash2, Save, ArrowLeft, Globe, Eye, FileText, Check, ShieldCheck, HelpCircle } from 'lucide-react'
 import Link from 'next/link'
+import { toast } from 'sonner'
 
 export default function PageEditor() {
     const { id } = useParams<{ id: string }>()
@@ -16,7 +19,8 @@ export default function PageEditor() {
     const [title, setTitle] = useState('')
     const [content, setContent] = useState('')
     const [slug, setSlug] = useState('')
-    const [status, setStatus] = useState<'draft' | 'published'>('draft')
+    const [isActive, setIsActive] = useState(true)
+    const [type, setType] = useState('custom')
     const [seoTitle, setSeoTitle] = useState('')
     const [seoDescription, setSeoDescription] = useState('')
 
@@ -33,7 +37,7 @@ export default function PageEditor() {
 
         setLoading(true)
         const { data, error } = await supabaseBrowser
-            .from('pages')
+            .from('pg_store_pages')
             .select('*')
             .eq('id', id)
             .single()
@@ -42,7 +46,8 @@ export default function PageEditor() {
             setTitle(data.title)
             setContent(data.content || '')
             setSlug(data.slug)
-            setStatus(data.status)
+            setIsActive(data.is_active)
+            setType(data.type)
             setSeoTitle(data.seo_title || '')
             setSeoDescription(data.seo_description || '')
         }
@@ -71,7 +76,8 @@ export default function PageEditor() {
             title,
             content,
             slug,
-            status,
+            is_active: isActive,
+            type,
             seo_title: seoTitle,
             seo_description: seoDescription,
             updated_at: new Date().toISOString()
@@ -79,31 +85,58 @@ export default function PageEditor() {
 
         if (isNew) {
             const { data, error } = await supabaseBrowser
-                .from('pages')
+                .from('pg_store_pages')
                 .insert([payload])
                 .select()
                 .single()
 
             if (!error && data) {
+                toast.success('Page created')
                 router.push(`/admin/pages/${data.id}`)
             } else {
-                alert(error?.message || 'Failed to create page')
+                toast.error(error?.message || 'Failed to create page')
             }
         } else {
             const { error } = await supabaseBrowser
-                .from('pages')
+                .from('pg_store_pages')
                 .update(payload)
                 .eq('id', id)
 
-            if (error) alert(error.message)
+            if (error) {
+                toast.error(error.message)
+            } else {
+                toast.success('Page updated')
+            }
         }
         setSaving(false)
     }
 
     const onDelete = async () => {
         if (!confirm('Are you sure you want to delete this page?')) return
-        await supabaseBrowser.from('pages').delete().eq('id', id)
+        await supabaseBrowser.from('pg_store_pages').delete().eq('id', id)
+        toast.success('Page deleted')
         router.push('/admin/pages')
+    }
+
+    const onRestore = async () => {
+        if (!confirm('Restore this page to its default content? Current changes will be lost.')) return;
+
+        const { data: store } = await supabaseBrowser.from('store_config').select('mood_card').eq('store_id', storeId).single();
+        const archetype = store?.mood_card?.archetype || 'generic';
+
+        // Map slug to dummy content
+        const defaults: Record<string, string> = {
+            'shipping-policy': `<h1>Shipping Policy</h1><p>We offer fast and reliable shipping across India. Standard delivery takes 3-5 business days.</p>`,
+            'refund-policy': `<h1>Refund Policy</h1><p>We have a 7-day no-questions-asked refund policy for all unused products.</p>`,
+            'terms-and-conditions': `<h1>Terms & Conditions</h1><p>By using our store, you agree to our terms of service and usage policies.</p>`
+        };
+
+        if (defaults[slug]) {
+            setContent(defaults[slug]);
+            toast.success('Restored to intelligence defaults');
+        } else {
+            toast.error('No default content found for this page type');
+        }
     }
 
     if (loading || !storeId) return <div className="p-8">Loading editor...</div>
@@ -111,33 +144,40 @@ export default function PageEditor() {
     return (
         <div className="max-w-5xl mx-auto p-6 pb-24 space-y-6">
             {/* HEADER */}
-            <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-4">
-                    <Link href="/admin/pages" className="p-2 hover:bg-gray-100 rounded">
+            <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                    <Link href="/admin/pages" className="p-2 hover:bg-neutral-100 rounded-xl transition-all">
                         <ArrowLeft className="w-5 h-5" />
                     </Link>
-                    <h1 className="text-2xl font-semibold">{isNew ? 'Add page' : title}</h1>
+                    <h1 className="text-2xl font-black tracking-tight uppercase italic">{isNew ? 'New Page' : 'Edit Page'}</h1>
                 </div>
-                <div className="flex gap-3">
+
+                <div className="flex items-center gap-4">
                     {!isNew && (
-                        <button onClick={onDelete} className="p-2 text-red-600 hover:bg-red-50 rounded">
-                            <Trash2 className="w-5 h-5" />
-                        </button>
+                        <>
+                            <button onClick={onRestore} title="Restore to Intelligence" className="p-2.5 text-blue-600 hover:bg-blue-50 rounded-xl transition-all border border-blue-100 shadow-sm">
+                                <RotateCcw className="w-5 h-5" />
+                            </button>
+                            <button onClick={onDelete} className="p-2.5 text-red-600 hover:bg-red-50 rounded-xl transition-all border border-red-100 shadow-sm">
+                                <Trash2 className="w-5 h-5" />
+                            </button>
+                        </>
                     )}
                     <button
                         onClick={onSave}
                         disabled={saving}
-                        className="bg-black text-white px-6 py-2 rounded text-sm font-medium flex items-center gap-2"
+                        className="bg-neutral-900 text-white px-8 py-2.5 rounded-xl text-sm font-black uppercase tracking-widest hover:bg-black transition-all flex items-center gap-2 shadow-lg"
                     >
-                        {saving ? 'Saving...' : 'Save'}
+                        <Save className="w-4 h-4" />
+                        Save Page
                     </button>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* MAIN CONTENT */}
-                <div className="lg:col-span-2 space-y-6">
-                    <div className="bg-white border rounded p-6 space-y-4">
+                <div className="lg:col-span-2 space-y-8">
+                    <div className="bg-white border border-[var(--border)] rounded-[2rem] p-8 space-y-6 shadow-sm">
                         <div>
                             <label className="block text-sm font-medium mb-1">Title</label>
                             <input
@@ -146,16 +186,6 @@ export default function PageEditor() {
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                             />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Content</label>
-                            <textarea
-                                className="w-full border rounded px-3 py-2 text-sm h-64 font-mono"
-                                placeholder="Write your page content here (HTML supported)..."
-                                value={content}
-                                onChange={(e) => setContent(e.target.value)}
-                            />
-                            <p className="text-[10px] text-gray-400 mt-1 font-bold">Basic HTML editor coming soon. Using raw textarea for now.</p>
                         </div>
                     </div>
 
@@ -174,15 +204,25 @@ export default function PageEditor() {
 
                 {/* SIDEBAR */}
                 <div className="space-y-6">
+                    <div className="bg-white border border-[var(--border)] rounded-[2rem] p-8 shadow-sm">
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-4 block">Content</Label>
+                        <Textarea
+                            value={content}
+                            onChange={(e) => setContent(e.target.value)}
+                            placeholder="Page content (HTML/Markdown supported)..."
+                            className="min-h-[400px] font-mono text-sm bg-neutral-50/30 rounded-2xl border-neutral-100 focus:bg-white transition-all"
+                        />
+                    </div>
+
                     <div className="bg-white border rounded p-6">
                         <h2 className="font-medium mb-4">Visibility</h2>
                         <div className="space-y-3">
                             <label className="flex items-center gap-3 cursor-pointer">
                                 <input
                                     type="radio"
-                                    name="status"
-                                    checked={status === 'published'}
-                                    onChange={() => setStatus('published')}
+                                    name="isActive"
+                                    checked={isActive}
+                                    onChange={() => setIsActive(true)}
                                     className="accent-black"
                                 />
                                 <div className="text-sm">Visible</div>
@@ -190,9 +230,9 @@ export default function PageEditor() {
                             <label className="flex items-center gap-3 cursor-pointer">
                                 <input
                                     type="radio"
-                                    name="status"
-                                    checked={status === 'draft'}
-                                    onChange={() => setStatus('draft')}
+                                    name="isActive"
+                                    checked={!isActive}
+                                    onChange={() => setIsActive(false)}
                                     className="accent-black"
                                 />
                                 <div className="text-sm">Hidden</div>

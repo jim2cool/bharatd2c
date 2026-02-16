@@ -9,7 +9,7 @@ export default function LandingPage() {
     }, []);
 
     return (
-        <div style={{ background: '#06070D', height: '100vh', display: 'flex', alignItems: 'center', justifyCenter: 'center' }}>
+        <div style={{ background: '#06070D', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {/* Loading state while redirecting */}
             <div style={{ color: '#00F5FF', fontFamily: 'monospace' }}>INITIALIZING ENGINE...</div>
         </div>

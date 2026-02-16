@@ -8,12 +8,36 @@ interface ThemeInjectorProps {
     children: React.ReactNode;
 }
 
+/**
+ * ThemeInjector (Client Component)
+ * Converts DRS v3 StylePreset tokens into CSS variables.
+ * Note: This mirrors the logic in ThemeProvider.tsx but allows for scoped 
+ * style injection if needed, though for PDP it usually affects global root.
+ */
 export function ThemeInjector({ style, children }: ThemeInjectorProps) {
     if (!style) return <>{children}</>;
 
-    // Convert camelCase to kebab-case for CSS variables
-    // e.g. textPrimary -> --text-primary
-    // but specific mapping allows for better control
+    // ── RADIUS MAPPING ──────────────────────────────────────────────────────
+    const radiusMap = {
+        sharp: { sm: "0px", md: "0px", lg: "0px", full: "0px" },
+        clean: { sm: "0.25rem", md: "0.375rem", lg: "0.5rem", full: "9999px" },
+        soft: { sm: "0.375rem", md: "0.5rem", lg: "0.75rem", full: "9999px" },
+        round: { sm: "0.5rem", md: "0.75rem", lg: "1rem", full: "9999px" },
+        pill: { sm: "0.75rem", md: "1rem", lg: "1.5rem", full: "9999px" },
+    };
+
+    const radius = radiusMap[style.shape.radiusScale] || radiusMap.clean;
+
+    // ── SHADOW MAPPING ──────────────────────────────────────────────────────
+    const shadowMap = {
+        flat: "none",
+        soft: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+        raised: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+        floating: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+    };
+
+    const shadow = shadowMap[style.shape.elevation] || shadowMap.soft;
+
     const variables = {
         // Colors
         '--bg-background': style.colors.background,
@@ -30,27 +54,20 @@ export function ThemeInjector({ style, children }: ThemeInjectorProps) {
         '--col-error': style.colors.error,
         '--col-warning': style.colors.warning,
 
-        // Typography settings (font families would be loaded globally or via Next.js font optimization)
-        '--font-heading': style.typography.headingFont,
-        '--font-body': style.typography.bodyFont,
+        // Typography
+        '--font-heading': `"${style.typography.headingFont}", system-ui, sans-serif`,
+        '--font-body': `"${style.typography.bodyFont}", system-ui, sans-serif`,
         '--heading-case': style.typography.headingCase,
         '--heading-weight': style.typography.headingWeight,
         '--letter-spacing': style.typography.letterSpacing,
         '--line-height': style.typography.lineHeight,
 
         // Shape
-        '--radius-scale': style.shape.radiusScale === 'round' ? '1rem' :
-            style.shape.radiusScale === 'pill' ? '9999px' :
-                style.shape.radiusScale === 'sharp' ? '0px' :
-                    style.shape.radiusScale === 'clean' ? '0.5rem' : '0.75rem',
-
-        '--shadow-elevation': style.shape.elevation === 'flat' ? 'none' :
-            style.shape.elevation === 'raised' ? '0 10px 15px -3px rgb(0 0 0 / 0.1)' :
-                style.shape.elevation === 'floating' ? '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)' : '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-
-        '--border-width': style.shape.borderStyle === 'thick' ? '2px' :
-            style.shape.borderStyle === 'hairline' ? '1px' :
-                style.shape.borderStyle === 'none' ? '0px' : '1px',
+        '--radius-button': radius.md,
+        '--radius-card': radius.lg,
+        '--radius-image': radius.lg,
+        '--radius-input': radius.sm,
+        '--shadow-card': shadow,
 
         // Motion
         '--motion-speed': style.motion.speed === 'fast' ? '150ms' :
@@ -62,11 +79,6 @@ export function ThemeInjector({ style, children }: ThemeInjectorProps) {
     return (
         <div style={variables} className="contents">
             <style jsx global>{`
-            :root {
-                --radius-button: var(--radius-scale);
-                --radius-card: var(--radius-scale);
-                --radius-input: var(--radius-scale);
-            }
             body {
                 background-color: var(--bg-background);
                 color: var(--text-primary);
