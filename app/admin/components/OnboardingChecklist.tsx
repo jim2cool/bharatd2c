@@ -31,7 +31,18 @@ export function OnboardingChecklist({ checklist }: { checklist: ChecklistState }
         fetchUrl()
     }, [])
 
-    const steps = [
+    type Step = {
+        id: string
+        title: string
+        description: string
+        action: string
+        time: string
+        href: string
+        completed: boolean
+        isMagic?: boolean
+    }
+
+    const steps: Step[] = [
         {
             id: 'hasPages',
             title: 'Review store policies',
