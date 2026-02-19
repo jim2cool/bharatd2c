@@ -51,6 +51,7 @@ export interface ProductData {
     slug: string;
     title: string;
     subtitle: string; // 1-line functional descriptor
+    description_intro?: string; // Phase 22: Content before the first H2
     rating: number;
     reviewCount: number;
 
@@ -75,18 +76,40 @@ export interface ProductData {
 
     urgency_settings?: {
         enabled: boolean;
-        type: 'timer' | 'stock' | 'text';
+        type: 'timer' | 'stock' | 'text' | 'countdown' | 'low_stock' | 'recent_view';
         text?: string;
         timer?: number; // minutes
         stock?: number;
+        viewers?: number; // Added for recent_view
+        config?: {
+            minutes?: number;
+            stock?: number;
+            viewers?: number;
+        };
     };
 
     bundle_settings?: {
         enabled: boolean;
         title?: string;
+        tiers?: { qty: number; label: string; discount: number }[];
+        most_popular_index?: number;
     };
 
+    trust_indicators?: { icon: string; text: string }[] | null;
+    trust_strip_image_url?: string | null;
     cod_enabled?: boolean;
+    prepaid_enabled?: boolean;
+    cart_button_enabled?: boolean;
+    show_estimated_delivery?: boolean;
+    shipping_settings?: {
+        handling_time_min: number;
+        handling_time_max: number;
+        transit_time_min: number;
+        transit_time_max: number;
+        is_edd_enabled: boolean;
+        free_shipping_threshold?: number;
+        edd_mode?: 'detailed' | 'compact';
+    };
 
     bundles: BundleOption[];
 
@@ -102,6 +125,25 @@ export interface ProductData {
     content: ContentSection[]; // Description, How it works, etc.
 
     relatedProducts: RelatedProduct[]; // AOV / People also bought
+    related_products_title?: string;
+
+    // Phase 17: Admin Alignment
+    has_variants?: boolean;
+    variant_options?: { name: string; values: string[] }[];
+    variants?: {
+        id: string;
+        title: string;
+        price: number;
+        mrp?: number;
+        inventory: number;
+        sku?: string;
+        options: Record<string, string>; // e.g. { Color: "Red", Size: "M" }
+    }[];
+
+    debug?: {
+        store: any;
+        platform: any;
+    };
 }
 
 // Prop Interfaces for Components
@@ -145,6 +187,9 @@ export interface CTAGroupProps {
     onPrepaidClick: () => void;
     onAddToCart?: () => void;
     codEnabled?: boolean;
+    prepaidEnabled?: boolean;
+    cartEnabled?: boolean;
+    prepaidOfferText?: string;
 }
 
 export interface ProofProps {

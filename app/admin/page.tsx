@@ -90,32 +90,34 @@ export default function AdminDashboard() {
   const checkStoreStatus = async (activeStoreId: string) => {
     setLoading(true)
 
-    // 1. Check Products (Indicator of "New" store)
-    const { count: productCount } = await supabaseBrowser
-      .from('products')
-      .select('*', { count: 'exact', head: true })
-      .eq('store_id', activeStoreId)
+    // 1. Parallel Fetch: Products, Pages, Store Config
+    const [productsRes, pagesRes, storeRes] = await Promise.all([
+      supabaseBrowser
+        .from('products')
+        .select('*', { count: 'exact', head: true })
+        .eq('store_id', activeStoreId),
+      supabaseBrowser
+        .from('pages')
+        .select('*', { count: 'exact', head: true })
+        .eq('store_id', activeStoreId),
+      supabaseBrowser
+        .from('stores')
+        .select('domain, theme_config')
+        .eq('id', activeStoreId)
+        .single()
+    ]);
 
-    // 2. Check Pages
-    const { count: pagesCount } = await supabaseBrowser
-      .from('pages')
-      .select('*', { count: 'exact', head: true })
-      .eq('store_id', activeStoreId)
+    const productCount = productsRes.count || 0;
+    const pagesCount = pagesRes.count || 0;
+    const store = storeRes.data;
 
-    // 3. Check Store Config for Checklist
-    const { data: store } = await supabaseBrowser
-      .from('stores')
-      .select('domain, theme_config')
-      .eq('id', activeStoreId)
-      .single()
-
-    const hasProducts = (productCount || 0) > 0
+    const hasProducts = productCount > 0;
 
     // Update Checklist State
     setChecklist({
       hasProducts,
       hasDomain: !!store?.domain,
-      hasPages: (pagesCount || 0) > 0,
+      hasPages: pagesCount > 0,
       hasTheme: !!store?.theme_config && Object.keys(store.theme_config).length > 0,
       hasShipping: false, // Placeholder
     })
@@ -148,25 +150,28 @@ export default function AdminDashboard() {
     if (range === '7d') from.setDate(from.getDate() - 7)
     if (range === '30d') from.setDate(from.getDate() - 30)
 
-    // 1. Fetch Orders
-    const { data: orders } = await supabaseBrowser
-      .from('orders')
-      .select(`
-        id, order_number, status, total_amount, created_at,
-        order_items (qty, price, products (title, cogs))
-      `)
-      .eq('store_id', activeStoreId)
-      .gte('created_at', from.toISOString())
-      .lte('created_at', now.toISOString())
-      .order('created_at', { ascending: false })
+    // 1. Parallel Fetch: Orders & Low Stock
+    const [ordersRes, lowStockRes] = await Promise.all([
+      supabaseBrowser
+        .from('orders')
+        .select(`
+          id, order_number, status, total_amount, created_at,
+          order_items (qty, price, products (title, cogs))
+        `)
+        .eq('store_id', activeStoreId)
+        .gte('created_at', from.toISOString())
+        .lte('created_at', now.toISOString())
+        .order('created_at', { ascending: false }),
+      supabaseBrowser
+        .from('products')
+        .select('id, title, qty')
+        .eq('store_id', activeStoreId)
+        .lt('qty', 10)
+        .limit(5)
+    ]);
 
-    // 2. Fetch Low Stock Products
-    const { data: lowStock } = await supabaseBrowser
-      .from('products')
-      .select('id, title, qty')
-      .eq('store_id', activeStoreId)
-      .lt('qty', 10)
-      .limit(5)
+    const orders = ordersRes.data;
+    const lowStock = lowStockRes.data;
 
     const safeOrders = orders || []
     let revenue = 0, profit = 0
@@ -253,15 +258,11 @@ export default function AdminDashboard() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link
-                  href="/admin/products/generate?onboarding=true"
+                  href="/admin/products/new"
                   className="inline-flex items-center justify-center gap-3 px-10 py-5 bg-blue-600 text-white rounded-[1.5rem] text-sm font-black hover:bg-blue-500 transition-all shadow-xl shadow-blue-600/20 hover:-translate-y-1 active:translate-y-0"
                 >
-                  Launch AI Generator <ArrowRight className="w-4 h-4" />
+                  Add Your First Product <ArrowRight className="w-4 h-4" />
                 </Link>
-                <div className="px-6 py-5 bg-white/5 border border-white/10 rounded-[1.5rem] flex items-center gap-3 backdrop-blur-sm">
-                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-neutral-300">AI Engine: Online</span>
-                </div>
               </div>
             </div>
           </div>

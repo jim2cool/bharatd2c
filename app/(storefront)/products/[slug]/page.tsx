@@ -50,17 +50,39 @@ export async function generateMetadata(
   }
 }
 
-export default async function ProductPage({
-  params,
-}: {
+export default async function ProductPage(props: {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
-  const { slug } = await params
+  const { slug } = await props.params
+  const searchParams = await props.searchParams
   const store = await getActiveStore()
 
   if (!slug || !store) notFound()
 
-  const product = await getProductDataForPDP(slug, store.id)
+  // 1. Preview Mode Logic
+  const isPreviewRequest = searchParams.preview === 'true'
+  let isPreviewMode = false
+
+  if (isPreviewRequest) {
+    const { supabaseAdmin } = await import('@/lib/supabase-admin')
+    const { cookies } = await import('next/headers')
+    const cookieStore = await cookies()
+
+    // Check for standard Supabase Auth Token
+    // We iterate over cookies to find the one starting with 'sb-' and ending with '-auth-token'
+    const authCookie = cookieStore.getAll().find(c => c.name.startsWith('sb-') && c.name.endsWith('-auth-token'))
+
+    if (authCookie) {
+      // Verify the token is valid by getting the user
+      const { data: { user }, error } = await supabaseAdmin.auth.getUser(authCookie.value)
+      if (user && !error) {
+        isPreviewMode = true
+      }
+    }
+  }
+
+  const product = await getProductDataForPDP(slug, store.id, { isPreview: isPreviewMode })
   if (!product) notFound()
 
   // JSON-LD Product Schema
@@ -97,6 +119,15 @@ export default async function ProductPage({
       />
       <div className="max-w-[1200px] mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-10">
 
+        {/* PREVIEW MODE BANNER */}
+        {isPreviewMode && (
+          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-xl flex items-center gap-3 text-yellow-800">
+            <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
+            <span className="font-bold text-sm uppercase tracking-wider">Preview Mode</span>
+            <span className="text-sm opacity-75 hidden md:inline">• You are viewing a draft or unpublished product.</span>
+          </div>
+        )}
+
         {/* Dawn-Style Two Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-10">
 
@@ -123,7 +154,7 @@ export default async function ProductPage({
                   case 'ingredients':
                   case 'how_to_use':
                   case 'specs':
-                    return <ContentAccordions key="content" sections={product.content} />
+                    return <ContentAccordions key="content" sections={product.content} intro={product.description_intro} />
                   case 'reviews':
                     // If reviews are requested in RHS
                     return (
@@ -150,7 +181,7 @@ export default async function ProductPage({
               case 'reviews':
                 return <Proof key="proof" rating={product.rating} reviewCount={product.reviewCount} reviews={product.reviews} />
               case 'related':
-                return <PeopleAlsoBought key="related" products={product.relatedProducts} />
+                return <PeopleAlsoBought key="related" products={product.relatedProducts} title={product.related_products_title} />
               default:
                 return null;
             }

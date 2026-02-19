@@ -79,22 +79,7 @@ export default function NewProductPage() {
         <p className="text-neutral-500 text-sm font-medium mt-1">Start fresh with a manual entry or use AI for speed.</p>
       </div>
 
-      {/* AI CALLOUT */}
-      <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-[2rem] border border-blue-100 relative overflow-hidden group">
-        <div className="relative z-10 flex items-center justify-between gap-6">
-          <div className="space-y-1">
-            <h3 className="font-black text-blue-900 text-sm">Save 15+ minutes with AI</h3>
-            <p className="text-blue-700/70 text-xs font-medium">Draft your entire listing (description, specs, images) just by pasting a link.</p>
-          </div>
-          <button
-            onClick={() => router.push('/admin/products/generate')}
-            className="shrink-0 px-5 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-black shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95"
-          >
-            Try AI Generator
-          </button>
-        </div>
-        <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-blue-600/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
-      </div>
+
 
       <div className="h-[1px] bg-neutral-100 w-full" />
 

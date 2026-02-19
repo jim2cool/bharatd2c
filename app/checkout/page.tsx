@@ -22,6 +22,7 @@ import {
   ArrowRight,
   Plus
 } from "lucide-react";
+import { calculatePrepaidDiscount, type PrepaidRule, type CartItemForDiscount } from "@/lib/utils/discount-engine";
 
 // Local type removed to use imported CartItem from @/lib/cart
 
@@ -79,29 +80,16 @@ function CheckoutContent() {
     }
   };
 
-  const finalTotal = () => {
-    let currentTotal = paymentMethod === 'online'
-      ? total - cart.reduce((acc, item) => acc + (item.prepaid_discount || 0) * item.qty, 0)
-      : total;
-
-    // Apply Automated Bundle Discount
-    currentTotal -= bundleDiscount;
-
-    if (discount) {
-      if (discount.type === 'percentage') {
-        currentTotal = currentTotal * (1 - discount.value / 100);
-      } else if (discount.type === 'fixed_amount') {
-        currentTotal = Math.max(0, currentTotal - discount.value);
-      }
-    }
-    return Math.max(0, Math.round(currentTotal));
-  };
+  // Placeholder for stacking engine (moved lower for variable visibility)
 
   // New State for Features
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [codAvailable, setCodAvailable] = useState(true);
   const [codRestrictedItems, setCodRestrictedItems] = useState<string[]>([]);
   const [store, setStore] = useState<any>(null);
+  const [prepaidRules, setPrepaidRules] = useState<PrepaidRule[]>([]);
+  const [stackingLogic, setStackingLogic] = useState<'highest_only' | 'stack_all'>('highest_only');
+  const [productCollections, setProductCollections] = useState<Record<string, string[]>>({});
 
   // OTP States (P1-1)
   const [showOtpModal, setShowOtpModal] = useState(false);
@@ -168,22 +156,80 @@ function CheckoutContent() {
   const fetchStoreData = async () => {
     const { data: storeData } = await supabaseBrowser
       .from('stores')
-      .select('name, logo_url')
+      .select('id, name, logo_url, prepaid_stacking_logic')
       .single();
-    if (storeData) setStore(storeData);
+
+    if (storeData) {
+      setStore(storeData);
+      setStackingLogic(storeData.prepaid_stacking_logic || 'highest_only');
+
+      // Fetch prepaid rules
+      const { data: rules } = await supabaseBrowser
+        .from('prepaid_configs')
+        .select('*')
+        .eq('store_id', storeData.id)
+        .eq('is_active', true);
+
+      if (rules) setPrepaidRules(rules as PrepaidRule[]);
+    }
   };
 
-  // Sales Engine: Cross-sell & Bundles
+  // Sales Engine: Cross-sell & Bundles (P8: Centralized)
   const [crossSellProducts, setCrossSellProducts] = useState<any[]>([]);
   const [bundleDiscount, setBundleDiscount] = useState(0);
 
   const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
 
+  // --- STACKING ENGINE (P8) ---
+  const getCalculatedPrepaidDiscount = (baseAmount: number) => {
+    if (paymentMethod !== 'online' || total === 0) return 0;
+
+    // Use ratio to pass effective price after bundle/promo discounts to the engine
+    const ratio = baseAmount / total;
+
+    const itemsForEngine: CartItemForDiscount[] = cart.map(item => ({
+      product_id: item.product_id,
+      price: item.price * ratio,
+      qty: item.qty,
+      collection_ids: productCollections[item.product_id] || []
+    }));
+
+    return calculatePrepaidDiscount(itemsForEngine, prepaidRules, stackingLogic);
+  };
+
+  const subtotal = total;
+  const afterBundle = subtotal - bundleDiscount;
+
+  let promoSavings = 0;
+  if (discount) {
+    if (discount.type === 'percentage') {
+      promoSavings = Math.round(afterBundle * (discount.value / 100));
+    } else {
+      promoSavings = Math.min(afterBundle, discount.value);
+    }
+  }
+  const afterPromo = Math.max(0, afterBundle - promoSavings);
+
+  // Prepaid is applied on top of the amount after other discounts
+  const prepaidSavings = getCalculatedPrepaidDiscount(afterPromo);
+  const checkoutTotalFinal = Math.max(0, Math.round(afterPromo - prepaidSavings));
+
+  const finalTotal = () => {
+    return checkoutTotalFinal;
+  };
+
   const checkCODAvailability = async (items: CartItem[]) => {
     const ids = items.map(i => i.product_id);
     const { data } = await supabaseBrowser
       .from('products')
-      .select('id, title, cod_enabled, bundle_settings')
+      .from('products')
+      .select(`
+        id, 
+        title, 
+        cod_enabled, 
+        bundle_settings,
+        product_collections ( collection_id )
+      `)
       .in('id', ids);
 
     if (data) {
@@ -207,20 +253,37 @@ function CheckoutContent() {
         if (crossData) setCrossSellProducts(crossData);
       }
 
-      // 3. Calculate Multi-purchase Bundle Discount
+      // 3. Calculate Multi-purchase Bundle Discount (Dynamic Tiers)
       let totalBDiscount = 0;
       items.forEach(item => {
         const pData = data.find(p => p.id === item.product_id);
         const bs = pData?.bundle_settings;
-        if (bs?.multi_purchase_enabled && item.qty >= (bs.multi_qty || 1)) {
+
+        // NEW: Check dynamic tiers first
+        if (bs?.enabled && bs.tiers && bs.tiers.length > 0) {
+          const sortedTiers = [...bs.tiers].sort((a, b) => b.qty - a.qty);
+          const matchingTier = sortedTiers.find(t => item.qty >= t.qty);
+          if (matchingTier) {
+            totalBDiscount += (item.price * item.qty) * (matchingTier.discount / 100);
+          }
+        }
+        // Legacy fallback
+        else if (bs?.multi_purchase_enabled && item.qty >= (bs.multi_qty || 1)) {
           if (bs.multi_discount_type === 'percentage') {
             totalBDiscount += (item.price * item.qty) * (bs.multi_discount_value / 100);
           } else if (bs.multi_discount_type === 'flat') {
-            totalBDiscount += bs.multi_discount_value;
+            totalBDiscount += (bs.multi_discount_value || 0);
           }
         }
       });
       setBundleDiscount(Math.round(totalBDiscount));
+
+      // Map Collections
+      const colMap: Record<string, string[]> = {};
+      data.forEach(p => {
+        colMap[p.id] = p.product_collections?.map((pc: any) => pc.collection_id) || [];
+      });
+      setProductCollections(colMap);
     }
   };
 
@@ -725,7 +788,7 @@ function CheckoutContent() {
                 <div className="bg-neutral-50 p-6 rounded-2xl space-y-3">
                   <div className="flex justify-between text-xs font-bold text-neutral-500 uppercase tracking-widest">
                     <span>Subtotal</span>
-                    <span className="text-neutral-900">₹{total.toLocaleString()}</span>
+                    <span className="text-neutral-900">₹{subtotal.toLocaleString()}</span>
                   </div>
                   {bundleDiscount > 0 && (
                     <div className="flex justify-between text-xs font-bold text-green-600 uppercase tracking-widest">
@@ -733,20 +796,16 @@ function CheckoutContent() {
                       <span>-₹{bundleDiscount.toLocaleString()}</span>
                     </div>
                   )}
-                  {paymentMethod === 'online' && (
-                    <div className="flex justify-between text-xs font-bold text-green-600 uppercase tracking-widest">
-                      <span>Prepaid Discount</span>
-                      <span>-₹{cart.reduce((acc, item) => acc + (item.prepaid_discount || 0) * item.qty, 0).toLocaleString()}</span>
-                    </div>
-                  )}
                   {discount && (
                     <div className="flex justify-between text-xs font-bold text-green-600 uppercase tracking-widest">
                       <span>Promo: {discount.code}</span>
-                      <span>
-                        -₹{discount.type === 'percentage'
-                          ? Math.round(total * (discount.value / 100)).toLocaleString()
-                          : discount.value.toLocaleString()}
-                      </span>
+                      <span>-₹{promoSavings.toLocaleString()}</span>
+                    </div>
+                  )}
+                  {paymentMethod === 'online' && prepaidSavings > 0 && (
+                    <div className="flex justify-between text-xs font-bold text-green-600 uppercase tracking-widest">
+                      <span>Prepaid Discount</span>
+                      <span>-₹{prepaidSavings.toLocaleString()}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-xs font-bold text-neutral-500 uppercase tracking-widest">

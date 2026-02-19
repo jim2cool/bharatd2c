@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { StorePaymentSettings } from "./StorePaymentSettings";
 
 const storeSchema = z.object({
     name: z.string().min(1, "Store name is required"),
@@ -240,6 +241,9 @@ export default function GeneralSettingsPage() {
                         </div>
                     </div>
                 </section>
+
+                {/* Store Payment Settings */}
+                <StorePaymentSettings />
             </div>
         </form>
     );

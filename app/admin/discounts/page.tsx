@@ -16,11 +16,14 @@ import {
     TrendingDown,
     Search,
     ChevronRight,
-    ArrowUpRight
+    ArrowUpRight,
+    Info
 } from "lucide-react";
 import { supabaseBrowser } from "@/lib/supabase-browser";
 import { getActiveStoreIdClient as getActiveStoreId } from "@/lib/getActiveStore.client";
 import { toast } from "sonner";
+import { PrepaidRulesSection } from "./components/PrepaidRulesSection";
+import { saveDiscount, toggleDiscountStatus, deleteDiscountServer, getDiscounts } from "./actions";
 
 export default function DiscountsPage() {
     const [loading, setLoading] = useState(true);
@@ -46,13 +49,15 @@ export default function DiscountsPage() {
         const storeId = getActiveStoreId();
         if (!storeId) return;
 
-        const { data, error } = await supabaseBrowser
-            .from("discounts")
-            .select("*")
-            .eq("store_id", storeId)
-            .order("created_at", { ascending: false });
+        setLoading(true);
+        const result = await getDiscounts(storeId);
 
-        if (data) setDiscounts(data);
+        if (result.success && result.data) {
+            setDiscounts(result.data);
+        } else {
+            console.error("Failed to fetch discounts via Server Action");
+            toast.error("Could not load discounts");
+        }
         setLoading(false);
     };
 
@@ -65,21 +70,21 @@ export default function DiscountsPage() {
         setSaving(true);
         const storeId = getActiveStoreId();
 
-        const { error } = await supabaseBrowser
-            .from("discounts")
-            .insert({
-                store_id: storeId,
-                code: formData.code.toUpperCase(),
-                type: formData.type,
-                value: formData.value,
-                min_order_amount: formData.min_order_amount || 0,
-                expires_at: formData.expires_at || null,
-                usage_limit: formData.usage_limit ? parseInt(formData.usage_limit as string) : null,
-                is_active: true
-            });
+        const payload = {
+            store_id: storeId,
+            code: formData.code.toUpperCase(),
+            type: formData.type,
+            value: formData.value,
+            min_order_amount: formData.min_order_amount || 0,
+            expires_at: formData.expires_at || null,
+            usage_limit: formData.usage_limit ? parseInt(formData.usage_limit as string) : null,
+            is_active: true
+        };
 
-        if (error) {
-            toast.error("Failed to create discount");
+        const result = await saveDiscount(payload);
+
+        if (result.error) {
+            toast.error(`Failed to create discount: ${result.error}`);
         } else {
             toast.success("Discount created successfully");
             setFormData({
@@ -97,23 +102,16 @@ export default function DiscountsPage() {
     };
 
     const toggleStatus = async (id: string, current: boolean) => {
-        const { error } = await supabaseBrowser
-            .from("discounts")
-            .update({ is_active: !current })
-            .eq("id", id);
-
-        if (error) toast.error("Update failed");
+        const result = await toggleDiscountStatus(id, !current);
+        if (result.error) toast.error("Update failed");
         else fetchDiscounts();
     };
 
     const deleteDiscount = async (id: string) => {
         if (!confirm("Are you sure?")) return;
-        const { error } = await supabaseBrowser
-            .from("discounts")
-            .delete()
-            .eq("id", id);
+        const result = await deleteDiscountServer(id);
 
-        if (error) toast.error("Delete failed");
+        if (result.error) toast.error("Delete failed");
         else fetchDiscounts();
     };
 
@@ -121,6 +119,11 @@ export default function DiscountsPage() {
 
     return (
         <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4">
+            {/* PREPAID RULES SECTION */}
+            <div className="mb-12 border-b border-neutral-100 pb-12">
+                <PrepaidRulesSection />
+            </div>
+
             {/* HEADER */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="space-y-1">
@@ -135,6 +138,29 @@ export default function DiscountsPage() {
                 >
                     {showNewForm ? <ChevronRight className="w-4 h-4 rotate-90" /> : <Plus className="w-4 h-4" />}
                     {showNewForm ? "Cancel" : "Create Discount"}
+                </Button>
+            </div>
+
+            {/* ADVISORY: Quantity Breaks (P8) */}
+            <div className="bg-blue-50/50 p-6 rounded-[2rem] border border-blue-100 flex flex-col md:flex-row items-center gap-6 animate-in slide-in-from-right-4">
+                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                    <Info className="w-6 h-6 text-blue-600" />
+                </div>
+                <div className="text-center md:text-left flex-1">
+                    <h3 className="text-xs font-black text-blue-900 uppercase tracking-wider flex items-center justify-center md:justify-start gap-2">
+                        Quantity Breaks Management
+                    </h3>
+                    <p className="text-[10px] font-bold text-blue-500 tracking-tight leading-relaxed mt-1">
+                        Bulk discounts and tiered pricing are configured at the <span className="text-blue-700">Individual Product</span> level.
+                        Go to Products &gt; Edit &gt; Quantity Breaks to manage these.
+                    </p>
+                </div>
+                <Button
+                    variant="outline"
+                    className="border-blue-100 text-blue-600 hover:bg-blue-100/50 rounded-xl h-9 text-[9px] font-black uppercase tracking-widest px-4"
+                    onClick={() => window.location.href = '/admin/products'}
+                >
+                    Manage Products
                 </Button>
             </div>
 

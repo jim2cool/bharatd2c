@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
@@ -71,6 +72,8 @@ const MenuBar = ({ editor }: { editor: any }) => {
 }
 
 export function Editor({ value, onChange, placeholder }: EditorProps) {
+    const [isCodeMode, setIsCodeMode] = useState(false)
+
     const editor = useEditor({
         extensions: [
             StarterKit,
@@ -91,6 +94,7 @@ export function Editor({ value, onChange, placeholder }: EditorProps) {
         onUpdate: ({ editor }) => {
             onChange(editor.getHTML())
         },
+        immediatelyRender: false,
         editorProps: {
             attributes: {
                 class: 'prose prose-sm max-w-none focus:outline-none min-h-[200px] p-4 text-sm'
@@ -98,10 +102,51 @@ export function Editor({ value, onChange, placeholder }: EditorProps) {
         }
     })
 
+    // Sync editor content when value changes externally (e.g. form reset)
+    useEffect(() => {
+        if (editor && value !== editor.getHTML()) {
+            editor.commands.setContent(value)
+        }
+    }, [value, editor])
+
     return (
         <div className="border rounded-2xl overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 transition-all bg-white">
-            <MenuBar editor={editor} />
-            <EditorContent editor={editor} />
+            <div className="flex items-center justify-between bg-neutral-50 px-4 py-1 border-b">
+                <div className="flex gap-2">
+                    <button
+                        type="button"
+                        onClick={() => setIsCodeMode(false)}
+                        className={`text-[10px] font-black uppercase tracking-widest px-3 py-2 rounded-t-lg transition-all ${!isCodeMode ? 'bg-white border-x border-t -mb-[1px] text-blue-600' : 'text-neutral-400 hover:text-neutral-600'}`}
+                    >
+                        Visual
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setIsCodeMode(true)}
+                        className={`text-[10px] font-black uppercase tracking-widest px-3 py-2 rounded-t-lg transition-all ${isCodeMode ? 'bg-white border-x border-t -mb-[1px] text-blue-600' : 'text-neutral-400 hover:text-neutral-600'}`}
+                    >
+                        Code
+                    </button>
+                </div>
+                <div className="text-[9px] font-bold text-neutral-400 uppercase tracking-tight">
+                    {isCodeMode ? 'Direct HTML Editing' : 'WYSIWYG Editor'}
+                </div>
+            </div>
+
+            {!isCodeMode && <MenuBar editor={editor} />}
+
+            <div className="relative">
+                {isCodeMode ? (
+                    <textarea
+                        value={value}
+                        onChange={(e) => onChange(e.target.value)}
+                        className="w-full min-h-[300px] p-4 text-xs font-mono bg-neutral-900 text-green-400 focus:outline-none"
+                        placeholder="Paste your HTML here..."
+                    />
+                ) : (
+                    <EditorContent editor={editor} />
+                )}
+            </div>
         </div>
     )
 }

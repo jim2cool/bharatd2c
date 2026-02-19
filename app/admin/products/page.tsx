@@ -168,13 +168,6 @@ export default function ProductsPage() {
 
         <div className="flex gap-3">
           <Link
-            href="/admin/products/generate"
-            className="px-6 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-black shadow-lg shadow-blue-100 ring-4 ring-white hover:bg-blue-700 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 group"
-          >
-            <Sparkles className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform" />
-            Generate with AI
-          </Link>
-          <Link
             href="/admin/products/import"
             className="px-6 py-2.5 bg-white border border-neutral-200 rounded-xl text-xs font-bold hover:bg-neutral-50 shadow-sm transition-all"
           >

@@ -33,16 +33,6 @@ export function OnboardingChecklist({ checklist }: { checklist: ChecklistState }
 
     const steps = [
         {
-            id: 'hasProducts',
-            title: 'Generate products with AI',
-            description: 'Save hours by generating high-converting product listings from just a link or image.',
-            action: 'Generate with AI',
-            time: '2 mins',
-            href: '/admin/products/generate',
-            completed: checklist.hasProducts,
-            isMagic: true
-        },
-        {
             id: 'hasPages',
             title: 'Review store policies',
             description: 'We\'ve pre-filled standard legal pages to save you time. Just check and personalize.',

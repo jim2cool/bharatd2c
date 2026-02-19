@@ -2,240 +2,120 @@
 
 import { useEffect, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase-browser";
-import { Save, ShieldAlert, Globe, Server, Mail, CheckCircle2, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
+import { ShieldAlert, CreditCard, ShoppingCart, Banknote, Save } from "lucide-react";
 
-// ═══════════════════════════════════════════════════════════════════════════
-// TYPES
-// ═══════════════════════════════════════════════════════════════════════════
-
-type PlatformSetting = {
-    key: string;
-    value: any;
-};
-
-// ═══════════════════════════════════════════════════════════════════════════
-// MAIN PAGE
-// ═══════════════════════════════════════════════════════════════════════════
-
-export default function PlatformSettingsPage() {
+export default function GlobalSettingsPage() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [settings, setSettings] = useState<Record<string, any>>({
-        maintenance_mode: false,
-        registration_enabled: true,
-        support_email: "support@easy-d2c.com",
-        main_domain: "easy-d2c.com",
-        cname_target: "ingress.easy-d2c.com"
+    const [settings, setSettings] = useState({
+        cod_enabled: true,
+        prepaid_enabled: true,
+        cart_button_enabled: true
     });
 
-    const [hasChanges, setHasChanges] = useState(false);
-
     useEffect(() => {
-        const fetchSettings = async () => {
-            try {
-                const { data, error } = await supabaseBrowser
-                    .from("platform_settings")
-                    .select("key, value");
+        const load = async () => {
+            const { data } = await supabaseBrowser
+                .from('platform_settings')
+                .select('*')
+                .eq('id', 1)
+                .single();
 
-                if (!error && data) {
-                    const mapped = data.reduce((acc, curr) => ({
-                        ...acc,
-                        [curr.key]: curr.value
-                    }), {});
-                    setSettings(prev => ({ ...prev, ...mapped }));
-                }
-            } catch (e) {
-                console.warn("Could not fetch platform settings, using defaults.");
-            } finally {
-                setLoading(false);
+            if (data) {
+                setSettings({
+                    cod_enabled: data.cod_enabled,
+                    prepaid_enabled: data.prepaid_enabled,
+                    cart_button_enabled: data.cart_button_enabled
+                });
             }
+            setLoading(false);
         };
-
-        fetchSettings();
+        load();
     }, []);
 
-    const handleChange = (key: string, value: any) => {
-        setSettings(prev => ({ ...prev, [key]: value }));
-        setHasChanges(true);
-    };
-
-    const handleSave = async () => {
+    const save = async () => {
         setSaving(true);
-        try {
-            // Since we can only update individual rows, we'll loop or use a rpc
-            const updates = Object.entries(settings).map(([key, value]) =>
-                supabaseBrowser.from("platform_settings").upsert({ key, value })
-            );
+        const { error } = await supabaseBrowser
+            .from('platform_settings')
+            .upsert({
+                id: 1,
+                ...settings
+            });
 
-            const results = await Promise.all(updates);
-            const errors = results.filter(r => r.error);
-
-            if (errors.length > 0) {
-                console.error("Errors saving settings:", errors);
-                toast.error("Some settings failed to save. Verify DB permissions.");
-            } else {
-                toast.success("All settings saved successfully");
-                setHasChanges(false);
-            }
-        } catch (e) {
-            toast.error("Failed to connect to platform settings");
-        } finally {
-            setSaving(false);
-        }
+        setSaving(false);
+        if (error) toast.error("Failed to update platform settings");
+        else toast.success("Platform settings updated");
     };
 
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center min-h-[400px]">
-                <Loader2 className="w-8 h-8 animate-spin text-neutral-300" />
-            </div>
-        );
-    }
-
-    return (
-        <div className="max-w-6xl mx-auto py-8 px-4 space-y-10">
-            {/* HEADER */}
-            <div className="flex items-center justify-between border-b border-neutral-100 pb-8">
+    const ToggleCard = ({ label, field, icon: Icon, description }: any) => (
+        <div className="flex items-center justify-between p-6 bg-white rounded-2xl border border-neutral-200 shadow-sm">
+            <div className="flex items-center gap-4">
+                <div className={`p-3 rounded-xl ${settings[field] ? 'bg-blue-100 text-blue-600' : 'bg-red-100 text-red-600'}`}>
+                    <Icon className="w-6 h-6" />
+                </div>
                 <div>
-                    <h1 className="text-4xl font-black text-neutral-900 tracking-tight">Platform Governance</h1>
-                    <p className="text-neutral-500 mt-1 font-medium">Control global behavior and infrastructure targets</p>
-                </div>
-                <button
-                    onClick={handleSave}
-                    disabled={saving || !hasChanges}
-                    className="flex items-center gap-2 px-8 py-3 bg-black text-white font-bold rounded-xl hover:bg-neutral-800 disabled:opacity-30 transition-all shadow-xl hover:shadow-2xl active:scale-95"
-                >
-                    {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                    {saving ? "Saving..." : "Save Configuration"}
-                </button>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-                <div className="lg:col-span-12 space-y-8">
-
-                    {/* CRITICAL CONTROLS */}
-                    <section className="bg-white border-2 border-red-50 p-8 rounded-[2rem] shadow-sm relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-8 opacity-5">
-                            <ShieldAlert className="w-32 h-32 text-red-600" />
-                        </div>
-                        <h2 className="text-xl font-black text-red-900 mb-6 flex items-center gap-2">
-                            <ShieldAlert className="w-5 h-5" />
-                            Emergency & Policy Controls
-                        </h2>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
-                            <ControlBlock
-                                label="Platform Maintenance Mode"
-                                description="Redirects all marketplace and admin traffic to a maintenance page. Super-Admins still have access."
-                                icon={Server}
-                                checked={settings.maintenance_mode}
-                                onChange={(val: boolean) => handleChange("maintenance_mode", val)}
-                                activeColor="bg-red-600"
-                            />
-                            <ControlBlock
-                                label="Seller Self-Registration"
-                                description="Enable or disable the onboarding flow for new store owners. Current stores remain active."
-                                icon={Globe}
-                                checked={settings.registration_enabled}
-                                onChange={(val: boolean) => handleChange("registration_enabled", val)}
-                                activeColor="bg-black"
-                            />
-                        </div>
-                    </section>
-
-                    {/* INFRASTRUCTURE & DOMAINS */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <section className="bg-white p-8 rounded-[2rem] border border-neutral-200 shadow-sm relative overflow-hidden group">
-                            <h2 className="text-xl font-black text-neutral-800 mb-6 flex items-center gap-2">
-                                <Globe className="w-5 h-5 text-blue-500" />
-                                Domain Infrastructure
-                            </h2>
-                            <div className="space-y-6">
-                                <InputBlock
-                                    label="Primary Marketplace Domain"
-                                    description="Used for main storefront landing and core routing"
-                                    value={settings.main_domain}
-                                    onChange={(val: string) => handleChange("main_domain", val)}
-                                    placeholder="easy-d2c.com"
-                                />
-                                <InputBlock
-                                    label="Custom Domain CNAME Target"
-                                    description="Value sellers should point their DNS to"
-                                    value={settings.cname_target}
-                                    onChange={(val: string) => handleChange("cname_target", val)}
-                                    placeholder="ingress.easy-d2c.com"
-                                />
-                            </div>
-                        </section>
-
-                        <section className="bg-white p-8 rounded-[2rem] border border-neutral-200 shadow-sm relative overflow-hidden group">
-                            <h2 className="text-xl font-black text-neutral-800 mb-6 flex items-center gap-2">
-                                <Mail className="w-5 h-5 text-purple-500" />
-                                Support & Comms
-                            </h2>
-                            <div className="space-y-6">
-                                <InputBlock
-                                    label="Global Support Email"
-                                    description="Primary contact address for platform-wide issues"
-                                    value={settings.support_email}
-                                    onChange={(val: string) => handleChange("support_email", val)}
-                                    placeholder="support@easy-d2c.com"
-                                />
-                                <div className="p-4 bg-purple-50 rounded-2xl border border-purple-100 mt-4">
-                                    <div className="flex gap-3">
-                                        <CheckCircle2 className="w-5 h-5 text-purple-600 shrink-0" />
-                                        <div className="text-[11px] text-purple-900 font-bold leading-relaxed">
-                                            PLATFORM STATUS: Healthy
-                                            <div className="font-bold opacity-70 mt-1 uppercase tracking-widest text-[9px]">All systems operational in Region fsn1</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
-                    </div>
-
+                    <h3 className="text-lg font-bold text-neutral-900">{label}</h3>
+                    <p className="text-sm text-neutral-500">{description}</p>
                 </div>
             </div>
-        </div>
-    );
-}
-
-function ControlBlock({ label, description, icon: Icon, checked, onChange, activeColor }: any) {
-    return (
-        <div className="flex items-start justify-between p-6 bg-white border border-neutral-100 rounded-3xl hover:border-neutral-200 transition-all group">
-            <div className="space-y-2 max-w-[80%]">
-                <div className="flex items-center gap-2">
-                    <Icon className="w-4 h-4 text-neutral-400 group-hover:text-black transition-colors" />
-                    <span className="text-sm font-black text-neutral-900 tracking-tight">{label}</span>
-                </div>
-                <p className="text-xs text-neutral-500 font-medium leading-relaxed">{description}</p>
-            </div>
-            <button
-                type="button"
-                onClick={() => onChange(!checked)}
-                className={`w-12 h-6 rounded-full transition-all relative shrink-0 ${checked ? activeColor : "bg-neutral-100"}`}
-            >
-                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${checked ? "translate-x-6" : "translate-x-0"}`} />
-            </button>
-        </div>
-    );
-}
-
-function InputBlock({ label, description, value, onChange, placeholder }: any) {
-    return (
-        <div className="space-y-2">
-            <div className="flex items-baseline justify-between">
-                <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest ml-1">{label}</label>
-            </div>
-            <input
-                type="text"
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                placeholder={placeholder}
-                className="w-full px-5 py-3 bg-neutral-50 border border-neutral-100 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-black outline-none transition-all"
+            <Switch
+                checked={settings[field]}
+                onCheckedChange={(val) => setSettings({ ...settings, [field]: val })}
+                className="scale-125"
             />
-            <p className="text-[10px] text-neutral-400 font-bold ml-1 uppercase tracking-tight">{description}</p>
+        </div>
+    );
+
+    if (loading) return <div className="p-10 text-center">Loading settings...</div>;
+
+    return (
+        <div className="max-w-4xl mx-auto py-12 px-6">
+            <div className="flex items-center justify-between mb-12 border-b border-neutral-200 pb-8">
+                <div>
+                    <h1 className="text-4xl font-black text-neutral-900 tracking-tight mb-2">Platform Control</h1>
+                    <p className="text-neutral-500 font-medium text-lg">Master switches for global feature availability</p>
+                </div>
+                <Button onClick={save} disabled={saving} size="lg" className="bg-black text-white px-8 h-14 text-lg rounded-xl">
+                    {saving ? "Saving..." : "Save Config"}
+                </Button>
+            </div>
+
+            <div className="space-y-6">
+                <div className="p-6 bg-red-50 rounded-2xl border border-red-100 flex gap-4 items-start mb-8">
+                    <ShieldAlert className="w-6 h-6 text-red-600 mt-1" />
+                    <div>
+                        <h3 className="text-lg font-bold text-red-900">Critical Zone</h3>
+                        <p className="text-red-700 leading-relaxed">
+                            Disabling a feature here will forcefully disable it for <strong>ALL STORES</strong> immediately, regardless of their individual settings.
+                            Use with caution.
+                        </p>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-6">
+                    <ToggleCard
+                        label="Global Prepaid Gateway"
+                        field="prepaid_enabled"
+                        icon={CreditCard}
+                        description="Master switch for online payments across the platform."
+                    />
+                    <ToggleCard
+                        label="Global Cash on Delivery"
+                        field="cod_enabled"
+                        icon={Banknote}
+                        description="Master switch for loose cash handling services."
+                    />
+                    <ToggleCard
+                        label="Global Cart Workflow"
+                        field="cart_button_enabled"
+                        icon={ShoppingCart}
+                        description="Master switch for Add to Cart functionality."
+                    />
+                </div>
+            </div>
         </div>
     );
 }

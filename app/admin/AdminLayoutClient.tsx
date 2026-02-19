@@ -58,9 +58,12 @@ export function AdminLayoutClient({
     if (sid) {
       getStoreBaseUrl(supabaseBrowser).then(url => setStoreUrl(url))
 
-      // 🛰️ REAL-TIME ORDER NOTIFICATIONS
-      const channel = supabaseBrowser
-        .channel('admin-order-pulse')
+      // 🛰️ REAL-TIME ORDER NOTIFICATIONS (Optimized)
+      const channel = supabaseBrowser.channel('admin-order-pulse')
+
+      let lastToast = 0;
+
+      channel
         .on(
           'postgres_changes',
           {
@@ -70,6 +73,11 @@ export function AdminLayoutClient({
             filter: `store_id=eq.${sid}`
           },
           (payload) => {
+            // Prevent spam: only show 1 toast every 2 seconds
+            const now = Date.now();
+            if (now - lastToast < 2000) return;
+            lastToast = now;
+
             const newOrder = payload.new as any
             toast.success('New Order Received!', {
               description: `Order #${newOrder.order_number} just landed.`,
@@ -79,8 +87,6 @@ export function AdminLayoutClient({
               },
               duration: 8000,
             })
-
-            // Play a subtle notification sound if possible, or just the visual toast
           }
         )
         .subscribe()
@@ -105,7 +111,6 @@ export function AdminLayoutClient({
         { label: 'Orders', href: '/admin/orders', icon: ShoppingBag },
         { label: 'Customers', href: '#', icon: Users },
         { label: 'Discounts', href: '/admin/discounts', icon: Percent },
-        { label: 'Bundles', href: '/admin/products/bundles', icon: Layers },
         { label: 'Marketing', href: '/admin/marketing', icon: Megaphone },
       ]
     },
@@ -138,7 +143,7 @@ export function AdminLayoutClient({
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <div className="flex min-h-screen bg-[#f8fafc]">
+    <div className="fixed inset-0 flex overflow-hidden bg-[#f8fafc]">
       {/* LEFT NAV */}
       <aside className="w-[260px] bg-white border-r border-slate-100 flex flex-col admin-pulse-sidebar sticky top-0 h-screen">
         <div className="px-6 py-8">
@@ -259,12 +264,11 @@ export function AdminLayoutClient({
                 <ArrowUpRight className="w-3.5 h-3.5 opacity-30 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </a>
               <Link
-                href="/admin/products/generate"
+                href="/admin/products/new"
                 className="flex items-center gap-3 px-6 py-3 bg-white border border-slate-100 rounded-2xl text-xs font-black uppercase tracking-widest shadow-2xl hover:bg-slate-50 transition-all group"
               >
                 <Plus className="w-4 h-4 text-neutral-900" />
                 <span>Create Product</span>
-                <Sparkles className="w-3.5 h-3.5 text-blue-400 group-hover:rotate-12 transition-transform" />
               </Link>
             </div>
           )}

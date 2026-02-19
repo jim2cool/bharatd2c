@@ -19,15 +19,21 @@ export function DeliveryEstimator() {
     const calculateEstimate = (pin: string) => {
         setStatus('loading')
 
-        // Simulate API delay
+        // User requested fixed logic based on order date
         setTimeout(() => {
             const today = new Date()
-            // Delhi/Metros: 3 days, Others: 5-7 days
-            const daysToAdd = pin.startsWith('11') || pin.startsWith('40') || pin.startsWith('56') ? 3 : 5
-            const deliveryDate = new Date(today.getTime() + (daysToAdd * 24 * 60 * 60 * 1000))
+            // Standardizing: 4 days for metros/fast, 7 days for others
+            const isMetro = pin.startsWith('11') || pin.startsWith('40') || pin.startsWith('56') || pin.startsWith('60') || pin.startsWith('70')
+            const minDays = isMetro ? 4 : 5
+            const maxDays = isMetro ? 6 : 8
 
-            const options: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'short' }
-            setEstimate(deliveryDate.toLocaleDateString('en-IN', options))
+            const deliveryDateMin = new Date(today.getTime() + (minDays * 24 * 60 * 60 * 1000))
+            const deliveryDateMax = new Date(today.getTime() + (maxDays * 24 * 60 * 60 * 1000))
+
+            const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' }
+            const dateStr = `${deliveryDateMin.toLocaleDateString('en-IN', options)} - ${deliveryDateMax.toLocaleDateString('en-IN', options)}`
+
+            setEstimate(dateStr)
             setStatus('success')
         }, 800)
     }
