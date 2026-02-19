@@ -26,8 +26,8 @@ import { Switch } from "@/components/ui/switch"
 
 // Schema
 const shippingSettingsSchema = z.object({
-    is_edd_enabled: z.boolean().default(true),
-    edd_mode: z.enum(['detailed', 'compact']).default('detailed'),
+    is_edd_enabled: z.boolean(),
+    edd_mode: z.enum(['detailed', 'compact']),
     handling_time_min: z.coerce.number().min(0, "Min 0 days"),
     handling_time_max: z.coerce.number().min(0, "Min 0 days"),
     transit_time_min: z.coerce.number().min(0, "Min 0 days"),
