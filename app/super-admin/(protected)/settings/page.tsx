@@ -10,7 +10,13 @@ import { ShieldAlert, CreditCard, ShoppingCart, Banknote, Save } from "lucide-re
 export default function GlobalSettingsPage() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [settings, setSettings] = useState({
+    interface Settings {
+        cod_enabled: boolean;
+        prepaid_enabled: boolean;
+        cart_button_enabled: boolean;
+    }
+
+    const [settings, setSettings] = useState<Settings>({
         cod_enabled: true,
         prepaid_enabled: true,
         cart_button_enabled: true
@@ -50,7 +56,7 @@ export default function GlobalSettingsPage() {
         else toast.success("Platform settings updated");
     };
 
-    const ToggleCard = ({ label, field, icon: Icon, description }: any) => (
+    const ToggleCard = ({ label, field, icon: Icon, description }: { label: string, field: keyof Settings, icon: any, description: string }) => (
         <div className="flex items-center justify-between p-6 bg-white rounded-2xl border border-neutral-200 shadow-sm">
             <div className="flex items-center gap-4">
                 <div className={`p-3 rounded-xl ${settings[field] ? 'bg-blue-100 text-blue-600' : 'bg-red-100 text-red-600'}`}>
