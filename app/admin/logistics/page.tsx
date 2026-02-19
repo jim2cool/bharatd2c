@@ -42,7 +42,7 @@ export default function LogisticsPage() {
     const [saving, setSaving] = useState(false)
     const supabase = supabaseBrowser
 
-    const form = useForm<ShippingSettingsFormValues>({
+    const form = useForm<any>({
         resolver: zodResolver(shippingSettingsSchema),
         defaultValues: {
             is_edd_enabled: true,
