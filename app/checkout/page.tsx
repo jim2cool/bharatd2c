@@ -222,7 +222,6 @@ function CheckoutContent() {
     const ids = items.map(i => i.product_id);
     const { data } = await supabaseBrowser
       .from('products')
-      .from('products')
       .select(`
         id, 
         title, 
