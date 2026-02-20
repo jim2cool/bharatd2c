@@ -80,6 +80,9 @@ export type ProductFormData = {
   shipping_cost_estimate?: number | null
   gateway_fee?: number | null
   base_ad_cost?: number | null
+  weight_grams?: number | null
+  partial_cod_enabled?: boolean | null
+  use_store_partial_settings?: boolean | null
 }
 
 export function useProductEditor(id: string) {
@@ -144,7 +147,10 @@ export function useProductEditor(id: string) {
           },
           ...data.urgency_settings
         },
-        show_estimated_delivery: data.show_estimated_delivery !== false
+        show_estimated_delivery: data.show_estimated_delivery !== false,
+        weight_grams: data.weight_grams || 500,
+        partial_cod_enabled: !!data.partial_cod_enabled,
+        use_store_partial_settings: data.use_store_partial_settings !== false
       })
       setLoading(false)
     }
@@ -200,7 +206,10 @@ export function useProductEditor(id: string) {
       show_estimated_delivery: data.show_estimated_delivery !== false, // Default to true if undefined
       shipping_cost_estimate: data.shipping_cost_estimate ? Number(data.shipping_cost_estimate) : 0,
       gateway_fee: data.gateway_fee ? Number(data.gateway_fee) : 0,
-      base_ad_cost: data.base_ad_cost ? Number(data.base_ad_cost) : 0
+      base_ad_cost: data.base_ad_cost ? Number(data.base_ad_cost) : 0,
+      weight_grams: data.weight_grams ? Number(data.weight_grams) : 500,
+      partial_cod_enabled: !!data.partial_cod_enabled,
+      use_store_partial_settings: data.use_store_partial_settings !== false
     }
 
     // Validation: Enforce that at least one purchase path is resolved
@@ -257,7 +266,10 @@ export function useProductEditor(id: string) {
       show_estimated_delivery: payload.show_estimated_delivery,
       shipping_cost_estimate: payload.shipping_cost_estimate,
       gateway_fee: payload.gateway_fee,
-      base_ad_cost: payload.base_ad_cost
+      base_ad_cost: payload.base_ad_cost,
+      weight_grams: payload.weight_grams,
+      partial_cod_enabled: payload.partial_cod_enabled,
+      use_store_partial_settings: payload.use_store_partial_settings
     }
 
     const { error: productError, data: updateData, count } = await supabaseBrowser

@@ -93,25 +93,25 @@ export default function ShippingManager({ order, onUpdate }: { order: any, onUpd
                         key={partner.id}
                         onClick={() => partner.status === 'ready' && setSelectedPartner(partner.id)}
                         disabled={partner.status === 'maintenance'}
-                        className={`w-full text-left p-3 rounded-lg border transition-all flex items-center justify-between group
+                        className={`w-full text-left p-4 rounded-xl border transition-all flex items-center justify-between group
               ${selectedPartner === partner.id
-                                ? 'border-indigo-600 bg-indigo-50/50 shadow-sm'
-                                : 'border-neutral-100 hover:border-neutral-200 bg-neutral-50/30'
+                                ? 'border-blue-600 bg-blue-50/50 shadow-sm'
+                                : 'border-slate-100 hover:border-slate-200 bg-white'
                             }
               ${partner.status === 'maintenance' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
             `}
                     >
                         <div className="flex items-center gap-3">
-                            <div className={`w-2 h-2 rounded-full ${selectedPartner === partner.id ? 'bg-indigo-600 animate-pulse' : 'bg-neutral-300'}`} />
+                            <div className={`w-2.5 h-2.5 rounded-full ${selectedPartner === partner.id ? 'bg-blue-600 animate-pulse' : 'bg-slate-200 group-hover:bg-slate-300'}`} />
                             <div>
-                                <div className="text-xs font-bold text-neutral-800">{partner.name}</div>
-                                <div className="text-[10px] text-neutral-400 font-medium">ETA: {partner.eta}</div>
+                                <div className="text-sm font-bold text-slate-900">{partner.name}</div>
+                                <div className="text-[10px] text-slate-500 font-medium uppercase tracking-tight">ETA: {partner.eta}</div>
                             </div>
                         </div>
                         <div className="text-right">
-                            <div className="text-xs font-black text-neutral-900">₹{partner.price}</div>
+                            <div className="text-sm font-black text-slate-900">₹{partner.price}</div>
                             {partner.status === 'maintenance' && (
-                                <div className="text-[8px] font-black text-red-500 uppercase tracking-tighter">Down</div>
+                                <div className="text-[8px] font-black text-red-500 uppercase tracking-tighter">Unavailable</div>
                             )}
                         </div>
                     </button>

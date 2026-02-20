@@ -99,6 +99,9 @@ const productSchema = z.object({
   shipping_cost_estimate: z.number().nullable().optional(),
   gateway_fee: z.number().nullable().optional(),
   base_ad_cost: z.number().nullable().optional(),
+  weight_grams: z.number().nullable().optional(),
+  partial_cod_enabled: z.boolean(),
+  use_store_partial_settings: z.boolean(),
 })
 
 export default function EditProductPage() {
@@ -137,7 +140,10 @@ export default function EditProductPage() {
       variants: [],
       shipping_cost_estimate: 0,
       gateway_fee: 0,
-      base_ad_cost: 0
+      base_ad_cost: 0,
+      weight_grams: 500,
+      partial_cod_enabled: false,
+      use_store_partial_settings: true
     }
   })
 
@@ -189,7 +195,10 @@ export default function EditProductPage() {
         prepaid_offer_text: product.prepaid_offer_text,
         has_variants: !!product.has_variants,
         variant_options: product.variant_options || [],
-        variants: product.product_variants || []
+        variants: product.product_variants || [],
+        weight_grams: product.weight_grams || 500,
+        partial_cod_enabled: !!product.partial_cod_enabled,
+        use_store_partial_settings: product.use_store_partial_settings !== false
       })
     }
   }, [product, reset])

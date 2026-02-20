@@ -4,8 +4,8 @@ import { getCart, clearCart, getDirectCheckoutItem, clearDirectCheckout, CartIte
 import { useEffect, useState, Suspense } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { supabaseBrowser } from "@/lib/supabase-browser";
-import { evaluateRTORisk, RTOScore } from "@/lib/rto-intelligence";
+import { calculateRiskScore, RiskResult } from "@/lib/rto-engine";
+import { getSessionSignals, useAdaptiveTracking } from "@/lib/adaptive-engine";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -23,6 +23,7 @@ import {
   Plus
 } from "lucide-react";
 import { calculatePrepaidDiscount, type PrepaidRule, type CartItemForDiscount } from "@/lib/utils/discount-engine";
+import { calculatePartialAmount } from "@/lib/utils/payment-utils";
 
 // Local type removed to use imported CartItem from @/lib/cart
 
@@ -30,6 +31,9 @@ function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const errorParam = searchParams.get('error');
+
+  // Activate Session Intelligence
+  useAdaptiveTracking();
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [showSummary, setShowSummary] = useState(false);
@@ -46,8 +50,8 @@ function CheckoutContent() {
     city: "",
     state: "",
   });
-  const [rtoScore, setRtoScore] = useState<RTOScore | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'online'>('cod');
+  const [rtoResult, setRtoResult] = useState<RiskResult | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'online' | 'partial_cod'>('cod');
   const [email, setEmail] = useState("");
   const [createAccount, setCreateAccount] = useState(false);
 
@@ -90,6 +94,9 @@ function CheckoutContent() {
   const [prepaidRules, setPrepaidRules] = useState<PrepaidRule[]>([]);
   const [stackingLogic, setStackingLogic] = useState<'highest_only' | 'stack_all'>('highest_only');
   const [productCollections, setProductCollections] = useState<Record<string, string[]>>({});
+  const [isPartialForced, setIsPartialForced] = useState(false);
+  const [partialAmount, setPartialAmount] = useState(0);
+  const [productWeights, setProductWeights] = useState<Record<string, number>>({});
 
   // OTP States (P1-1)
   const [showOtpModal, setShowOtpModal] = useState(false);
@@ -156,7 +163,7 @@ function CheckoutContent() {
   const fetchStoreData = async () => {
     const { data: storeData } = await supabaseBrowser
       .from('stores')
-      .select('id, name, logo_url, prepaid_stacking_logic')
+      .select('id, name, logo_url, prepaid_stacking_logic, partial_cod_config')
       .single();
 
     if (storeData) {
@@ -227,6 +234,9 @@ function CheckoutContent() {
         title, 
         cod_enabled, 
         bundle_settings,
+        weight_grams,
+        partial_cod_enabled,
+        use_store_partial_settings,
         product_collections ( collection_id )
       `)
       .in('id', ids);
@@ -277,12 +287,26 @@ function CheckoutContent() {
       });
       setBundleDiscount(Math.round(totalBDiscount));
 
-      // Map Collections
-      const colMap: Record<string, string[]> = {};
-      data.forEach(p => {
-        colMap[p.id] = p.product_collections?.map((pc: any) => pc.collection_id) || [];
-      });
       setProductCollections(colMap);
+
+      // --- NEW: Partial COD Pre-resolution ---
+      const totalWeight = items.reduce((sum, item) => {
+        const weight = data.find(p => p.id === item.product_id)?.weight_grams || 500;
+        return sum + (weight * item.qty);
+      }, 0);
+
+      const hasProductForcingPartial = data.some(p => p.partial_cod_enabled && !p.use_store_partial_settings);
+
+      const storeConfig = store?.partial_cod_config || platformSettings?.partial_cod_config || {};
+      const storeEnabled = storeConfig.enabled === true;
+
+      if (storeEnabled || hasProductForcingPartial) {
+        setIsPartialForced(true);
+        const amt = calculatePartialAmount(total, totalWeight, storeConfig);
+        setPartialAmount(amt);
+        // If forced, default to partial_cod
+        setPaymentMethod('partial_cod');
+      }
     }
   };
 
@@ -323,9 +347,32 @@ function CheckoutContent() {
 
         setPincodeStatus("success");
 
-        // RTO Assessment
-        const risk = evaluateRTORisk(pin, paymentMethod);
-        setRtoScore(risk);
+        // RTO Assessment (New High-Resolution Engine)
+        const runRiskCheck = async () => {
+          const signals = getSessionSignals();
+          // We can't easily get cross-store/same-address count on client without more queries, 
+          // so we rely on what we have + session signals.
+          const result = await calculateRiskScore({
+            pincode: pin,
+            category: 'default',
+            payment_mode: paymentMethod === 'online' ? 'online' : 'cod',
+            total_amount: total,
+            name: form.name,
+            address: form.address,
+            phone: form.phone,
+            order_timestamp: new Date().toISOString(),
+            session_signals: signals
+          });
+          setRtoResult(result);
+
+          // Auto-Action: Force Online if high risk
+          if (result.action_type === 'prepaid_only' || result.action_type === 'auto_cancel') {
+            setPaymentMethod('online');
+          } else if (result.action_type === 'partial_prepaid') {
+            setPaymentMethod('partial_cod');
+          }
+        };
+        runRiskCheck();
       })
       .catch(() => {
         if (!cancelled) setPincodeStatus("failed");
@@ -360,8 +407,10 @@ function CheckoutContent() {
     setAttempted(true);
     if (!isValid || submitting) return;
 
-    // P1-1: COD Verification Step
-    if (paymentMethod === 'cod' && !showOtpModal) {
+    // P1-1: COD Verification Step (Driven by RTO Layer 3)
+    const needsVerification = paymentMethod === 'cod' && rtoResult?.action_type === 'whatsapp_confirm';
+
+    if (needsVerification && !showOtpModal) {
       try {
         setSubmitting(true);
         const res = await fetch("/api/otp/send", {
@@ -372,7 +421,7 @@ function CheckoutContent() {
         if (data.success) {
           setShowOtpModal(true);
         } else {
-          setPaymentError("Failed to send verification code. Please try again.");
+          setPaymentError("Verification failed. Our risk engine requires phone confirmation for this zone.");
         }
       } catch (err) {
         setPaymentError("Verification service unavailable.");
@@ -402,16 +451,27 @@ function CheckoutContent() {
         clearDraft();
         router.push(`/order-success?order_id=${data.order_id}`);
       } else {
-        // Online Payment Flow - Initiate PayU payment
+        // Online or Partial COD Flow - Initiate PayU payment
+        const isPartial = paymentMethod === 'partial_cod';
+        const payAmount = isPartial ? partialAmount : finalTotal();
+
         const res = await fetch("/api/payment/initiate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            amount: finalTotal(),
+            amount: payAmount,
             productinfo: cart.map(item => item.title).join(', '),
             firstname: form.name.split(' ')[0],
             email: email || `${form.phone}@customer.com`,
             phone: form.phone,
+            udf1: isPartial ? 'partial_cod' : '',
+            // Pass metadata to be saved upon callback
+            udf2: JSON.stringify({
+              form,
+              cart,
+              rto_score: rtoResult?.score,
+              rto_level: rtoResult?.level
+            })
           }),
         });
 
@@ -604,18 +664,30 @@ function CheckoutContent() {
                 <h2 className="text-xl font-black text-neutral-900 tracking-tight uppercase tracking-widest text-xs">Payment Information</h2>
               </div>
 
-              {/* RTO RISK ALERT */}
-              {rtoScore && rtoScore.riskLevel !== 'low' && (
-                <div className={`p-4 rounded-2xl flex items-start gap-3 border ${rtoScore.riskLevel === 'high' ? 'bg-red-50 border-red-100 text-red-900' : 'bg-amber-50 border-amber-100 text-amber-900'
+              {/* RTO RISK ALERT & INTERVENTIONS */}
+              {rtoResult && rtoResult.level !== 'low' && (
+                <div className={`p-5 rounded-3xl flex items-start gap-4 border shadow-sm transition-all duration-500 animate-in fade-in zoom-in-95 ${rtoResult.level === 'high' ? 'bg-red-50 border-red-100 text-red-900 ring-4 ring-red-500/5' : 'bg-amber-50 border-amber-100 text-amber-900 ring-4 ring-amber-500/5'
                   }`}>
-                  <AlertCircle className={`h-5 w-5 shrink-0 ${rtoScore.riskLevel === 'high' ? 'text-red-600' : 'text-amber-600'}`} />
+                  <div className={`mt-1 p-2 rounded-xl ${rtoResult.level === 'high' ? 'bg-red-100' : 'bg-amber-100'}`}>
+                    <AlertCircle className={`h-5 w-5 shrink-0 ${rtoResult.level === 'high' ? 'text-red-600' : 'text-amber-600'}`} />
+                  </div>
                   <div>
-                    <p className="text-xs font-black uppercase tracking-widest">Regional Order Alert</p>
-                    <p className="text-xs mt-1 font-medium leading-relaxed">
-                      {rtoScore.riskLevel === 'high'
-                        ? "This zone has high historical non-delivery rates. Online payment is highly recommended for priority shipping."
-                        : "Orders in this region occasionally face delivery delays with COD. Prepaid orders get priority dispatch."}
+                    <p className="text-[11px] font-black uppercase tracking-widest opacity-70 mb-1">Logistics Security Alert</p>
+                    <p className="text-sm font-black tracking-tight">{rtoResult.summary}</p>
+                    <p className="text-[11px] mt-1.5 font-medium leading-relaxed opacity-80 italic">
+                      {rtoResult.recommendation}
                     </p>
+
+                    {rtoResult.action_type === 'prepaid_only' && (
+                      <div className="mt-4 p-3 bg-white/50 border border-current/10 rounded-2xl text-[10px] font-bold uppercase tracking-tight">
+                        COD is restricted for this area. Please pay online to secure your delivery.
+                      </div>
+                    )}
+                    {rtoResult.action_type === 'partial_prepaid' && (
+                      <div className="mt-4 p-3 bg-white/50 border border-current/10 rounded-2xl text-[10px] font-bold uppercase tracking-tight">
+                        Secure your order by paying ₹200 now. Balance ₹{Math.round(total - 200)} on delivery.
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -647,33 +719,67 @@ function CheckoutContent() {
                   )}
                 </div>
 
-                {/* COD Option */}
-                <div
-                  className={`p-6 rounded-2xl border transition-all relative ${!codAvailable
-                    ? 'opacity-40 cursor-not-allowed border-neutral-100'
-                    : paymentMethod === 'cod'
-                      ? 'border-neutral-900 bg-neutral-900 text-white shadow-xl'
-                      : 'border-neutral-100 bg-white hover:border-neutral-200 cursor-pointer'
-                    }`}
-                  onClick={() => codAvailable && setPaymentMethod('cod')}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'cod' ? 'border-white' : 'border-neutral-200'
-                        }`}>
-                        {paymentMethod === 'cod' && <div className="w-3 h-3 rounded-full bg-white" />}
-                      </div>
-                      <div>
-                        <p className="font-black text-sm uppercase tracking-wider">Cash on Delivery</p>
-                        <p className={`text-[10px] font-bold mt-1 ${paymentMethod === 'cod' ? 'text-neutral-400' : 'text-neutral-500'
-                          }`}>Pay ₹{total.toLocaleString()} when order arrives</p>
+                {/* Partial COD Option (Intervention B or Global Settings) */}
+                {(isPartialForced || rtoResult?.action_type === 'partial_prepaid') && (
+                  <div
+                    className={`p-6 rounded-2xl border transition-all relative cursor-pointer ${paymentMethod === 'partial_cod'
+                      ? 'border-indigo-600 bg-indigo-600 text-white shadow-xl'
+                      : 'border-indigo-100 bg-indigo-50/30 hover:border-indigo-200'
+                      }`}
+                    onClick={() => setPaymentMethod('partial_cod')}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'partial_cod' ? 'border-white' : 'border-indigo-200'
+                          }`}>
+                          {paymentMethod === 'partial_cod' && <div className="w-3 h-3 rounded-full bg-white" />}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="font-black text-sm uppercase tracking-wider">Partial COD (Verified)</p>
+                            <span className="text-[9px] font-black bg-white/20 px-1.5 py-0.5 rounded uppercase">{isPartialForced ? "Required" : "Recommended"}</span>
+                          </div>
+                          <p className={`text-[10px] font-bold mt-1 ${paymentMethod === 'partial_cod' ? 'text-indigo-100' : 'text-indigo-600'
+                            }`}>Pay ₹{partialAmount.toLocaleString()} now + ₹{(total - partialAmount).toLocaleString()} on delivery</p>
+                        </div>
                       </div>
                     </div>
-                    {!codAvailable && (
-                      <span className="text-[10px] font-black text-red-600 bg-red-50 px-2 py-1 rounded-full uppercase tracking-widest">Disabled</span>
-                    )}
                   </div>
-                </div>
+                )}
+
+                {/* COD Option - HIDDEN if Partial is forced */}
+                {!isPartialForced && (
+                  <div
+                    className={`p-6 rounded-2xl border transition-all relative ${(!codAvailable || rtoResult?.action_type === 'prepaid_only' || rtoResult?.action_type === 'auto_cancel')
+                      ? 'opacity-40 cursor-not-allowed border-neutral-100'
+                      : paymentMethod === 'cod'
+                        ? 'border-neutral-900 bg-neutral-900 text-white shadow-xl'
+                        : 'border-neutral-100 bg-white hover:border-neutral-200 cursor-pointer'
+                      }`}
+                    onClick={() => {
+                      if (codAvailable && rtoResult?.action_type !== 'prepaid_only' && rtoResult?.action_type !== 'auto_cancel') {
+                        setPaymentMethod('cod');
+                      }
+                    }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'cod' ? 'border-white' : 'border-neutral-200'
+                          }`}>
+                          {paymentMethod === 'cod' && <div className="w-3 h-3 rounded-full bg-white" />}
+                        </div>
+                        <div>
+                          <p className="font-black text-sm uppercase tracking-wider">Cash on Delivery</p>
+                          <p className={`text-[10px] font-bold mt-1 ${paymentMethod === 'cod' ? 'text-neutral-400' : 'text-neutral-500'
+                            }`}>Pay ₹{total.toLocaleString()} when order arrives</p>
+                        </div>
+                      </div>
+                      {!codAvailable && (
+                        <span className="text-[10px] font-black text-red-600 bg-red-50 px-2 py-1 rounded-full uppercase tracking-widest">Disabled</span>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -836,7 +942,7 @@ function CheckoutContent() {
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">
-                      <span>{paymentMethod === 'cod' ? "Confirm Order" : "Complete Payment"}</span>
+                      <span>{paymentMethod === 'cod' ? "Confirm Order" : (paymentMethod === 'partial_cod' ? `Pay ₹${partialAmount.toLocaleString()} to Confirm` : "Complete Payment")}</span>
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </div>
                   )}

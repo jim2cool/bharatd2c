@@ -37,18 +37,20 @@ export function Card({ title, subtitle, children, className = '', icon: Icon, is
 
 export function Field({ label, error, children, className = '' }: { label: string; error?: string; children: React.ReactNode; className?: string }) {
     return (
-        <label className={`block group ${className}`}>
-            <span className="text-[11px] font-black uppercase tracking-widest text-neutral-500 group-focus-within:text-blue-600 transition-colors ml-1">{label}</span>
-            <div className="mt-2 relative bg-white rounded-2xl shadow-sm border border-neutral-300/50 group-focus-within:border-blue-500/50 transition-all">
+        <div className={`flex flex-col gap-1.5 group ${className}`}>
+            <span className="text-xs font-bold uppercase tracking-widest text-neutral-400 group-focus-within:text-blue-600 transition-colors">
+                {label}
+            </span>
+            <div className="relative">
                 {children}
             </div>
             {error && (
-                <div className="mt-2 flex items-center gap-1.5 text-[11px] font-bold text-red-500 animate-in slide-in-from-top-1 px-1">
+                <div className="mt-1 flex items-center gap-1.5 text-[10px] font-bold text-red-500 animate-in slide-in-from-top-1 px-1">
                     <span className="w-1 h-1 rounded-full bg-red-500" />
                     {error}
                 </div>
             )}
-        </label>
+        </div>
     )
 }
 

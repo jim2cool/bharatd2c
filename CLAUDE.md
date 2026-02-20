@@ -66,7 +66,7 @@ lib/
   pdp-adapter.ts          # Product data transformer for PDP
   payu/                   # Payment gateway integration
   logistics/nimbus.ts     # Shipping API wrapper
-  dropshipping/roposo.ts  # Dropshipping integration
+  dropshipping/supplier.ts  # Dropshipping integration
   themes/                 # Theme utilities
 
 hooks/

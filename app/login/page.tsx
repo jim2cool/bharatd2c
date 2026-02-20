@@ -40,25 +40,9 @@ export default function LoginPage() {
     }
 
     try {
-      // 1. Check if user has ANY stores
-      const { data: stores } = await supabaseBrowser
-        .from('stores')
-        .select('id')
-        .eq('owner_id', data.user.id)
-        .limit(1)
-
-      if (stores && stores.length > 0) {
-        // User already has a store, go to admin
-        const activeStoreId = localStorage.getItem('easy_active_store_id')
-        if (!activeStoreId) {
-          localStorage.setItem('easy_active_store_id', stores[0].id)
-          document.cookie = `easy_active_store_id=${stores[0].id}; path=/; SameSite=Lax; Secure; max-age=${60 * 60 * 24 * 365}`
-        }
-        router.push('/admin')
-      } else {
-        // No stores yet, go to onboarding
-        router.push('/onboarding')
-      }
+      // Just redirect to /admin and let the dashboard handle store selection/onboarding check
+      console.log('Login: Successful auth, redirecting to /admin')
+      router.push('/admin')
     } catch (err) {
       console.error('Login: Redirection error:', err)
       router.push('/onboarding')

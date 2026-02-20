@@ -26,7 +26,7 @@ The platform has successfully reached **Phase 26 (Theme Customization)**, with t
 | **Phase 16** | **Logistics Aggregator** | 40% | Wrapper created. Implement real shipment creation in dashboard. |
 | **Phase 16** | **Logistics Aggregator** | 80% | Wrapper created. Implement real shipment creation in dashboard (Nimbus/Shiprocket). |
 | **Phase 17** | **Super Admin Telemetry** | 100%| real-time Management API connection implemented via `route.ts`. |
-| **Phase 19** | **Dropshipping Integration** | 80% | `dropshipping_configs` DB live. Implement Roposo product sync loop. |
+| **Phase 19** | **Dropshipping Integration** | 80% | `dropshipping_configs` DB live. Implement Supplier product sync loop. |
 
 ### 🔴 Pending Work (Untouched)
 | Phase | Feature | Priority | Description |

@@ -66,10 +66,10 @@ export function CoreSection() {
                     <div className="relative group">
                         <input
                             {...register('title')}
-                            className="w-full bg-white border border-neutral-300 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all placeholder:text-neutral-300"
+                            className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all placeholder:text-slate-300 shadow-sm"
                             placeholder="e.g. Premium Silk Saree"
                         />
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-300 group-focus-within:text-blue-500 transition-colors">
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-500 transition-colors pointer-events-none">
                             <Edit3 className="w-4 h-4" />
                         </div>
                     </div>
@@ -78,33 +78,33 @@ export function CoreSection() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     <Field label="Selling Price" error={errors.price?.message}>
                         <div className="relative group/field">
-                            <span className="absolute left-5 top-1/2 -translate-y-1/2 text-neutral-500 font-bold text-xs group-focus-within/field:text-blue-600 transition-colors z-10 pointer-events-none">₹</span>
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs group-focus-within/field:text-blue-600 transition-colors z-10 pointer-events-none">₹</span>
                             <input
                                 {...register('price', { valueAsNumber: true })}
                                 type="number"
-                                className="w-full bg-white border border-neutral-300 rounded-2xl pl-16 pr-4 py-3.5 text-sm font-black focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+                                className="w-full bg-white border border-slate-300 rounded-xl pl-10 pr-4 py-3 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all shadow-sm"
                             />
                         </div>
                     </Field>
 
                     <Field label="MRP (Strike-off)" error={errors.mrp?.message}>
                         <div className="relative group/field">
-                            <span className="absolute left-5 top-1/2 -translate-y-1/2 text-neutral-400 font-bold text-xs z-10 pointer-events-none">₹</span>
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs z-10 pointer-events-none">₹</span>
                             <input
                                 {...register('mrp', { valueAsNumber: true })}
                                 type="number"
-                                className="w-full bg-neutral-50/50 border border-neutral-300 rounded-2xl pl-16 pr-4 py-3.5 text-sm font-medium text-neutral-500 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+                                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm font-medium text-slate-500 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
                             />
                         </div>
                     </Field>
 
                     <Field label="COGS (Cost)" error={errors.cogs?.message}>
                         <div className="relative group/field">
-                            <span className="absolute left-5 top-1/2 -translate-y-1/2 text-neutral-400 font-bold text-xs z-10 pointer-events-none">₹</span>
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs z-10 pointer-events-none">₹</span>
                             <input
                                 {...register('cogs', { valueAsNumber: true })}
                                 type="number"
-                                className="w-full bg-neutral-50/50 border border-neutral-300 rounded-2xl pl-16 pr-4 py-3.5 text-sm font-medium text-neutral-500 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+                                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm font-medium text-slate-500 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
                             />
                         </div>
                     </Field>
@@ -114,7 +114,7 @@ export function CoreSection() {
                             <input
                                 {...register('qty', { valueAsNumber: true })}
                                 type="number"
-                                className="w-full bg-white border border-neutral-300 rounded-2xl px-4 py-3.5 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+                                className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all shadow-sm"
                             />
                         </Field>
                     )}
@@ -123,19 +123,19 @@ export function CoreSection() {
                         <input
                             {...register('location')}
                             placeholder="Primary Warehouse..."
-                            className="w-full bg-white border border-neutral-300 rounded-2xl px-4 py-3.5 text-sm font-medium focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+                            className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm font-medium focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all shadow-sm"
                         />
                     </Field>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 border-t border-neutral-100 pt-8 mt-2">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 border-t border-slate-100 pt-8 mt-2">
                     <Field label="Est. Shipping" error={errors.shipping_cost_estimate?.message}>
                         <div className="relative group/field">
-                            <span className="absolute left-5 top-1/2 -translate-y-1/2 text-neutral-400 font-bold text-xs z-10 pointer-events-none">₹</span>
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs z-10 pointer-events-none">₹</span>
                             <input
                                 {...register('shipping_cost_estimate', { valueAsNumber: true })}
                                 type="number"
-                                className="w-full bg-neutral-50/30 border border-neutral-200 rounded-2xl pl-16 pr-4 py-3 text-xs font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+                                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
                                 placeholder="e.g. 60"
                             />
                         </div>
@@ -143,11 +143,11 @@ export function CoreSection() {
 
                     <Field label="Est. Gateway Fee" error={errors.gateway_fee?.message}>
                         <div className="relative group/field">
-                            <span className="absolute left-5 top-1/2 -translate-y-1/2 text-neutral-400 font-bold text-xs z-10 pointer-events-none">₹</span>
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs z-10 pointer-events-none">₹</span>
                             <input
                                 {...register('gateway_fee', { valueAsNumber: true })}
                                 type="number"
-                                className="w-full bg-neutral-50/30 border border-neutral-200 rounded-2xl pl-16 pr-4 py-3 text-xs font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+                                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
                                 placeholder="2% of price?"
                             />
                         </div>
@@ -155,11 +155,11 @@ export function CoreSection() {
 
                     <Field label="Target Ad Cost" error={errors.base_ad_cost?.message}>
                         <div className="relative group/field">
-                            <span className="absolute left-5 top-1/2 -translate-y-1/2 text-neutral-400 font-bold text-xs z-10 pointer-events-none">₹</span>
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs z-10 pointer-events-none">₹</span>
                             <input
                                 {...register('base_ad_cost', { valueAsNumber: true })}
                                 type="number"
-                                className="w-full bg-neutral-50/30 border border-neutral-200 rounded-2xl pl-16 pr-4 py-3 text-xs font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+                                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
                                 placeholder="CPA Target"
                             />
                         </div>
@@ -196,7 +196,7 @@ export function SEOSection({ isOpen, onToggle }: { isOpen?: boolean; onToggle?: 
                         <div className="relative group">
                             <input
                                 {...register('seo_title')}
-                                className="w-full bg-white border border-neutral-300 rounded-2xl pl-4 pr-12 py-3.5 text-sm font-medium focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all placeholder:text-neutral-300"
+                                className="w-full bg-white border border-slate-300 rounded-2xl pl-4 pr-12 py-3.5 text-sm font-medium focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all placeholder:text-neutral-300 shadow-sm"
                                 placeholder="SEO title"
                                 maxLength={60}
                             />
@@ -209,7 +209,7 @@ export function SEOSection({ isOpen, onToggle }: { isOpen?: boolean; onToggle?: 
                         <div className="relative group">
                             <textarea
                                 {...register('seo_description')}
-                                className="w-full bg-white border border-neutral-300 rounded-2xl pl-4 pr-4 pt-4 pb-8 text-sm font-medium focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all placeholder:text-neutral-300 min-h-[140px]"
+                                className="w-full bg-white border border-slate-300 rounded-2xl pl-4 pr-4 pt-4 pb-8 text-sm font-medium focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all placeholder:text-neutral-300 min-h-[140px] shadow-sm"
                                 placeholder="SEO description"
                                 maxLength={160}
                             />
@@ -273,7 +273,7 @@ export function ContentSection({ isOpen, onToggle }: { isOpen?: boolean; onToggl
                             type="number"
                             step="0.1"
                             max="5"
-                            className="w-full bg-white border border-neutral-300 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+                            className="w-full bg-white border border-slate-300 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all shadow-sm"
                         />
                     </div>
                 </Field>
@@ -302,7 +302,7 @@ export function ContentSection({ isOpen, onToggle }: { isOpen?: boolean; onToggl
                                 <div key={i} className="flex gap-4 group/item animate-in fade-in slide-in-from-left-2 duration-300">
                                     <div className="flex-1 relative">
                                         <input
-                                            className="w-full bg-white border border-neutral-300 rounded-2xl px-5 py-4 text-sm font-medium focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+                                            className="w-full bg-white border border-slate-300 rounded-2xl px-5 py-4 text-sm font-medium focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all shadow-sm"
                                             value={h}
                                             placeholder={`Highlight ${i + 1}`}
                                             onChange={e => {
@@ -547,6 +547,50 @@ export function PaymentOptionsSection({ isOpen, onToggle }: { isOpen?: boolean; 
                             </div>
                         </div>
                     )}
+
+                    <div className="pt-6 border-t border-slate-100 flex items-center justify-between p-6 bg-indigo-50/50 rounded-[28px] border border-indigo-100 mt-4">
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-xl bg-white border border-indigo-100 flex items-center justify-center text-indigo-600 shadow-sm">
+                                <Banknote className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <Label className="mb-0 text-indigo-900">Standard Partial COD</Label>
+                                <p className="text-[10px] text-indigo-600/70 font-bold uppercase tracking-wide">
+                                    {watch('partial_cod_enabled') ? "Custom partial payment active" : "Inheriting store/RTO rules"}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <div className="flex flex-col items-end gap-1 mr-2">
+                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Use Store Policy</span>
+                                <Controller
+                                    control={control}
+                                    name="use_store_partial_settings"
+                                    render={({ field }) => (
+                                        <Switch
+                                            checked={!!field.value}
+                                            onCheckedChange={(val) => field.onChange(val)}
+                                        />
+                                    )}
+                                />
+                            </div>
+                            {!watch('use_store_partial_settings') && (
+                                <div className="flex flex-col items-end gap-1">
+                                    <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest">Force Partial</span>
+                                    <Controller
+                                        control={control}
+                                        name="partial_cod_enabled"
+                                        render={({ field }) => (
+                                            <Switch
+                                                checked={!!field.value}
+                                                onCheckedChange={(val) => field.onChange(val)}
+                                            />
+                                        )}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    </div>
 
                     <p className="mt-2 text-[10px] text-neutral-400 font-bold uppercase tracking-widest text-center italic">
                         * At least one payment or cart button must be active.
@@ -1481,7 +1525,22 @@ export function ShippingSection({ isOpen, onToggle }: { isOpen?: boolean; onTogg
                     )}
                 />
             </div>
-            <p className="mt-4 text-[10px] text-neutral-400 font-bold uppercase tracking-widest text-center italic">
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+                <Field label="Physical Weight (grams)" subtitle="Used for Partial COD shipping rates">
+                    <div className="relative group">
+                        <input
+                            {...register('weight_grams', { valueAsNumber: true })}
+                            type="number"
+                            className="w-full bg-white border border-slate-300 rounded-2xl px-5 py-4 text-sm font-black focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all shadow-sm"
+                            placeholder="e.g. 500"
+                        />
+                        <div className="absolute right-5 top-1/2 -translate-y-1/2 font-black text-slate-300">g</div>
+                    </div>
+                </Field>
+            </div>
+
+            <p className="mt-8 text-[10px] text-neutral-400 font-bold uppercase tracking-widest text-center italic">
                 * Delivery dates are calculated using global store settings based on handling & transit time.
             </p>
         </Card>

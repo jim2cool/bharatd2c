@@ -15,18 +15,18 @@
   --canvas: #FFFFFF;
 
   /* 2. SURFACE: Subtle Neutral - Backgrounds/Borders */
-  --surface: #F9FAFB;
-  /* Cool Gray 50 */
-  --surface-hover: #F3F4F6;
-  /* Cool Gray 100 */
+  --surface: #F1F5F9;
+  /* Slate 100 - Stronger separation */
+  --surface-hover: #E2E8F0;
+  /* Slate 200 */
 
   /* 3. INK: Deep Charcoal - Text */
   --ink-900: #111827;
   /* Primary */
-  --ink-500: #6B7280;
-  /* Secondary/Muted */
-  --ink-300: #D1D5DB;
-  /* Borders/Lines */
+  --ink-500: #475569;
+  /* Secondary/Muted - Slate 600 */
+  --ink-300: #94A3B8;
+  /* Borders/Lines - Slate 400 for visibility */
 
   /* 4. URGENCY: Signal Red - Scarcity/Error */
   --urgency: #DC2626;

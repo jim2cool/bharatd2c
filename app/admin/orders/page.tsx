@@ -8,6 +8,7 @@ import { getActiveStoreIdClient } from '@/lib/getActiveStore.client'
 import { PageSkeleton } from '@/components/ui/Skeletons'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ShoppingBag } from 'lucide-react'
+import { SearchInput } from '../components/SearchInput'
 
 const PAGE_SIZE = 25
 
@@ -15,6 +16,7 @@ const STATUS_FILTERS = [
   { label: 'All', value: 'all', color: 'gray' },
   { label: 'New', value: 'new', color: 'blue' },
   { label: 'Confirmed', value: 'confirmed', color: 'indigo' },
+  { label: 'Held', value: 'held', color: 'orange' },
   { label: 'Shipped', value: 'shipped', color: 'purple' },
   { label: 'Cancelled', value: 'cancelled', color: 'red' },
 ]
@@ -22,6 +24,7 @@ const STATUS_FILTERS = [
 const STATUS_PILL: Record<string, string> = {
   new: 'bg-blue-100 text-blue-800',
   confirmed: 'bg-indigo-100 text-indigo-800',
+  held: 'bg-orange-100 text-orange-800',
   shipped: 'bg-purple-100 text-purple-800',
   delivered: 'bg-green-100 text-green-800',
   cancelled: 'bg-red-100 text-red-800',
@@ -134,11 +137,12 @@ export default function OrdersPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-semibold mb-4">Orders</h1>
 
-        <input
-          className="w-[320px] border rounded px-3 py-2 text-sm"
-          placeholder="Search by order # or phone"
+        <SearchInput
+          label="Search Orders"
+          placeholder="By order # or phone..."
           value={search}
           onChange={e => setSearch(e.target.value)}
+          containerClassName="w-full max-w-md"
         />
       </div>
 
@@ -150,6 +154,7 @@ export default function OrdersPage() {
             gray: 'bg-gray-100 text-gray-900',
             blue: 'bg-blue-100 text-blue-900',
             indigo: 'bg-indigo-100 text-indigo-900',
+            orange: 'bg-orange-100 text-orange-900',
             purple: 'bg-purple-100 text-purple-900',
             red: 'bg-red-100 text-red-900',
           }[f.color]

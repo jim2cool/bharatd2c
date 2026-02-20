@@ -2,34 +2,42 @@
 :root {
   --pulse-bg: #f8fafc;
   --pulse-surface: #ffffff;
-  --pulse-card-radius: 2rem;
-  --pulse-neon-blue: #2563eb;
-  --pulse-charcoal: #0f172a;
+  --pulse-card-radius: 1.25rem;
+  --pulse-primary: #0f172a;
+  --pulse-primary-vibrant: #3b82f6;
+  --pulse-slate-border: #cbd5e1;
+  --pulse-slate-border-strong: #94a3b8;
+  --pulse-charcoal: #020617;
+  --pulse-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --pulse-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --pulse-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
 .pulse-card {
   background: var(--pulse-surface);
-  border: 1px solid rgba(15, 23, 42, 0.05);
+  border: 1px solid var(--pulse-slate-border);
+  box-shadow: var(--pulse-shadow-sm);
   border-radius: var(--pulse-card-radius);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
 }
 
 .pulse-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.08);
+  border-color: var(--pulse-slate-border-strong);
+  box-shadow: var(--pulse-shadow-lg);
 }
 
 .nav-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 20px;
-  margin: 2px 14px;
-  border-radius: 14px;
+  padding: 10px 18px;
+  margin: 2px 12px;
+  border-radius: 12px;
   font-size: 13px;
   font-weight: 700;
-  color: #64748b;
-  transition: all 0.2s ease;
+  color: #475569;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .nav-item svg {
@@ -40,13 +48,13 @@
 
 .nav-item:hover {
   background: #f1f5f9;
-  color: #0f172a;
+  color: var(--pulse-charcoal);
 }
 
 .nav-item.active {
-  background: #0f172a;
+  background: var(--pulse-charcoal);
   color: #ffffff;
-  box-shadow: 0 10px 20px -5px rgba(15, 23, 42, 0.15);
+  box-shadow: 0 10px 25px -5px rgba(2, 6, 23, 0.25);
 }
 
 .nav-item.active svg {
@@ -56,12 +64,20 @@
 
 .nav-group-title {
   font-size: 10px;
-  font-weight: 900;
-  color: #94a3b8;
+  font-weight: 800;
+  color: #334155;
   text-transform: uppercase;
   letter-spacing: 0.15em;
   padding: 0 34px;
   margin-bottom: 12px;
+}
+
+/* Masonry Grid Layouts */
+.masonry-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1.5rem;
+  align-items: start;
 }
 
 /* Floating Action Button Pulse */
@@ -71,7 +87,15 @@
 }
 
 @keyframes fab-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
-  70% { box-shadow: 0 0 0 20px rgba(37, 99, 235, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+  0% {
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4);
+  }
+
+  70% {
+    box-shadow: 0 0 0 20px rgba(37, 99, 235, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+  }
 }

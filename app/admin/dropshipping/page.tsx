@@ -16,7 +16,7 @@ export default function DropshippingPage() {
             </header>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* ROPOSO CLOUD */}
+                {/* SUPPLIER CLOUD */}
                 <div className="pulse-card p-10 group relative overflow-hidden bg-gradient-to-br from-white to-neutral-50 border-blue-100">
                     <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform duration-500">
                         <Rocket className="w-32 h-32" />
@@ -25,9 +25,9 @@ export default function DropshippingPage() {
                         <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-8 border border-blue-100">
                             ⚡ Priority Sync
                         </div>
-                        <h2 className="text-2xl font-black text-neutral-900 tracking-tight mb-4">Roposo Cloud</h2>
+                        <h2 className="text-2xl font-black text-neutral-900 tracking-tight mb-4">Supplier Cloud</h2>
                         <p className="text-neutral-500 font-medium leading-relaxed mb-8 max-w-sm">
-                            Connect to India's largest dropshipping network. Instant sync for products, orders, and automated fulfillment.
+                            Connect to the supplier network. Instant sync for products, orders, and automated fulfillment.
                         </p>
 
                         <div className="grid grid-cols-2 gap-4 mb-10">

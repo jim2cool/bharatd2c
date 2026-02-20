@@ -45,17 +45,13 @@ export async function POST(request: NextRequest) {
 
         // Verify hash
         const isValidHash = verifyPayUHash({
-            key,
-            txnid,
-            amount,
-            productinfo,
-            firstname,
-            email,
-            phone,
-            status,
-            salt: merchantSalt,
-            hash,
-            additional_charges: additionalCharges
+            key, txnid, amount, productinfo, firstname, email, phone, status,
+            salt: merchantSalt, hash, additional_charges: additionalCharges,
+            udf1: formData.get('udf1') as string || '',
+            udf2: formData.get('udf2') as string || '',
+            udf3: formData.get('udf3') as string || '',
+            udf4: formData.get('udf4') as string || '',
+            udf5: formData.get('udf5') as string || '',
         })
 
         if (!isValidHash) {
@@ -79,26 +75,32 @@ export async function POST(request: NextRequest) {
             return NextResponse.redirect(new URL('/checkout?error=invalid', request.url))
         }
 
-        // Update order status in database
-        // Note: You'll need to create an orders table or update your existing order management
-        // For now, we'll just log the payment status
-        console.log('Payment callback received:', {
-            status,
-            txnid,
-            amount,
-            mihpayid,
-        })
+        // Update order status or Create order if it doesn't exist (Bifurcated Flow)
+        if (status === 'success') {
+            const udf1 = formData.get('udf1') as string
+            const udf2 = formData.get('udf2') as string
 
-        // TODO: Update order status in database
-        // const supabase = supabaseServer()
-        // await supabase
-        //   .from('orders')
-        //   .update({ 
-        //     payment_status: status === 'success' ? 'paid' : 'failed',
-        //     payment_id: mihpayid,
-        //     transaction_id: txnid
-        //   })
-        //   .eq('transaction_id', txnid)
+            if (udf2) {
+                try {
+                    const meta = JSON.parse(udf2)
+                    const { createOrder } = require('@/lib/order-service')
+
+                    const order = await createOrder({
+                        ...meta.form,
+                        cart: meta.cart,
+                        payment_method: udf1 === 'partial_cod' ? 'partial_cod' : 'online',
+                        transaction_id: txnid,
+                        payment_id: mihpayid,
+                        session_signals: meta.session_signals
+                    })
+
+                    console.log('Order created via payment callback:', order.order_number)
+                } catch (e) {
+                    console.error('Failed to create order from callback metadata:', e)
+                    // If creation fails, we might need a fallback/retry log
+                }
+            }
+        }
 
         // Redirect based on payment status
         if (status === 'success') {

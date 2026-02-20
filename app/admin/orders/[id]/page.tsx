@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { supabaseBrowser } from '@/lib/supabase-browser'
-import { evaluateCODRisk } from '@/lib/cod-risk'
+import { calculateRiskScore } from '@/lib/rto-engine'
 import { Layout, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 import ShippingManager from './components/ShippingManager'
@@ -11,6 +11,7 @@ import ShippingManager from './components/ShippingManager'
 const STATUS_OPTIONS = [
   'new',
   'confirmed',
+  'held',
   'shipped',
   'delivered',
   'cancelled',
@@ -101,32 +102,59 @@ export default function OrderDetailPage() {
     loadOrder()
   }
 
-  /* ---------------- COD RISK ---------------- */
+  /* ---------------- RTO RISK ---------------- */
 
   const runRisk = async () => {
-    const result = evaluateCODRisk({
-      paymentMode: order.payment_mode,
-      totalAmount: order.total_amount,
-      previousOrdersCount: 0,
+    setSaving(true)
+    const { count: previousRtos } = await supabaseBrowser
+      .from('orders')
+      .select('*', { count: 'exact', head: true })
+      .eq('customer_id', order.customer_id)
+      .eq('status', 'rto')
+
+    // Fetch other signals for the record
+    const { count: sameAddressCount } = await supabaseBrowser
+      .from('orders')
+      .select('*', { count: 'exact', head: true })
+      .eq('customer_id', order.customer_id)
+      .eq('payment_mode', 'cod')
+      .filter('created_at', 'gte', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+
+    const result = await calculateRiskScore({
+      pincode: meta.pincode,
+      category: 'default',
+      payment_mode: order.payment_mode,
+      total_amount: order.total_amount,
+      previous_rtos: previousRtos || 0,
+      name: meta.name,
+      address: meta.address,
       phone: meta.phone,
+      order_timestamp: order.created_at,
+      same_address_30d_count: sameAddressCount || 0,
+      session_signals: meta.session_signals // If available in meta
     })
+
+    const newMeta = {
+      ...meta,
+      risk_score: result.score,
+      risk_drivers: result.drivers,
+      risk_summary: result.summary,
+      risk_recommendation: result.recommendation,
+      action_type: result.action_type
+    }
 
     await supabaseBrowser
       .from('orders')
       .update({
         risk_level: result.level,
-        tags: result.reasons,
+        meta: newMeta,
       })
       .eq('id', order.id)
 
-    alert(
-      `Risk: ${result.level.toUpperCase()}\n${result.reasons.join('\n') || 'No reasons'
-      }`
-    )
-
+    toast.success(`Risk generated: ${result.summary}`)
     loadOrder()
+    setSaving(false)
   }
-
 
   /* ---------------- VALIDATE PINCODE ---------------- */
 
@@ -211,28 +239,54 @@ export default function OrderDetailPage() {
   return (
     <div>
       {/* HEADER */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold">
-          Order #{order.order_number}
-        </h1>
-        <div className="text-sm text-gray-600 mt-1">
-          Placed {formatIST(order.created_at)} IST ·{' '}
-          {order.payment_mode?.toUpperCase()}
-          {order.payment_mode === 'cod' && (
-            <span className={`ml-3 px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider ${order.meta?.otp_verified ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-              {order.meta?.otp_verified ? '✓ Verified' : '⚠ Action Required'}
-            </span>
-          )}
+      {order.payment_mode === 'cod' && (
+        <span className={`ml-3 px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider ${order.status === 'held' ? 'bg-orange-100 text-orange-700' : order.meta?.otp_verified ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+          {order.status === 'held' ? '⌛ Held for Review' : order.meta?.otp_verified ? '✓ Verified' : '⚠ Action Required'}
+        </span>
+      )}
+    </div>
+      </div >
+
+  {
+    order.status === 'held' && (
+      <div className="mb-6 bg-orange-50 border-2 border-orange-100 rounded-[2rem] p-8 flex items-center justify-between shadow-sm animate-in zoom-in-95 duration-500">
+        <div className="flex items-center gap-6">
+          <div className="w-14 h-14 rounded-2xl bg-orange-100 flex items-center justify-center border border-orange-200 shadow-inner">
+            <Zap className="w-7 h-7 text-orange-600" />
+          </div>
+          <div>
+            <h2 className="text-lg font-black text-orange-900 uppercase tracking-tighter">Minimal Setup - Guardrail Active</h2>
+            <p className="text-sm font-bold text-orange-700/80 leading-relaxed max-w-xl mt-1">
+              This order was held because your store is in <span className="underline decoration-2 underline-offset-4 font-black">Minimal Mode (State D)</span>.
+              Without WhatsApp or a Gateway, the RTO engine cannot automatically verify intent. Manual approval is required.
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-4">
+          <button
+            onClick={() => updateStatus('confirmed')}
+            className="px-8 py-4 bg-orange-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-orange-700 transition-all shadow-xl shadow-orange-200 active:scale-95"
+          >
+            Approve Order
+          </button>
+          <button
+            onClick={() => updateStatus('cancelled')}
+            className="px-8 py-4 bg-white border-2 border-orange-200 text-orange-700 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-orange-100 transition-all active:scale-95"
+          >
+            Cancel Order
+          </button>
         </div>
       </div>
+    )
+  }
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* LEFT / MAIN */}
-        <div className="lg:col-span-2 space-y-6">
+    < div className = "grid grid-cols-1 lg:grid-cols-3 gap-6" >
+      {/* LEFT / MAIN */ }
+      < div className = "lg:col-span-2 space-y-6" >
 
-          {/* ITEMS — PRIMARY FOCUS */}
-          <div className="bg-white border rounded">
-            <div className="px-4 py-3 border-b font-semibold">
+        {/* ITEMS — PRIMARY FOCUS */ }
+        < div className = "bg-white border border-slate-300 rounded-xl shadow-sm" >
+            <div className="px-4 py-3 border-b border-slate-100 font-semibold text-neutral-800">
               Items to ship
             </div>
 
@@ -272,117 +326,126 @@ export default function OrderDetailPage() {
                 ))}
               </tbody>
             </table>
-          </div>
+          </div >
 
-          {/* CUSTOMER & ADDRESS */}
-          <div className="bg-white border rounded p-4">
-            <div className="flex justify-between mb-3">
-              <h2 className="font-semibold">Customer & Address</h2>
-              <button
-                onClick={() => setEditMode(!editMode)}
-                className="text-sm text-blue-600"
-              >
-                {editMode ? 'Cancel' : 'Edit'}
-              </button>
-            </div>
-
-            {['name', 'phone', 'address', 'city', 'state', 'pincode'].map(f => (
-              <div key={f} className="mb-2">
-                <div className="text-xs text-gray-500 uppercase">
-                  {f}
-                </div>
-                {editMode ? (
-                  <input
-                    className="w-full border rounded px-2 py-1 text-sm"
-                    value={meta[f] || ''}
-                    onChange={e =>
-                      setOrder({
-                        ...order,
-                        meta: { ...meta, [f]: e.target.value },
-                      })
-                    }
-                  />
-                ) : (
-                  <div className="text-sm">{meta[f] || '—'}</div>
-                )}
-              </div>
-            ))}
-
-            {editMode && (
-              <button
-                onClick={saveCustomer}
-                disabled={saving}
-                className="mt-2 px-4 py-2 bg-black text-white rounded"
-              >
-                {saving ? 'Saving…' : 'Save changes'}
-              </button>
-            )}
-          </div>
-
-          {/* ADDRESS INTELLIGENCE */}
-
-          <div className="bg-white border rounded p-4">
-            <div className="flex justify-between items-center mb-3">
-              <button
-                onClick={() => setShowIntel(!showIntel)}
-                className="text-sm font-medium"
-              >
-                Address intelligence · India Post{' '}
-                {showIntel ? '▲' : '▼'}
-              </button>
-              <button
-                onClick={validatePincode}
-                disabled={saving}
-                className="text-xs bg-gray-100 hover:bg-gray-200 border px-2 py-1.5 rounded"
-              >
-                {saving ? 'Fetching...' : 'Validate Pincode'}
-              </button>
-            </div>
-
-            {showIntel && pincodeMeta && (
-              <div className="mt-3 space-y-2 text-sm">
-                {pincodeMeta.post_offices?.map((po: any, i: number) => (
-                  <div
-                    key={i}
-                    className="flex justify-between"
-                  >
-                    <div>
-                      <div className="font-medium">
-                        {po.name}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {po.district}, {po.region}
-                      </div>
-                    </div>
-                    <div
-                      className={
-                        po.delivery_status === 'Delivery'
-                          ? 'text-green-600'
-                          : 'text-orange-600'
-                      }
-                    >
-                      {po.delivery_status}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {showIntel && !pincodeMeta && (
-              <div className="text-sm text-gray-500 mt-2">
-                No data available. Click "Validate Pincode" to fetch.
-              </div>
-            )}
-          </div>
-
-        </div>
+    {/* CUSTOMER & ADDRESS */ }
+    < div className = "bg-white border border-slate-300 rounded-xl p-4 shadow-sm" >
+      <div className="flex justify-between mb-3">
+        <h2 className="font-semibold">Customer & Address</h2>
+        <button
+          onClick={() => setEditMode(!editMode)}
+          className="text-sm text-blue-600"
+        >
+          {editMode ? 'Cancel' : 'Edit'}
+        </button>
       </div>
 
-      {/* RIGHT / ACTION RAIL */}
-      <div className="space-y-6">
+  {
+    ['name', 'phone', 'address', 'city', 'state', 'pincode'].map(f => (
+      <div key={f} className="mb-2">
+        <div className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1.5">
+          {f}
+        </div>
+        {editMode ? (
+          <input
+            className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all shadow-sm"
+            value={meta[f] || ''}
+            onChange={e =>
+              setOrder({
+                ...order,
+                meta: { ...meta, [f]: e.target.value },
+              })
+            }
+          />
+        ) : (
+          <div className="text-sm font-medium">{meta[f] || '—'}</div>
+        )}
+      </div>
+    ))
+  }
 
-        {/* PROFIT ENGINE (MANIFESTO PRIME) */}
-        <div className={`border rounded-xl p-5 shadow-sm ${marginBg} border-current/10`}>
+  {
+    editMode && (
+      <button
+        onClick={saveCustomer}
+        disabled={saving}
+        className="mt-2 px-4 py-2 bg-black text-white rounded"
+      >
+        {saving ? 'Saving…' : 'Save changes'}
+      </button>
+    )
+  }
+          </div >
+
+    {/* ADDRESS INTELLIGENCE */ }
+
+    < div className = "bg-white border border-slate-300 rounded-xl p-4 shadow-sm" >
+      <div className="flex justify-between items-center mb-3">
+        <button
+          onClick={() => setShowIntel(!showIntel)}
+          className="text-sm font-medium"
+        >
+          Address intelligence · India Post{' '}
+          {showIntel ? '▲' : '▼'}
+        </button>
+        <button
+          onClick={validatePincode}
+          disabled={saving}
+          className="text-xs bg-gray-100 hover:bg-gray-200 border px-2 py-1.5 rounded"
+        >
+          {saving ? 'Fetching...' : 'Validate Pincode'}
+        </button>
+      </div>
+
+  {
+    showIntel && pincodeMeta && (
+      <div className="mt-3 space-y-2 text-sm">
+        {pincodeMeta.post_offices?.map((po: any, i: number) => (
+          <div
+            key={i}
+            className="flex justify-between"
+          >
+            <div>
+              <div className="font-medium">
+                {po.name}
+              </div>
+              <div className="text-xs text-gray-500">
+                {po.district}, {po.region}
+              </div>
+            </div>
+            <div
+              className={
+                po.delivery_status === 'Delivery'
+                  ? 'text-green-600'
+                  : 'text-orange-600'
+              }
+            >
+              {po.delivery_status}
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  {
+    showIntel && !pincodeMeta && (
+      <div className="text-sm text-gray-500 mt-2">
+        No data available. Click "Validate Pincode" to fetch.
+      </div>
+    )
+  }
+          </div >
+
+        </div >
+      </div >
+
+    {/* RIGHT / ACTION RAIL */ }
+    < div className = "space-y-6" >
+
+      {/* PROFIT ENGINE (MANIFESTO PRIME) */ }
+      < div className = {`border rounded-xl p-5 shadow-sm ${marginBg} border-current/10`
+}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-black uppercase tracking-widest text-neutral-800">Profit Breakdown</h2>
             <div className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${marginColor} bg-white border border-current/20`}>
@@ -417,10 +480,10 @@ export default function OrderDetailPage() {
           <p className="text-[9px] text-neutral-400 mt-4 leading-tight italic font-medium">
             *Net contribution is calculated after subtracting direct COGS, estimated shipping, and gateway costs.
           </p>
-        </div>
+        </div >
 
-        {/* ORDER SUMMARY */}
-        <div className="bg-white border rounded p-4">
+  {/* ORDER SUMMARY */ }
+  < div className = "bg-white border border-slate-300 rounded-xl p-4 shadow-sm" >
           <h2 className="font-semibold mb-3">Order summary</h2>
 
           <div className="flex justify-between text-sm mb-1">
@@ -449,16 +512,16 @@ export default function OrderDetailPage() {
               )}
             </div>
           </div>
-        </div>
+        </div >
 
-        {/* STATUS */}
-        <div className="bg-white border border-neutral-200 rounded-xl p-6 shadow-sm">
+  {/* STATUS */ }
+  < div className = "bg-white border border-neutral-200 rounded-xl p-6 shadow-sm" >
           <h2 className="text-sm font-bold text-neutral-800 mb-4 flex items-center gap-2">
             <Layout className="w-4 h-4 text-blue-500" />
             Order status
           </h2>
           <select
-            className="w-full border border-neutral-100 bg-neutral-50 rounded-lg px-3 py-2.5 text-sm font-semibold focus:ring-2 focus:ring-black outline-none transition-all"
+            className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all cursor-pointer shadow-sm"
             value={order.status}
             onChange={e => updateStatus(e.target.value)}
           >
@@ -471,49 +534,89 @@ export default function OrderDetailPage() {
           <p className="text-[10px] text-neutral-400 mt-2 font-medium">
             Changing status affects platform-wide reporting.
           </p>
-        </div>
+        </div >
 
-        <ShippingManager order={order} onUpdate={loadOrder} />
+  <ShippingManager order={order} onUpdate={loadOrder} />
 
-        {/* COD RISK */}
-        <div className="bg-orange-50/50 border border-orange-200 rounded-xl p-6">
-          <h2 className="text-sm font-bold text-orange-900 mb-2 flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-orange-400" />
-            COD Risk Assessment
-          </h2>
-          <button
-            onClick={runRisk}
-            className="w-full bg-white border border-orange-200 text-orange-600 py-2.5 rounded-lg text-sm font-bold hover:bg-orange-100 transition-colors shadow-sm"
-          >
-            Run risk check
-          </button>
-        </div>
-
-        {/* MANUAL VERIFY ACTION (P0-3) */}
-        {order.payment_mode === 'cod' && !order.meta?.otp_verified && (
-          <div className="bg-blue-600 text-white rounded-xl p-6 shadow-xl shadow-blue-100 border border-blue-400">
-            <h2 className="text-sm font-bold mb-2">Manual Verification</h2>
-            <p className="text-xs opacity-90 mb-4 leading-relaxed font-medium">
-              If you verified this order via call/WhatsApp, mark it here to unlock fulfillment.
-            </p>
-            <button
-              onClick={manualVerify}
-              disabled={saving}
-              className="w-full bg-white text-blue-600 py-2.5 rounded-lg text-sm font-bold hover:bg-neutral-50 transition-colors"
-            >
-              Mark as Verified
-            </button>
-          </div>
-        )}
-
-        <button
-          onClick={() => router.back()}
-          className="w-full border border-neutral-200 rounded-xl py-3 text-sm font-bold bg-white hover:bg-neutral-50 transition-colors text-neutral-600"
-        >
-          Back to orders
-        </button>
+{/* RTO RISK ASSESSMENT */ }
+<div className={`border rounded-xl p-5 shadow-sm transition-all ${order.risk_level === 'high' ? 'bg-red-50 text-red-900 border-red-200' :
+  order.risk_level === 'medium' ? 'bg-orange-50 text-orange-900 border-orange-200' :
+    order.risk_level === 'low' ? 'bg-green-50 text-green-900 border-green-200' :
+      'bg-slate-50 text-slate-800 border-slate-200'
+  }`}>
+  <div className="flex items-center justify-between mb-4">
+    <h2 className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
+      <Sparkles className="w-4 h-4" />
+      RTO Engine Logic
+    </h2>
+    {order.risk_level && (
+      <div className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border bg-white ${order.risk_level === 'high' ? 'text-red-700 border-red-200' :
+        order.risk_level === 'medium' ? 'text-orange-700 border-orange-200' :
+          'text-green-700 border-green-200'
+        }`}>
+        Score: {meta.risk_score || 0}
       </div>
+    )}
+  </div>
+
+  {meta.risk_summary ? (
+    <div className="mb-4">
+      <div className="text-sm font-black mb-1">{meta.risk_summary}</div>
+      <div className="text-xs font-medium leading-relaxed opacity-80">{meta.risk_recommendation}</div>
     </div>
+  ) : (
+    <div className="text-xs font-medium opacity-60 mb-4">
+      New specifications for Layer 2 Intelligence have been applied. Re-run analysis to see plain-language insights.
+    </div>
+  )}
+
+  {meta.risk_drivers && meta.risk_drivers.length > 0 && (
+    <div className="space-y-1 my-4 border-t border-current/10 pt-4">
+      <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2">Technical Signals</div>
+      {meta.risk_drivers.map((driver: string, i: number) => (
+        <div key={i} className="text-[10px] font-medium pl-2 border-l-2 border-current/20 py-0.5 opacity-60">
+          {driver}
+        </div>
+      ))}
+    </div>
+  )}
+
+  <button
+    onClick={runRisk}
+    disabled={saving}
+    className="w-full bg-white border border-current/10 py-2.5 rounded-lg text-[11px] uppercase tracking-widest font-black hover:bg-black hover:text-white transition-all shadow-sm disabled:opacity-50"
+  >
+    {saving ? 'Analyzing...' : meta.risk_summary ? 'Re-Run Risk Engine' : 'Generate Full Risk Profile'}
+  </button>
+</div>
+
+{/* MANUAL VERIFY ACTION (P0-3) */ }
+{
+  order.payment_mode === 'cod' && !order.meta?.otp_verified && (
+    <div className="bg-blue-600 text-white rounded-xl p-6 shadow-xl shadow-blue-100 border border-blue-400">
+      <h2 className="text-sm font-bold mb-2">Manual Verification</h2>
+      <p className="text-xs opacity-90 mb-4 leading-relaxed font-medium">
+        If you verified this order via call/WhatsApp, mark it here to unlock fulfillment.
+      </p>
+      <button
+        onClick={manualVerify}
+        disabled={saving}
+        className="w-full bg-white text-blue-600 py-2.5 rounded-lg text-sm font-bold hover:bg-neutral-50 transition-colors"
+      >
+        Mark as Verified
+      </button>
+    </div>
+  )
+}
+
+<button
+  onClick={() => router.back()}
+  className="w-full border border-neutral-200 rounded-xl py-3 text-sm font-bold bg-white hover:bg-neutral-50 transition-colors text-neutral-600"
+>
+  Back to orders
+</button>
+      </div >
+    </div >
   )
 }
 

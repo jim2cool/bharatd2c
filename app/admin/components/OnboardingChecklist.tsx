@@ -91,7 +91,7 @@ export function OnboardingChecklist({ checklist }: { checklist: ChecklistState }
                             Your shop is nearly <span className="text-blue-600">alive.</span>
                         </h1>
                         <p className="text-neutral-500 font-medium text-lg leading-relaxed">
-                            We've automated the heavy lifting. Complete these final nodes to activate your global commerce instance.
+                            We've pre-configured the essentials. Complete these final steps to launch your store correctly.
                         </p>
                     </div>
 
@@ -111,7 +111,7 @@ export function OnboardingChecklist({ checklist }: { checklist: ChecklistState }
                         </div>
                         <div className="flex items-center justify-between pt-2">
                             <p className="text-[11px] font-black text-neutral-900 uppercase tracking-widest leading-none">
-                                {completedCount} <span className="text-neutral-300">of</span> {steps.length} <span className="text-neutral-400 ml-1">Nodes Active</span>
+                                {completedCount} <span className="text-neutral-300">of</span> {steps.length} <span className="text-neutral-400 ml-1">Steps Complete</span>
                             </p>
                             {progress === 100 && <CheckCircle2 className="w-5 h-5 text-green-500" />}
                         </div>

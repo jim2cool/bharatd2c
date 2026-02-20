@@ -9,7 +9,6 @@ import { PageSkeleton } from '@/components/ui/Skeletons'
 import { EmptyState } from '@/components/ui/EmptyState'
 import {
   Plus,
-  Search,
   X,
   ChevronDown,
   ShoppingBag,
@@ -18,6 +17,7 @@ import {
   MoreHorizontal,
   Sparkles
 } from 'lucide-react'
+import { SearchInput } from '../components/SearchInput'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -185,18 +185,16 @@ export default function ProductsPage() {
 
       {/* FILTER BAR */}
       <div className="flex flex-col md:flex-row gap-4 items-center bg-white p-5 rounded-[2rem] border border-neutral-100 shadow-sm">
-        <div className="relative flex-1 max-w-xl w-full">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-neutral-400" />
-          <input
-            value={search}
-            onChange={e => {
-              setPage(1)
-              setSearch(e.target.value)
-            }}
-            placeholder="Search by title, SKU or category..."
-            className="w-full pl-12 pr-4 py-3 bg-neutral-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-neutral-400"
-          />
-        </div>
+        <SearchInput
+          label="Search Products"
+          placeholder="By title, SKU or category..."
+          value={search}
+          onChange={e => {
+            setPage(1)
+            setSearch(e.target.value)
+          }}
+          containerClassName="flex-1 max-w-xl w-full"
+        />
 
         <select
           value={statusFilter}
@@ -204,7 +202,7 @@ export default function ProductsPage() {
             setPage(1)
             setStatusFilter(e.target.value as any)
           }}
-          className="px-4 py-2 bg-neutral-50 border-none rounded-xl text-sm font-medium cursor-pointer"
+          className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium cursor-pointer focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none"
         >
           <option value="all">All Status</option>
           <option value="published">Published</option>
@@ -217,7 +215,7 @@ export default function ProductsPage() {
             setPage(1)
             setLocationFilter(e.target.value)
           }}
-          className="px-4 py-2 bg-neutral-50 border-none rounded-xl text-sm font-medium cursor-pointer"
+          className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium cursor-pointer focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none"
         >
           <option value="all">All Locations</option>
           <option value="Gurgaon">Gurgaon</option>

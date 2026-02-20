@@ -1,4 +1,4 @@
-export interface RoposoProduct {
+export interface SupplierProduct {
     sku: string;
     title: string;
     description: string;
@@ -8,21 +8,21 @@ export interface RoposoProduct {
     stock: number;
 }
 
-export class RoposoSync {
+export class SupplierSync {
     private apiKey: string;
-    private baseUrl = 'https://api.roposocloud.com/v1'; // Example URL
+    private baseUrl = 'https://api.suppliercloud.com/v1'; // Example URL
 
     constructor(apiKey: string) {
         this.apiKey = apiKey;
     }
 
-    async fetchProducts(category?: string): Promise<RoposoProduct[]> {
-        console.log("Fetching products from Roposo Cloud...", category || 'all');
+    async fetchProducts(category?: string): Promise<SupplierProduct[]> {
+        console.log("Fetching products from Supplier Cloud...", category || 'all');
 
         // Mocked response for skeleton
         return [
             {
-                sku: 'ROP-12345',
+                sku: 'SUP-12345',
                 title: 'Premium Wireless Earbuds',
                 description: 'High-quality wireless earbuds with noise cancellation.',
                 price: 1299,
@@ -34,10 +34,10 @@ export class RoposoSync {
     }
 
     async syncOrder(orderData: any) {
-        console.log("Syncing order to Roposo Cloud:", orderData.id);
+        console.log("Syncing order to Supplier Cloud:", orderData.id);
         return {
             success: true,
-            provider_order_id: `ROP_ORD_${Math.random().toString(36).substring(7).toUpperCase()}`
+            provider_order_id: `SUP_ORD_${Math.random().toString(36).substring(7).toUpperCase()}`
         };
     }
 }

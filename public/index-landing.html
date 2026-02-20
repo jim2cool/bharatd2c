@@ -1,0 +1,2325 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Easy D2C — The Most Powerful D2C Store Possible</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@300;400;700;800&family=DM+Mono:wght@300;400&display=swap"
+    rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    html {
+      scroll-behavior: smooth
+    }
+
+    :root {
+      --bg: #06070D;
+      --w: #F0F3FF;
+      --dim: rgba(240, 243, 255, .35);
+      --dimmer: rgba(240, 243, 255, .1);
+      --border: rgba(240, 243, 255, .05);
+      /* neon palette */
+      --nc: #00F5FF;
+      --ncs: rgba(0, 245, 255, .18);
+      /* cyan   */
+      --ng: #FFD700;
+      --ngs: rgba(255, 215, 0, .18);
+      /* gold   */
+      --no: #FF4500;
+      --nos: rgba(255, 69, 0, .18);
+      /* orange */
+      --np: #BF5FFF;
+      --nps: rgba(191, 95, 255, .18);
+      /* purple */
+      --nn: #39FF14;
+      --nns: rgba(57, 255, 20, .18);
+      /* green  */
+      --nr: #FF2D55;
+      --nrs: rgba(255, 45, 85, .18);
+      /* red    */
+      --nw: #FFFFFF;
+      --nws: rgba(255, 255, 255, .15);
+      /* white  */
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--w);
+      font-family: 'Syne', sans-serif;
+      overflow-x: hidden;
+      cursor: none
+    }
+
+    /* ── CURSOR ── */
+    #C {
+      position: fixed;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #fff;
+      pointer-events: none;
+      z-index: 9999;
+      mix-blend-mode: difference
+    }
+
+    #C2 {
+      position: fixed;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, .2);
+      pointer-events: none;
+      z-index: 9998;
+      transition: all .15s ease
+    }
+
+    /* ── BRICK TEXTURE ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: .06;
+      background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 20px, rgba(255, 255, 255, .03) 20px, rgba(255, 255, 255, .03) 21px),
+        repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255, 255, 255, .02) 40px, rgba(255, 255, 255, .02) 41px);
+    }
+
+    /* ── GRAIN ── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9990;
+      opacity: .4;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E")
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 500;
+      padding: 18px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(to bottom, rgba(6, 7, 13, .98), transparent)
+    }
+
+    .logo {
+      font-family: 'Bebas Neue';
+      font-size: 24px;
+      letter-spacing: 3px;
+      text-shadow: 0 0 20px rgba(0, 245, 255, .5)
+    }
+
+    .logo em {
+      color: var(--nc);
+      font-style: normal
+    }
+
+    .nav-r {
+      display: flex;
+      gap: 28px;
+      align-items: center
+    }
+
+    .nav-l {
+      font-family: 'DM Mono';
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--dim)
+    }
+
+    .nav-btn {
+      font-family: 'Syne';
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 9px 20px;
+      border: 1px solid rgba(0, 245, 255, .4);
+      color: var(--nc);
+      background: transparent;
+      cursor: none;
+      transition: all .2s;
+      text-shadow: 0 0 10px rgba(0, 245, 255, .5);
+      box-shadow: 0 0 10px rgba(0, 245, 255, .06)
+    }
+
+    .nav-btn:hover {
+      background: var(--nc);
+      color: var(--bg);
+      box-shadow: 0 0 20px rgba(0, 245, 255, .3)
+    }
+
+    /* ══ HERO ══ */
+    #hero {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      padding: 0 40px;
+      z-index: 1
+    }
+
+    .h-atm {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(6, 7, 13, .2) 0%, var(--bg) 100%)
+    }
+
+    .h-grid {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image: linear-gradient(rgba(0, 245, 255, .025) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 245, 255, .025) 1px, transparent 1px);
+      background-size: 80px 80px;
+      mask-image: radial-gradient(ellipse 85% 85% at center, black 15%, transparent 100%)
+    }
+
+    .h-tag {
+      font-family: 'DM Mono';
+      font-size: 10px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--nc);
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: up .7s ease .3s forwards;
+      text-shadow: 0 0 12px rgba(0, 245, 255, .6)
+    }
+
+    .h-h {
+      font-family: 'Bebas Neue';
+      font-size: clamp(64px, 11vw, 156px);
+      line-height: .88;
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+      opacity: 0;
+      animation: up .9s ease .5s forwards
+    }
+
+    .h-h .out {
+      -webkit-text-stroke: 1.5px var(--nc);
+      color: transparent;
+      text-shadow: 0 0 40px rgba(0, 245, 255, .2), 0 0 80px rgba(0, 245, 255, .08)
+    }
+
+    .h-h .nw {
+      color: var(--w)
+    }
+
+    .h-sub {
+      font-family: 'DM Mono';
+      font-weight: 300;
+      font-size: clamp(11px, 1.3vw, 14px);
+      color: var(--dim);
+      letter-spacing: 2px;
+      line-height: 2;
+      max-width: 500px;
+      margin-bottom: 12px;
+      opacity: 0;
+      animation: up .7s ease .8s forwards
+    }
+
+    .h-shot {
+      font-family: 'DM Mono';
+      font-size: 10px;
+      color: rgba(255, 45, 85, .55);
+      letter-spacing: 1px;
+      margin-bottom: 52px;
+      opacity: 0;
+      animation: up .6s ease 1s forwards;
+      border: 1px solid rgba(255, 45, 85, .12);
+      padding: 7px 14px;
+      border-radius: 4px;
+      display: inline-block
+    }
+
+    .scroll-cue {
+      position: absolute;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      animation: up .7s ease 1.5s forwards
+    }
+
+    .scroll-cue span {
+      font-family: 'DM Mono';
+      font-size: 9px;
+      letter-spacing: 4px;
+      color: var(--dimmer);
+      text-transform: uppercase
+    }
+
+    .s-line {
+      width: 1px;
+      height: 50px;
+      background: rgba(255, 255, 255, .05);
+      position: relative;
+      overflow: hidden
+    }
+
+    .s-run {
+      position: absolute;
+      top: -60%;
+      left: 0;
+      width: 100%;
+      height: 60%;
+      background: linear-gradient(to bottom, transparent, var(--nc), transparent);
+      animation: run 2s ease-in-out infinite
+    }
+
+    @keyframes run {
+      0% {
+        top: -60%
+      }
+
+      100% {
+        top: 160%
+      }
+    }
+
+    /* ══ SCENE ══ */
+    #scene {
+      position: relative;
+      height: 1100vh;
+      z-index: 1
+    }
+
+    .stage {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden
+    }
+
+    .s-amb {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      transition: background 1.4s ease
+    }
+
+    /* ── COPY LEFT ── */
+    .copy {
+      position: absolute;
+      left: 3.5%;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 29%;
+      z-index: 20
+    }
+
+    .c-num {
+      font-family: 'DM Mono';
+      font-size: 9px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      transition: color .5s;
+      opacity: .7
+    }
+
+    .c-h {
+      font-family: 'Bebas Neue';
+      font-size: clamp(32px, 3.8vw, 54px);
+      line-height: .92;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: all .65s cubic-bezier(.16, 1, .3, 1)
+    }
+
+    .c-h.on {
+      opacity: 1;
+      transform: translateY(0)
+    }
+
+    .c-p {
+      font-size: 12.5px;
+      line-height: 1.8;
+      font-weight: 300;
+      color: var(--dim);
+      opacity: 0;
+      transform: translateY(12px);
+      transition: all .65s cubic-bezier(.16, 1, .3, 1) .1s;
+      max-width: 280px
+    }
+
+    .c-p.on {
+      opacity: 1;
+      transform: translateY(0)
+    }
+
+    .c-p strong {
+      color: var(--w);
+      font-weight: 400
+    }
+
+    .c-stat {
+      margin-top: 16px;
+      padding: 10px 14px;
+      border-left: 2px solid currentColor;
+      border-radius: 0 5px 5px 0;
+      font-family: 'DM Mono';
+      font-size: 10px;
+      letter-spacing: 1px;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all .55s ease .25s;
+      line-height: 1.6;
+      background: rgba(255, 255, 255, .02)
+    }
+
+    .c-stat.on {
+      opacity: 1;
+      transform: translateY(0)
+    }
+
+    .c-stat strong {
+      display: block;
+      font-family: 'Bebas Neue';
+      font-size: 26px;
+      letter-spacing: 2px;
+      margin-bottom: 1px
+    }
+
+    .c-potshot {
+      margin-top: 10px;
+      font-family: 'DM Mono';
+      font-size: 9px;
+      color: rgba(255, 45, 85, .45);
+      letter-spacing: 1px;
+      opacity: 0;
+      transition: all .55s ease .35s;
+      font-style: italic
+    }
+
+    .c-potshot.on {
+      opacity: 1
+    }
+
+    /* ── NEON WIREFRAME WRAP ── */
+    .wf-wrap {
+      position: absolute;
+      right: 3.5%;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 44%;
+      max-width: 480px;
+      z-index: 10
+    }
+
+    /* ── THE PDP WIREFRAME ── */
+    .pdp {
+      width: 100%;
+      background: rgba(6, 7, 13, .96);
+      border: 1px solid rgba(255, 255, 255, .05);
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 40px 120px rgba(0, 0, 0, .8), 0 0 0 1px rgba(255, 255, 255, .03)
+    }
+
+    /* browser chrome */
+    .chrome {
+      height: 30px;
+      background: rgba(255, 255, 255, .02);
+      border-bottom: 1px solid rgba(255, 255, 255, .04);
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      gap: 4px;
+      flex-shrink: 0
+    }
+
+    .cd {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%
+    }
+
+    .cd-r {
+      background: #FF5F56
+    }
+
+    .cd-y {
+      background: #FFBD2E
+    }
+
+    .cd-g {
+      background: #28C840
+    }
+
+    .curl {
+      flex: 1;
+      height: 14px;
+      background: rgba(255, 255, 255, .03);
+      border-radius: 3px;
+      margin: 0 8px;
+      display: flex;
+      align-items: center;
+      padding: 0 7px
+    }
+
+    .curl span {
+      font-family: 'DM Mono';
+      font-size: 7px;
+      color: var(--dimmer);
+      letter-spacing: .5px
+    }
+
+    /* PDP grid */
+    .pdp-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-bottom: 1px solid rgba(255, 255, 255, .04)
+    }
+
+    .pdp-l {
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      border-right: 1px solid rgba(255, 255, 255, .04)
+    }
+
+    .pdp-r {
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px
+    }
+
+    .pdp-below {
+      border-top: 1px solid rgba(255, 255, 255, .04)
+    }
+
+    /* ── NEON ZONE BASE ── */
+    .nz {
+      border-radius: 6px;
+      position: relative;
+      overflow: hidden;
+      transition: all .7s ease;
+      border: 1.5px solid rgba(255, 255, 255, .06)
+    }
+
+    /* neon glow states */
+    .nz.lit-c {
+      border-color: var(--nc);
+      box-shadow: 0 0 10px rgba(0, 245, 255, .25), 0 0 20px rgba(0, 245, 255, .08), inset 0 0 15px rgba(0, 245, 255, .04)
+    }
+
+    .nz.lit-g {
+      border-color: var(--ng);
+      box-shadow: 0 0 10px rgba(255, 215, 0, .25), 0 0 20px rgba(255, 215, 0, .08), inset 0 0 15px rgba(255, 215, 0, .04)
+    }
+
+    .nz.lit-o {
+      border-color: var(--no);
+      box-shadow: 0 0 10px rgba(255, 69, 0, .25), 0 0 20px rgba(255, 69, 0, .08), inset 0 0 15px rgba(255, 69, 0, .04)
+    }
+
+    .nz.lit-p {
+      border-color: var(--np);
+      box-shadow: 0 0 10px rgba(191, 95, 255, .25), 0 0 20px rgba(191, 95, 255, .08), inset 0 0 15px rgba(191, 95, 255, .04)
+    }
+
+    .nz.lit-n {
+      border-color: var(--nn);
+      box-shadow: 0 0 10px rgba(57, 255, 20, .25), 0 0 20px rgba(57, 255, 20, .08), inset 0 0 15px rgba(57, 255, 20, .04)
+    }
+
+    .nz.lit-r {
+      border-color: var(--nr);
+      box-shadow: 0 0 10px rgba(255, 45, 85, .25), 0 0 20px rgba(255, 45, 85, .08), inset 0 0 15px rgba(255, 45, 85, .04)
+    }
+
+    .nz.lit-w {
+      border-color: var(--nw);
+      box-shadow: 0 0 14px rgba(255, 255, 255, .3), 0 0 28px rgba(255, 255, 255, .1), inset 0 0 20px rgba(255, 255, 255, .05)
+    }
+
+    .nz.lit-all {
+      border-color: var(--nc);
+      box-shadow: 0 0 16px rgba(0, 245, 255, .3), 0 0 32px rgba(0, 245, 255, .1), 0 0 60px rgba(0, 245, 255, .05)
+    }
+
+    /* gallery */
+    .nz-gal {
+      aspect-ratio: 1.1/1;
+      background: rgba(255, 255, 255, .01)
+    }
+
+    .gal-ph {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 6px
+    }
+
+    .gal-icon {
+      width: 44px;
+      height: 36px;
+      border: 1.5px solid rgba(255, 255, 255, .07);
+      border-radius: 4px;
+      position: relative;
+      transition: all .6s
+    }
+
+    .nz.lit-c .gal-icon {
+      border-color: var(--nc);
+      box-shadow: 0 0 8px rgba(0, 245, 255, .3)
+    }
+
+    .gal-icon::before {
+      content: '';
+      position: absolute;
+      bottom: 5px;
+      left: 5px;
+      right: 5px;
+      height: 14px;
+      border-radius: 50% 50% 0 0;
+      background: rgba(255, 255, 255, .04);
+      transition: background .6s
+    }
+
+    .nz.lit-c .gal-icon::before {
+      background: rgba(0, 245, 255, .1)
+    }
+
+    .gal-icon::after {
+      content: '';
+      position: absolute;
+      top: 5px;
+      right: 7px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .04);
+      transition: background .6s
+    }
+
+    .nz.lit-c .gal-icon::after {
+      background: rgba(0, 245, 255, .2)
+    }
+
+    .gal-lbl {
+      font-family: 'DM Mono';
+      font-size: 7px;
+      color: var(--dimmer);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      transition: color .6s
+    }
+
+    .nz.lit-c .gal-lbl {
+      color: var(--nc)
+    }
+
+    .gal-up {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 3px;
+      padding: 5px;
+      opacity: 0;
+      transition: opacity .8s ease
+    }
+
+    .gal-up.on {
+      opacity: 1
+    }
+
+    .gi {
+      border-radius: 3px;
+      background: linear-gradient(135deg, rgba(0, 245, 255, .12), rgba(0, 245, 255, .03));
+      border: 1px solid rgba(0, 245, 255, .2)
+    }
+
+    .gi.m {
+      grid-row: 1/3;
+      background: linear-gradient(135deg, rgba(0, 245, 255, .18), rgba(0, 245, 255, .05))
+    }
+
+    /* thumbs */
+    .nz-thumbs {
+      display: flex;
+      gap: 5px
+    }
+
+    .thumb {
+      flex: 1;
+      aspect-ratio: 1;
+      border-radius: 4px;
+      border: 1.5px solid rgba(255, 255, 255, .05);
+      background: rgba(255, 255, 255, .02);
+      transition: all .6s
+    }
+
+    .thumb.on {
+      border-color: var(--nc);
+      background: rgba(0, 245, 255, .05);
+      box-shadow: 0 0 6px rgba(0, 245, 255, .2)
+    }
+
+    /* title */
+    .nz-title {
+      padding: 8px
+    }
+
+    .tl {
+      height: 8px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, .06);
+      margin-bottom: 4px;
+      transition: background .6s
+    }
+
+    .tl.s {
+      width: 55%;
+      height: 6px;
+      background: rgba(255, 255, 255, .04)
+    }
+
+    /* reviews */
+    .nz-rev {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 8px;
+      transition: all .6s
+    }
+
+    .stars {
+      display: flex;
+      gap: 2px
+    }
+
+    .star {
+      width: 9px;
+      height: 9px;
+      background: rgba(255, 255, 255, .07);
+      clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+      transition: all .3s ease
+    }
+
+    .star.on {
+      background: var(--ng);
+      filter: drop-shadow(0 0 4px rgba(255, 215, 0, .7))
+    }
+
+    .rev-c {
+      font-family: 'DM Mono';
+      font-size: 7px;
+      color: var(--dimmer);
+      letter-spacing: 1px;
+      transition: color .6s
+    }
+
+    .nz-rev.on .rev-c {
+      color: var(--ng)
+    }
+
+    /* price */
+    .nz-price {
+      padding: 8px
+    }
+
+    .price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 7px
+    }
+
+    .pmain {
+      font-family: 'Bebas Neue';
+      font-size: 22px;
+      color: rgba(255, 255, 255, .1);
+      letter-spacing: 1px;
+      transition: all .6s;
+      text-shadow: none
+    }
+
+    .pmain.on {
+      color: var(--w);
+      text-shadow: 0 0 16px rgba(255, 255, 255, .2)
+    }
+
+    .pold {
+      font-family: 'DM Mono';
+      font-size: 8px;
+      color: var(--dimmer);
+      text-decoration: line-through
+    }
+
+    .pbadge {
+      font-family: 'DM Mono';
+      font-size: 7px;
+      padding: 2px 5px;
+      border-radius: 2px;
+      background: rgba(57, 255, 20, .08);
+      color: var(--nn);
+      border: 1px solid rgba(57, 255, 20, .2);
+      opacity: 0;
+      transition: opacity .5s .3s;
+      box-shadow: 0 0 8px rgba(57, 255, 20, .1)
+    }
+
+    .pbadge.on {
+      opacity: 1
+    }
+
+    /* urgency */
+    .nz-urg {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 8px;
+      opacity: .2;
+      transition: all .7s
+    }
+
+    .nz-urg.on {
+      opacity: 1
+    }
+
+    .urg-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .1);
+      flex-shrink: 0;
+      transition: all .6s
+    }
+
+    .nz-urg.on .urg-dot {
+      background: var(--no);
+      box-shadow: 0 0 8px var(--no);
+      animation: opulse 1.5s ease-in-out infinite
+    }
+
+    @keyframes opulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 4px var(--no)
+      }
+
+      50% {
+        box-shadow: 0 0 14px var(--no), 0 0 28px rgba(255, 69, 0, .3)
+      }
+    }
+
+    .urg-t {
+      font-family: 'DM Mono';
+      font-size: 8px;
+      color: var(--dimmer);
+      letter-spacing: 1px;
+      transition: color .6s
+    }
+
+    .nz-urg.on .urg-t {
+      color: var(--no);
+      text-shadow: 0 0 8px rgba(255, 69, 0, .4)
+    }
+
+    .urg-timer {
+      margin-left: auto;
+      font-family: 'DM Mono';
+      font-size: 9px;
+      color: var(--no);
+      letter-spacing: 1px;
+      opacity: 0;
+      transition: opacity .5s .3s;
+      text-shadow: 0 0 8px rgba(255, 69, 0, .5)
+    }
+
+    .nz-urg.on .urg-timer {
+      opacity: 1
+    }
+
+    /* variants */
+    .nz-var {
+      display: flex;
+      gap: 4px;
+      padding: 6px 8px
+    }
+
+    .vsw {
+      width: 20px;
+      height: 20px;
+      border-radius: 3px;
+      border: 1.5px solid rgba(255, 255, 255, .06);
+      background: rgba(255, 255, 255, .02);
+      transition: all .6s
+    }
+
+    .vsw.on {
+      border-color: var(--np);
+      background: rgba(191, 95, 255, .1);
+      box-shadow: 0 0 8px rgba(191, 95, 255, .3)
+    }
+
+    /* CTA */
+    .nz-cta {
+      padding: 10px;
+      text-align: center;
+      font-family: 'DM Mono';
+      font-size: 9px;
+      color: var(--dimmer);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      transition: all .7s;
+      position: relative;
+      overflow: hidden;
+      cursor: none
+    }
+
+    .nz-cta.ready {
+      color: var(--nn);
+      text-shadow: 0 0 12px rgba(57, 255, 20, .6)
+    }
+
+    .nz-cta.click {
+      animation: ctaK .35s ease forwards
+    }
+
+    @keyframes ctaK {
+
+      0%,
+      100% {
+        transform: scale(1)
+      }
+
+      50% {
+        transform: scale(.94)
+      }
+    }
+
+    /* trust */
+    .nz-trust {
+      display: flex;
+      gap: 3px
+    }
+
+    .tb {
+      flex: 1;
+      padding: 5px 2px;
+      border-radius: 4px;
+      text-align: center;
+      border: 1.5px solid rgba(255, 255, 255, .05);
+      background: rgba(255, 255, 255, .02);
+      font-family: 'DM Mono';
+      font-size: 6px;
+      color: var(--dimmer);
+      letter-spacing: .5px;
+      transition: all .6s
+    }
+
+    .tb.on {
+      border-color: var(--nc);
+      background: rgba(0, 245, 255, .04);
+      color: var(--nc);
+      text-shadow: 0 0 6px rgba(0, 245, 255, .4);
+      box-shadow: 0 0 6px rgba(0, 245, 255, .1)
+    }
+
+    /* AOV */
+    .nz-aov {
+      padding: 8px 10px;
+      opacity: .15;
+      transition: all .7s;
+      border-top: 1px solid rgba(255, 255, 255, .04)
+    }
+
+    .nz-aov.on {
+      opacity: 1
+    }
+
+    .aov-lbl {
+      font-family: 'DM Mono';
+      font-size: 7px;
+      color: var(--dimmer);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      transition: all .6s
+    }
+
+    .nz-aov.on .aov-lbl {
+      color: var(--np);
+      text-shadow: 0 0 8px rgba(191, 95, 255, .5)
+    }
+
+    .aov-row {
+      display: flex;
+      gap: 5px
+    }
+
+    .aov-card {
+      flex: 1;
+      border-radius: 4px;
+      padding: 6px;
+      border: 1.5px solid rgba(255, 255, 255, .05);
+      background: rgba(255, 255, 255, .02);
+      transition: all .6s
+    }
+
+    .nz-aov.on .aov-card {
+      border-color: var(--np);
+      background: rgba(191, 95, 255, .05);
+      box-shadow: 0 0 8px rgba(191, 95, 255, .1)
+    }
+
+    .aov-img {
+      height: 18px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, .04);
+      margin-bottom: 3px;
+      transition: background .6s
+    }
+
+    .nz-aov.on .aov-img {
+      background: rgba(191, 95, 255, .1)
+    }
+
+    .aov-line {
+      height: 3px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, .04);
+      transition: background .6s
+    }
+
+    .nz-aov.on .aov-line {
+      background: rgba(191, 95, 255, .15)
+    }
+
+    .aov-line.s {
+      width: 55%;
+      margin-top: 2px
+    }
+
+    /* Category */
+    .nz-cat {
+      padding: 8px 10px;
+      opacity: .15;
+      transition: all .7s;
+      border-top: 1px solid rgba(255, 255, 255, .04)
+    }
+
+    .nz-cat.on {
+      opacity: 1
+    }
+
+    .cat-lbl {
+      font-family: 'DM Mono';
+      font-size: 7px;
+      color: var(--dimmer);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      transition: all .6s
+    }
+
+    .nz-cat.on .cat-lbl {
+      color: var(--nn);
+      text-shadow: 0 0 8px rgba(57, 255, 20, .5)
+    }
+
+    .cat-mod {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 7px;
+      border-radius: 4px;
+      border: 1.5px solid rgba(255, 255, 255, .05);
+      background: rgba(255, 255, 255, .02);
+      margin-bottom: 4px;
+      opacity: 0;
+      transform: translateX(5px);
+      transition: all .5s
+    }
+
+    .cat-mod.on {
+      opacity: 1;
+      transform: translateX(0);
+      border-color: var(--nn);
+      background: rgba(57, 255, 20, .04);
+      box-shadow: 0 0 8px rgba(57, 255, 20, .08)
+    }
+
+    .cat-icon {
+      font-size: 11px
+    }
+
+    .cl {
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, .05);
+      transition: background .6s
+    }
+
+    .nz-cat.on .cl {
+      background: rgba(57, 255, 20, .12)
+    }
+
+    .cl.s {
+      width: 50%
+    }
+
+    .cat-lines {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px
+    }
+
+    /* ── CHECKOUT OVERLAY ── */
+    .co-ov {
+      position: absolute;
+      inset: 0;
+      border-radius: 12px;
+      background: rgba(6, 7, 13, .97);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .9s ease;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden
+    }
+
+    .co-ov.on {
+      opacity: 1
+    }
+
+    .co-body {
+      flex: 1;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow: hidden
+    }
+
+    .co-title {
+      font-family: 'Bebas Neue';
+      font-size: 16px;
+      letter-spacing: 2px;
+      color: var(--dim)
+    }
+
+    .co-section {
+      font-family: 'DM Mono';
+      font-size: 7px;
+      color: var(--dimmer);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 2px;
+      margin-bottom: 3px
+    }
+
+    .co-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 4px
+    }
+
+    .co-field {
+      height: 24px;
+      border-radius: 4px;
+      border: 1.5px solid rgba(255, 255, 255, .07);
+      background: rgba(255, 255, 255, .03);
+      position: relative;
+      overflow: hidden;
+      transition: all .5s
+    }
+
+    .co-field.lit {
+      border-color: var(--nc);
+      box-shadow: 0 0 6px rgba(0, 245, 255, .15)
+    }
+
+    .co-fl {
+      position: absolute;
+      top: 50%;
+      left: 9px;
+      transform: translateY(-50%);
+      font-family: 'DM Mono';
+      font-size: 7px;
+      color: var(--dimmer);
+      letter-spacing: .5px
+    }
+
+    /* RTO score card */
+    .rto-card {
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1.5px solid rgba(255, 45, 85, .25);
+      background: rgba(255, 45, 85, .04);
+      opacity: 0;
+      transition: opacity .7s;
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .rto-card.on {
+      opacity: 1
+    }
+
+    .rto-pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--nr);
+      flex-shrink: 0;
+      box-shadow: 0 0 10px var(--nr);
+      animation: rp 1.4s ease-in-out infinite
+    }
+
+    @keyframes rp {
+
+      0%,
+      100% {
+        box-shadow: 0 0 5px var(--nr)
+      }
+
+      50% {
+        box-shadow: 0 0 16px var(--nr), 0 0 30px rgba(255, 45, 85, .3)
+      }
+    }
+
+    .rto-info {
+      flex: 1
+    }
+
+    .rto-top {
+      font-family: 'DM Mono';
+      font-size: 8px;
+      color: rgba(255, 45, 85, .9);
+      letter-spacing: 1px;
+      text-shadow: 0 0 8px rgba(255, 45, 85, .4)
+    }
+
+    .rto-bot {
+      font-family: 'DM Mono';
+      font-size: 7px;
+      color: var(--dimmer);
+      letter-spacing: .5px;
+      margin-top: 1px
+    }
+
+    .rto-num {
+      font-family: 'Bebas Neue';
+      font-size: 32px;
+      letter-spacing: 1px;
+      transition: all 1s ease;
+      color: var(--nr);
+      text-shadow: 0 0 20px rgba(255, 45, 85, .6)
+    }
+
+    .rto-num.safe {
+      color: var(--nn);
+      text-shadow: 0 0 20px rgba(57, 255, 20, .6)
+    }
+
+    /* payment options */
+    .co-pay {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-top: 2px
+    }
+
+    .pay-btn {
+      height: 30px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Mono';
+      font-size: 8px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      border: 1.5px solid rgba(255, 255, 255, .07);
+      background: rgba(255, 255, 255, .03);
+      color: var(--dim);
+      transition: all .7s ease
+    }
+
+    .pay-btn.cod {
+      border-color: rgba(255, 45, 85, .35);
+      background: rgba(255, 45, 85, .06);
+      color: rgba(255, 45, 85, .8);
+      text-shadow: 0 0 8px rgba(255, 45, 85, .3);
+      box-shadow: 0 0 8px rgba(255, 45, 85, .06)
+    }
+
+    .pay-btn.cod.blocked {
+      opacity: 0;
+      transform: translateY(-8px) scale(.93);
+      pointer-events: none
+    }
+
+    .pay-btn.prepaid {
+      border-color: rgba(57, 255, 20, .4);
+      background: rgba(57, 255, 20, .06);
+      color: var(--nn);
+      text-shadow: 0 0 10px rgba(57, 255, 20, .5);
+      box-shadow: 0 0 12px rgba(57, 255, 20, .08)
+    }
+
+    /* WA verify */
+    .wa-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 9px;
+      border-radius: 5px;
+      border: 1.5px solid rgba(57, 255, 20, .2);
+      background: rgba(57, 255, 20, .04);
+      opacity: 0;
+      transform: translateY(5px);
+      transition: all .6s
+    }
+
+    .wa-row.on {
+      opacity: 1;
+      transform: translateY(0)
+    }
+
+    .wa-icon {
+      font-size: 13px
+    }
+
+    .wa-txt {
+      font-family: 'DM Mono';
+      font-size: 7px;
+      color: rgba(57, 255, 20, .8);
+      letter-spacing: .5px;
+      line-height: 1.5;
+      text-shadow: 0 0 6px rgba(57, 255, 20, .3)
+    }
+
+    /* ── ORDER OVERLAY ── */
+    .ord-ov {
+      position: absolute;
+      inset: 0;
+      border-radius: 12px;
+      background: rgba(6, 7, 13, .97);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .9s ease;
+      overflow: hidden
+    }
+
+    .ord-ov.on {
+      opacity: 1
+    }
+
+    .ord-body {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      height: 100%
+    }
+
+    .ord-hdr {
+      text-align: center;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, .05)
+    }
+
+    .ord-tick {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 2px solid rgba(57, 255, 20, .5);
+      background: rgba(57, 255, 20, .05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 8px;
+      font-size: 16px;
+      box-shadow: 0 0 20px rgba(57, 255, 20, .2), 0 0 40px rgba(57, 255, 20, .06);
+      opacity: 0;
+      transform: scale(.4);
+      transition: all .7s cubic-bezier(.34, 1.56, .64, 1)
+    }
+
+    .ord-tick.on {
+      opacity: 1;
+      transform: scale(1)
+    }
+
+    .ord-t {
+      font-family: 'Bebas Neue';
+      font-size: 18px;
+      letter-spacing: 2px;
+      color: var(--nn);
+      text-shadow: 0 0 16px rgba(57, 255, 20, .5)
+    }
+
+    .ord-s {
+      font-family: 'DM Mono';
+      font-size: 7px;
+      color: var(--dim);
+      letter-spacing: 1px;
+      margin-top: 2px
+    }
+
+    .ord-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 5px
+    }
+
+    .ord-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 8px;
+      border-radius: 4px;
+      border: 1.5px solid rgba(255, 255, 255, .05);
+      background: rgba(255, 255, 255, .02);
+      opacity: 0;
+      transform: translateX(-8px);
+      transition: all .55s ease
+    }
+
+    .ord-row.on {
+      opacity: 1;
+      transform: translateX(0)
+    }
+
+    .ord-rl {
+      font-family: 'DM Mono';
+      font-size: 7px;
+      color: var(--dimmer);
+      letter-spacing: .5px
+    }
+
+    .ord-rv {
+      font-family: 'DM Mono';
+      font-size: 8px;
+      letter-spacing: 1px
+    }
+
+    .ord-row.sv .ord-rv {
+      color: var(--nn);
+      text-shadow: 0 0 8px rgba(57, 255, 20, .4)
+    }
+
+    .ord-row.wn .ord-rv {
+      color: var(--ng);
+      text-shadow: 0 0 8px rgba(255, 215, 0, .3)
+    }
+
+    .ord-row.gd .ord-rv {
+      color: var(--nc);
+      text-shadow: 0 0 8px rgba(0, 245, 255, .3)
+    }
+
+    .rto-engine-badge {
+      padding: 7px 9px;
+      border-radius: 5px;
+      border: 1.5px solid rgba(0, 245, 255, .15);
+      background: rgba(0, 245, 255, .03);
+      font-family: 'DM Mono';
+      font-size: 7px;
+      color: var(--nc);
+      letter-spacing: .5px;
+      line-height: 1.6;
+      opacity: 0;
+      transition: opacity .5s ease .6s;
+      text-shadow: 0 0 6px rgba(0, 245, 255, .3)
+    }
+
+    .rto-engine-badge.on {
+      opacity: 1
+    }
+
+    /* ── FORMULA STRIP ── */
+    .f-strip {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(6, 7, 13, .92);
+      border: 1px solid rgba(255, 255, 255, .05);
+      border-radius: 100px;
+      padding: 8px 18px;
+      backdrop-filter: blur(20px);
+      white-space: nowrap;
+      z-index: 20
+    }
+
+    .fl {
+      font-family: 'Bebas Neue';
+      font-size: 17px;
+      color: rgba(240, 243, 255, .1);
+      transition: all .6s ease;
+      letter-spacing: 2px
+    }
+
+    .fl.on {
+      color: var(--w);
+      text-shadow: 0 0 16px currentColor
+    }
+
+    .fl.done {
+      color: rgba(240, 243, 255, .2)
+    }
+
+    .fsep {
+      color: rgba(255, 255, 255, .08);
+      font-size: 12px;
+      margin: 0 1px
+    }
+
+    .feq {
+      font-family: 'Bebas Neue';
+      font-size: 17px;
+      color: rgba(255, 255, 255, .06);
+      margin: 0 4px
+    }
+
+    .fans {
+      font-family: 'Bebas Neue';
+      font-size: 17px;
+      color: rgba(240, 243, 255, .1);
+      letter-spacing: 2px;
+      transition: all .7s ease
+    }
+
+    .fans.on {
+      color: var(--nn);
+      text-shadow: 0 0 20px rgba(57, 255, 20, .8);
+      font-size: 19px
+    }
+
+    /* ══ FINAL ══ */
+    #final {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 40px;
+      position: relative;
+      overflow: hidden;
+      z-index: 1
+    }
+
+    .f-bg {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(ellipse 70% 55% at 50% 40%, rgba(57, 255, 20, .06) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 25% 70%, rgba(0, 245, 255, .04) 0%, transparent 50%),
+        radial-gradient(ellipse 40% 40% at 75% 60%, rgba(191, 95, 255, .03) 0%, transparent 50%)
+    }
+
+    .f-grid {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image: linear-gradient(rgba(57, 255, 20, .02) 1px, transparent 1px), linear-gradient(90deg, rgba(57, 255, 20, .02) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 80% 80% at center, black, transparent)
+    }
+
+    .f-tag {
+      font-family: 'DM Mono';
+      font-size: 9px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--nn);
+      margin-bottom: 28px;
+      opacity: 0;
+      animation: up .7s ease .1s forwards;
+      text-shadow: 0 0 12px rgba(57, 255, 20, .6)
+    }
+
+    .f-h {
+      font-family: 'Bebas Neue';
+      font-size: clamp(52px, 9vw, 128px);
+      line-height: .88;
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+      opacity: 0;
+      animation: up .9s ease .3s forwards
+    }
+
+    .f-h .nc {
+      color: var(--nc);
+      text-shadow: 0 0 40px rgba(0, 245, 255, .4)
+    }
+
+    .f-h .ng {
+      color: var(--ng);
+      text-shadow: 0 0 40px rgba(255, 215, 0, .3)
+    }
+
+    .f-h .nn {
+      color: var(--nn);
+      text-shadow: 0 0 40px rgba(57, 255, 20, .4)
+    }
+
+    .f-h .outline {
+      -webkit-text-stroke: 1.5px rgba(240, 243, 255, .35);
+      color: transparent
+    }
+
+    .f-sub {
+      font-size: clamp(13px, 1.7vw, 18px);
+      font-weight: 300;
+      color: var(--dim);
+      max-width: 540px;
+      line-height: 1.8;
+      margin-bottom: 12px;
+      opacity: 0;
+      animation: up .7s ease .5s forwards
+    }
+
+    .f-sub em {
+      color: var(--w);
+      font-style: normal
+    }
+
+    /* THE PRICE BOMB */
+    .price-bomb {
+      margin: 32px 0 48px;
+      opacity: 0;
+      animation: up .9s ease .7s forwards
+    }
+
+    .pb-line1 {
+      font-family: 'DM Mono';
+      font-size: 10px;
+      letter-spacing: 4px;
+      color: var(--dimmer);
+      text-transform: uppercase;
+      margin-bottom: 10px
+    }
+
+    .pb-price {
+      font-family: 'Bebas Neue';
+      font-size: clamp(60px, 10vw, 120px);
+      line-height: 1;
+      color: var(--nn);
+      text-shadow: 0 0 40px rgba(57, 255, 20, .5), 0 0 80px rgba(57, 255, 20, .2);
+      letter-spacing: 2px;
+      position: relative;
+      display: inline-block
+    }
+
+    .pb-price::after {
+      content: '/ MONTH';
+      font-size: .2em;
+      color: var(--dim);
+      position: absolute;
+      bottom: 14px;
+      right: -3px;
+      letter-spacing: 3px;
+      text-shadow: none
+    }
+
+    .pb-note {
+      font-family: 'DM Mono';
+      font-size: 10px;
+      color: var(--dimmer);
+      letter-spacing: 2px;
+      margin-top: 8px;
+      text-transform: uppercase
+    }
+
+    .pb-note em {
+      color: rgba(57, 255, 20, .5);
+      font-style: normal
+    }
+
+    .f-cta {
+      opacity: 0;
+      animation: up .7s ease .9s forwards;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px
+    }
+
+    .cta-main {
+      font-family: 'Syne';
+      font-weight: 800;
+      font-size: 12px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      padding: 18px 52px;
+      border: 1.5px solid rgba(57, 255, 20, .5);
+      color: var(--nn);
+      background: rgba(57, 255, 20, .06);
+      cursor: none;
+      transition: all .25s;
+      box-shadow: 0 0 20px rgba(57, 255, 20, .08);
+      text-shadow: 0 0 12px rgba(57, 255, 20, .4)
+    }
+
+    .cta-main:hover {
+      background: rgba(57, 255, 20, .15);
+      box-shadow: 0 0 30px rgba(57, 255, 20, .2)
+    }
+
+    .cta-sub {
+      font-family: 'DM Mono';
+      font-size: 10px;
+      color: var(--dimmer);
+      letter-spacing: 2px
+    }
+
+    /* all tubes lit - final visual */
+    .tubes-lit {
+      display: flex;
+      justify-content: center;
+      gap: 3px;
+      margin-top: 48px;
+      opacity: 0;
+      animation: up .8s ease 1.1s forwards
+    }
+
+    .tube {
+      width: 36px;
+      height: 4px;
+      border-radius: 2px
+    }
+
+    .t1 {
+      background: var(--nc);
+      box-shadow: 0 0 8px var(--nc), 0 0 16px rgba(0, 245, 255, .4)
+    }
+
+    .t2 {
+      background: var(--ng);
+      box-shadow: 0 0 8px var(--ng), 0 0 16px rgba(255, 215, 0, .4)
+    }
+
+    .t3 {
+      background: var(--no);
+      box-shadow: 0 0 8px var(--no), 0 0 16px rgba(255, 69, 0, .4)
+    }
+
+    .t4 {
+      background: var(--np);
+      box-shadow: 0 0 8px var(--np), 0 0 16px rgba(191, 95, 255, .4)
+    }
+
+    .t5 {
+      background: var(--nn);
+      box-shadow: 0 0 8px var(--nn), 0 0 16px rgba(57, 255, 20, .4)
+    }
+
+    .t6 {
+      background: var(--nr);
+      box-shadow: 0 0 8px var(--nr), 0 0 16px rgba(255, 45, 85, .4)
+    }
+
+    /* KEYFRAMES */
+    @keyframes up {
+      from {
+        opacity: 0;
+        transform: translateY(22px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="C"></div>
+  <div id="C2"></div>
+
+  <!-- NAV -->
+  <nav>
+    <div class="logo">EASY<em>D2C</em></div>
+    <div class="nav-r">
+      <a href="#scene" class="nav-l">The Formula</a>
+      <a href="#final" class="nav-l">Pricing</a>
+      <a href="/login" class="nav-l">Login</a>
+      <a href="/signup" class="nav-btn">Try Free →</a>
+    </div>
+  </nav>
+
+  <!-- ══ HERO ══ -->
+  <section id="hero">
+    <div class="h-atm"></div>
+    <div class="h-grid"></div>
+    <div class="h-tag">// India's First Conversion Architecture Engine</div>
+    <h1 class="h-h">
+      <span class="nw">What if your</span><br>
+      <span class="out">store</span><br>
+      <span class="nw">sold harder?</span>
+    </h1>
+    <p class="h-sub">Every other platform hands you a blank wireframe.<br>
+      <em>We hand you a conversion machine.</em>
+    </p>
+    <div class="h-shot">Shopify gives you a canvas. We give you the science.</div>
+    <div class="scroll-cue">
+      <div class="s-line">
+        <div class="s-run"></div>
+      </div>
+      <span>scroll to build</span>
+    </div>
+  </section>
+
+  <!-- ══ SCENE ══ -->
+  <div id="scene">
+    <div class="stage">
+      <div class="s-amb" id="sAmb"></div>
+
+      <!-- COPY LEFT -->
+      <div class="copy" id="copy">
+        <div class="c-num" id="cNum">01 / 07</div>
+        <h2 class="c-h" id="cH">Content &amp;<br>Gallery</h2>
+        <p class="c-p" id="cP">Photo in. <strong>World-class A+ gallery and copy</strong> out. LLM-ready.
+          SEO-structured. Pre-slotted into conversion zones.</p>
+        <div class="c-stat" id="cStat"><strong>71%</strong> of buyers returned products due to misleading content. Fix
+          it upstream.</div>
+        <div class="c-potshot" id="cPotshot">"Wix gave us a text box and wished us luck."</div>
+      </div>
+
+      <!-- WIREFRAME -->
+      <div class="wf-wrap">
+        <div class="pdp" id="pdp">
+          <!-- chrome -->
+          <div class="chrome">
+            <div class="cd cd-r"></div>
+            <div class="cd cd-y"></div>
+            <div class="cd cd-g"></div>
+            <div class="curl"><span>yourstore.easyd2c.in</span></div>
+          </div>
+
+          <!-- PDP grid -->
+          <div class="pdp-grid">
+            <!-- LEFT -->
+            <div class="pdp-l">
+              <!-- Gallery -->
+              <div class="nz nz-gal" id="zGal">
+                <div class="gal-ph" id="galPh">
+                  <div class="gal-icon"></div>
+                  <div class="gal-lbl">Product Image</div>
+                </div>
+                <div class="gal-up" id="galUp">
+                  <div class="gi m"></div>
+                  <div class="gi"></div>
+                  <div class="gi"></div>
+                </div>
+              </div>
+              <!-- Thumbs -->
+              <div style="display:flex;gap:5px" class="nz-thumbs">
+                <div class="thumb" id="th1"></div>
+                <div class="thumb" id="th2"></div>
+                <div class="thumb" id="th3"></div>
+              </div>
+            </div>
+
+            <!-- RIGHT -->
+            <div class="pdp-r">
+              <!-- title -->
+              <div class="nz nz-title" id="zTitle">
+                <div class="tl"></div>
+                <div class="tl s"></div>
+              </div>
+              <!-- reviews -->
+              <div class="nz nz-rev" id="zRev">
+                <div class="stars">
+                  <div class="star" id="s1"></div>
+                  <div class="star" id="s2"></div>
+                  <div class="star" id="s3"></div>
+                  <div class="star" id="s4"></div>
+                  <div class="star" id="s5"></div>
+                </div>
+                <div class="rev-c" id="revC">Reviews</div>
+              </div>
+              <!-- price -->
+              <div class="nz nz-price" id="zPrice">
+                <div class="price-row">
+                  <span class="pmain" id="pmain">₹499</span>
+                  <span class="pold">₹899</span>
+                  <span class="pbadge" id="pbadge">44% OFF</span>
+                </div>
+              </div>
+              <!-- urgency -->
+              <div class="nz nz-urg" id="zUrg">
+                <div class="urg-dot" id="urgDot"></div>
+                <div class="urg-t" id="urgT">Only 4 left in stock</div>
+                <div class="urg-timer" id="urgTimer">02:47:13</div>
+              </div>
+              <!-- variants -->
+              <div class="nz nz-var" id="zVar">
+                <div class="vsw" id="v1"></div>
+                <div class="vsw" id="v2"></div>
+                <div class="vsw" id="v3"></div>
+                <div class="vsw" id="v4"></div>
+              </div>
+              <!-- CTA -->
+              <div class="nz nz-cta" id="zCta">Buy Now / Add to Cart</div>
+              <!-- trust -->
+              <div class="nz-trust" id="zTrust">
+                <div class="tb" id="tb1">🔒 Secure</div>
+                <div class="tb" id="tb2">⚡ COD</div>
+                <div class="tb" id="tb3">↩ Returns</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- BELOW FOLD -->
+          <div class="pdp-below">
+            <!-- AOV -->
+            <div class="nz-aov" id="zAov">
+              <div class="aov-lbl">Bundle &amp; Save / Frequently Bought</div>
+              <div class="aov-row">
+                <div class="aov-card">
+                  <div class="aov-img"></div>
+                  <div class="aov-line"></div>
+                  <div class="aov-line s"></div>
+                </div>
+                <div class="aov-card">
+                  <div class="aov-img"></div>
+                  <div class="aov-line"></div>
+                  <div class="aov-line s"></div>
+                </div>
+                <div class="aov-card">
+                  <div class="aov-img"></div>
+                  <div class="aov-line"></div>
+                  <div class="aov-line s"></div>
+                </div>
+              </div>
+            </div>
+            <!-- Category modules -->
+            <div class="nz-cat" id="zCat">
+              <div class="cat-lbl">Category Intelligence — Active Modules</div>
+              <div class="cat-mod" id="cm1"><span class="cat-icon">👗</span>
+                <div class="cat-lines">
+                  <div class="cl"></div>
+                  <div class="cl s"></div>
+                </div>
+              </div>
+              <div class="cat-mod" id="cm2"><span class="cat-icon">💄</span>
+                <div class="cat-lines">
+                  <div class="cl"></div>
+                  <div class="cl s"></div>
+                </div>
+              </div>
+              <div class="cat-mod" id="cm3"><span class="cat-icon">🍱</span>
+                <div class="cat-lines">
+                  <div class="cl"></div>
+                  <div class="cl s"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CHECKOUT OVERLAY -->
+          <div class="co-ov" id="coOv">
+            <div class="chrome">
+              <div class="cd cd-r"></div>
+              <div class="cd cd-y"></div>
+              <div class="cd cd-g"></div>
+              <div class="curl"><span>checkout.easyd2c.in/secure</span></div>
+            </div>
+            <div class="co-body">
+              <div class="co-title">Secure Checkout</div>
+              <div class="co-section">Delivery Details</div>
+              <div class="co-fields">
+                <div class="co-field" id="cf1">
+                  <div class="co-fl">Full Name</div>
+                </div>
+                <div class="co-field" id="cf2">
+                  <div class="co-fl">Phone · Lucknow 226001</div>
+                </div>
+                <div class="co-field" id="cf3">
+                  <div class="co-fl">Address</div>
+                </div>
+              </div>
+              <!-- RTO engine score -->
+              <div class="rto-card" id="rtoCard">
+                <div class="rto-pulse"></div>
+                <div class="rto-info">
+                  <div class="rto-top">RTO ENGINE — ORDER SCORING</div>
+                  <div class="rto-bot" id="rtoBotTxt">COD · ₹899 · Lucknow 226001 · 1am order</div>
+                </div>
+                <div class="rto-num" id="rtoNum">74</div>
+              </div>
+              <div class="co-section">Payment Method</div>
+              <div class="co-pay">
+                <div class="pay-btn cod" id="codBtn">💸 Cash on Delivery</div>
+                <div class="pay-btn prepaid" id="prepaidBtn">✓ Pay Online — Free Shipping</div>
+              </div>
+              <div class="wa-row" id="waRow">
+                <div class="wa-icon">💬</div>
+                <div class="wa-txt">WhatsApp verification sent to +91 98xxx xxx12<br>Reply 1 to confirm · Reply 2 to
+                  cancel</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ORDER OVERLAY -->
+          <div class="ord-ov" id="ordOv">
+            <div class="ord-body">
+              <div class="ord-hdr">
+                <div class="ord-tick" id="ordTick">✓</div>
+                <div class="ord-t">Order Protected</div>
+                <div class="ord-s">Prepaid · Dispatching Today · Lucknow</div>
+              </div>
+              <div class="ord-rows">
+                <div class="ord-row sv" id="or1">
+                  <div class="ord-rl">RTO Risk Score</div>
+                  <div class="ord-rv">74 → 18 · Protected ✓</div>
+                </div>
+                <div class="ord-row wn" id="or2">
+                  <div class="ord-rl">Logistics Cost Saved</div>
+                  <div class="ord-rv">₹180 protected</div>
+                </div>
+                <div class="ord-row gd" id="or3">
+                  <div class="ord-rl">Payment</div>
+                  <div class="ord-rv">Prepaid · Confirmed</div>
+                </div>
+                <div class="ord-row gd" id="or4">
+                  <div class="ord-rl">Pincode Intelligence</div>
+                  <div class="ord-rv">226001 · Medium Risk → Cleared</div>
+                </div>
+                <div class="ord-row" id="or5">
+                  <div class="ord-rl">Estimated Delivery</div>
+                  <div class="ord-rv" style="color:var(--w)">Tomorrow · 2–4pm</div>
+                </div>
+              </div>
+              <div class="rto-engine-badge" id="rtoBadge">
+                ⚡ RTO Engine: 14 signals scored · COD suppressed · WhatsApp verified · ₹180 logistics protected this
+                order
+              </div>
+            </div>
+          </div>
+
+        </div><!-- end pdp -->
+      </div><!-- end wf-wrap -->
+
+      <!-- FORMULA STRIP -->
+      <div class="f-strip">
+        <span class="fl" id="fl1">C</span><span class="fsep">+</span>
+        <span class="fl" id="fl2">T</span><span class="fsep">+</span>
+        <span class="fl" id="fl3">U</span><span class="fsep">+</span>
+        <span class="fl" id="fl4">A</span><span class="fsep">+</span>
+        <span class="fl" id="fl5">Cat</span><span class="fsep">+</span>
+        <span class="fl" id="fl6">RTO</span><span class="fsep">+</span>
+        <span class="fl" id="fl7">✓</span>
+        <span class="feq">=</span>
+        <span class="fans" id="fans">?</span>
+      </div>
+    </div>
+  </div><!-- end scene -->
+
+  <!-- ══ FINAL ══ -->
+  <section id="final">
+    <div class="f-bg"></div>
+    <div class="f-grid"></div>
+
+    <div class="f-tag">// The answer</div>
+    <h2 class="f-h">
+      <span class="outline">The most</span><br>
+      <span class="nn">powerful</span><br>
+      <span class="nc">D2C store</span><br>
+      <span class="outline">possible.</span>
+    </h2>
+    <p class="f-sub">
+      No CRO agency. No UX consultant. No ₹12,000/month app stack.<br>
+      <em>Structurally enforced. Architecturally immutable. Yours from day one.</em>
+    </p>
+
+    <div class="price-bomb">
+      <div class="pb-line1">Early Access Pricing — Now Starting At Only</div>
+      <div class="pb-price">₹199</div>
+      <div class="pb-note">7 days free · No card required · <em>Early bird pricing</em></div>
+    </div>
+
+    <div class="f-cta">
+      <a href="/signup" class="cta-main" style="text-decoration:none; display:inline-block;">Start Free — No Card Needed
+        →</a>
+      <div class="cta-sub">// ₹199/month after trial · Cancel anytime · Full platform from day one</div>
+    </div>
+
+    <div class="tubes-lit">
+      <div class="tube t1"></div>
+      <div class="tube t2"></div>
+      <div class="tube t3"></div>
+      <div class="tube t4"></div>
+      <div class="tube t5"></div>
+      <div class="tube t6"></div>
+    </div>
+  </section>
+
+  <script>
+    // ── CURSOR
+    const C = document.getElementById('C'), C2 = document.getElementById('C2');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+    document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY });
+    (function tick() {
+      C.style.cssText = `left:${mx - 4}px;top:${my - 4}px;`;
+      rx += (mx - rx) * .1; ry += (my - ry) * .1;
+      C2.style.cssText = `left:${rx - 14}px;top:${ry - 14}px;`;
+      requestAnimationFrame(tick);
+    })();
+
+    // ── COUNTDOWN TIMER
+    let secs = 10033;
+    setInterval(() => {
+      secs--; if (secs < 0) secs = 86399;
+      const h = Math.floor(secs / 3600), m = Math.floor((secs % 3600) / 60), s = secs % 60;
+      const el = document.getElementById('urgTimer');
+      if (el) el.textContent = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }, 1000);
+
+    // ── STEP DATA
+    const steps = [
+      {
+        // Step 1 — Content & Gallery
+        num: '01 / 07', h: 'Content &<br>Gallery',
+        p: 'Photo in. <strong>World-class A+ gallery and copy</strong> out. LLM-ready. SEO-structured. Pre-slotted into conversion zones.',
+        stat: '<strong>71%</strong> of buyers returned products due to misleading content. Fix it upstream.',
+        potshot: '"Wix gave us a text box and wished us luck."',
+        color: 'var(--nc)', ambColor: 'rgba(0,245,255,.04)',
+        fl: ['fl1'],
+        fn: () => {
+          document.getElementById('zGal').classList.add('lit-c');
+          document.getElementById('galPh').style.opacity = '0';
+          setTimeout(() => document.getElementById('galUp').classList.add('on'), 400);
+          ['th1', 'th2', 'th3'].forEach((id, i) => setTimeout(() => document.getElementById(id).classList.add('on'), 500 + i * 150));
+        }
+      },
+      {
+        // Step 2 — Trust & Social Proof
+        num: '02 / 07', h: 'Trust &<br>Social Proof',
+        p: 'Reviews, badges, proof — <strong>locked into structural positions.</strong> Below the CTA. Always. You physically cannot remove them.',
+        stat: '<strong>48%</strong> of buyers abandon due to low trust. On Easy D2C — trust is load-bearing.',
+        potshot: '"Shopify lets you delete your trust badges. We don\'t."',
+        color: 'var(--ng)', ambColor: 'rgba(255,215,0,.03)',
+        fl: ['fl1', 'fl2'],
+        fn: () => {
+          document.getElementById('zRev').classList.add('lit-g', 'on');
+          document.getElementById('zTitle').classList.add('lit-g');
+          ['s1', 's2', 's3', 's4', 's5'].forEach((id, i) => setTimeout(() => document.getElementById(id).classList.add('on'), 300 + i * 120));
+          setTimeout(() => { document.getElementById('revC').textContent = '4.9 · 2,847 reviews'; document.getElementById('revC').classList.add('on'); }, 900);
+          document.getElementById('pmain').classList.add('on');
+          document.getElementById('pbadge').classList.add('on');
+          document.getElementById('zPrice').classList.add('lit-g');
+          ['tb1', 'tb2', 'tb3'].forEach((id, i) => setTimeout(() => document.getElementById(id).classList.add('on'), 400 + i * 150));
+        }
+      },
+      {
+        // Step 3 — Urgency
+        num: '03 / 07', h: 'Adaptive<br>Urgency',
+        p: 'The store watches every visitor. High dwell? Social proof surfaces. <strong>Exit intent? Scarcity fires.</strong> Rage clicks? Support triggers. All silent.',
+        stat: '<strong>Exit intent</strong> interventions recover 8-12% of abandoning visitors on average.',
+        potshot: '"Other platforms don\'t even know your visitor is leaving."',
+        color: 'var(--no)', ambColor: 'rgba(255,69,0,.03)',
+        fl: ['fl1', 'fl2', 'fl3'],
+        fn: () => {
+          document.getElementById('zUrg').classList.add('on', 'lit-o');
+          ['v1', 'v2', 'v3', 'v4'].forEach((id, i) => setTimeout(() => document.getElementById(id).classList.add('on'), 300 + i * 100));
+          document.getElementById('zVar').classList.add('lit-p');
+        }
+      },
+      {
+        // Step 4 — AOV
+        num: '04 / 07', h: 'AOV<br>Boosters',
+        p: 'Every order worth more. <strong>Bundles, cross-sells, quantity breaks</strong> — pre-configured for your category. Not a plugin. Architecture.',
+        stat: '<strong>Avg AOV lift</strong> of 22-35% when cross-sells are architecturally enforced vs optional.',
+        potshot: '"ReConvert costs ₹1,800/month. We bake it in."',
+        color: 'var(--np)', ambColor: 'rgba(191,95,255,.03)',
+        fl: ['fl1', 'fl2', 'fl3', 'fl4'],
+        fn: () => {
+          document.getElementById('zAov').classList.add('on');
+        }
+      },
+      {
+        // Step 5 — Category
+        num: '05 / 07', h: 'Category<br>Intelligence',
+        p: 'Fashion gets size guides + swatches. Beauty gets ingredient blocks. Food gets FSSAI compliance. <strong>Pre-loaded. Already correct.</strong>',
+        stat: '<strong>10 categories</strong> understood out of the box. No plugin hunting. No setup.',
+        potshot: '"Dukaan gives you a generic store. We give you your store."',
+        color: 'var(--nn)', ambColor: 'rgba(57,255,20,.03)',
+        fl: ['fl1', 'fl2', 'fl3', 'fl4', 'fl5'],
+        fn: () => {
+          document.getElementById('zCat').classList.add('on');
+          ['cm1', 'cm2', 'cm3'].forEach((id, i) => setTimeout(() => document.getElementById(id).classList.add('on'), 300 + i * 250));
+          // CTA ready
+          setTimeout(() => {
+            document.getElementById('zCta').classList.add('lit-w', 'ready');
+          }, 800);
+        }
+      },
+      {
+        // Step 6 — CTA click → Checkout → RTO
+        num: '06 / 07', h: 'RTO<br>Intelligence',
+        p: 'Every COD order scored on <strong>14 live signals</strong> before it ships. Risky orders caught. COD suppressed. Prepaid recovered.',
+        stat: '<strong>26%</strong> of COD orders fail delivery in India. The engine fights every one of them.',
+        potshot: '"No platform even tries to solve this. We built an engine."',
+        color: 'var(--nr)', ambColor: 'rgba(255,45,85,.04)',
+        fl: ['fl1', 'fl2', 'fl3', 'fl4', 'fl5', 'fl6'],
+        fn: () => {
+          // CTA click animation
+          const cta = document.getElementById('zCta');
+          cta.classList.add('click');
+          setTimeout(() => {
+            // show checkout
+            document.getElementById('coOv').classList.add('on');
+            // light up fields
+            ['cf1', 'cf2', 'cf3'].forEach((id, i) => setTimeout(() => document.getElementById(id).classList.add('lit'), 300 + i * 200));
+            // show RTO card
+            setTimeout(() => {
+              document.getElementById('rtoCard').classList.add('on');
+              // animate score down
+              let score = 74;
+              const tick = setInterval(() => {
+                score -= 2;
+                if (score <= 18) {
+                  score = 18; clearInterval(tick);
+                  // score safe
+                  document.getElementById('rtoNum').classList.add('safe');
+                  document.getElementById('rtoNum').textContent = '18';
+                  document.getElementById('rtoBotTxt').textContent = 'Scored safe · Prepaid converted · Protected';
+                  // block COD
+                  setTimeout(() => {
+                    document.getElementById('codBtn').classList.add('blocked');
+                    document.getElementById('prepaidBtn').classList.add('glow');
+                  }, 400);
+                  // show WA
+                  setTimeout(() => document.getElementById('waRow').classList.add('on'), 800);
+                } else {
+                  document.getElementById('rtoNum').textContent = score;
+                }
+              }, 80);
+            }, 900);
+          }, 400);
+        }
+      },
+      {
+        // Step 7 — Order confirmed
+        num: '07 / 07', h: 'Order<br>Protected',
+        p: 'The machine delivered. Risky order scored, COD suppressed, prepaid converted, <strong>₹180 in logistics saved.</strong> Before a single parcel moved.',
+        stat: '<strong>40-48%</strong> RTO reduction achievable with intelligent scoring + WhatsApp verification.',
+        potshot: '"Your competitors are dispatching bad orders right now. You\'re not."',
+        color: 'var(--nn)', ambColor: 'rgba(57,255,20,.05)',
+        fl: ['fl1', 'fl2', 'fl3', 'fl4', 'fl5', 'fl6', 'fl7'],
+        fn: () => {
+          // transition to order
+          document.getElementById('coOv').classList.remove('on');
+          setTimeout(() => {
+            document.getElementById('ordOv').classList.add('on');
+            setTimeout(() => document.getElementById('ordTick').classList.add('on'), 400);
+            ['or1', 'or2', 'or3', 'or4', 'or5'].forEach((id, i) => setTimeout(() => document.getElementById(id).classList.add('on'), 600 + i * 180));
+            setTimeout(() => document.getElementById('rtoBadge').classList.add('on'), 1600);
+          }, 400);
+          // formula answer
+          document.getElementById('fans').classList.add('on');
+          document.getElementById('fans').textContent = 'MACHINE';
+        }
+      }
+    ];
+
+    let last = -1;
+
+    function show(idx) {
+      if (idx === last) return;
+      last = idx;
+      const s = steps[idx];
+
+      // ambient
+      document.getElementById('sAmb').style.background = `radial-gradient(ellipse 60% 60% at 60% 50%,${s.ambColor} 0%,transparent 100%)`;
+
+      // copy
+      const ch = document.getElementById('cH'), cp = document.getElementById('cP'), cst = document.getElementById('cStat'), cpt = document.getElementById('cPotshot'), cn = document.getElementById('cNum');
+      [ch, cp, cst, cpt].forEach(el => el.classList.remove('on'));
+      setTimeout(() => {
+        cn.textContent = s.num; cn.style.color = s.color;
+        ch.innerHTML = s.h; cp.innerHTML = s.p; cst.innerHTML = s.stat; cpt.textContent = s.potshot;
+        cst.style.color = s.color; cst.style.background = s.color.replace(')', ', .04)').replace('var(', 'rgba(').replace(')', '');
+        setTimeout(() => { ch.classList.add('on'); }, 60);
+        setTimeout(() => { cp.classList.add('on'); }, 130);
+        setTimeout(() => { cst.classList.add('on'); }, 210);
+        setTimeout(() => { cpt.classList.add('on'); }, 300);
+      }, 120);
+
+      // formula letters
+      steps.forEach((st, i) => {
+        st.fl.forEach(fid => {
+          const el = document.getElementById(fid);
+          if (!el) return;
+          if (i < idx) { el.classList.add('done'); el.classList.remove('on') }
+          else if (i === idx) { el.classList.add('on'); el.classList.remove('done') }
+          else { el.classList.remove('on', 'done') }
+        });
+      });
+
+      // activate step fn
+      if (s.fn) s.fn();
+    }
+
+    function onScroll() {
+      const scene = document.getElementById('scene');
+      const rect = scene.getBoundingClientRect();
+      const total = scene.offsetHeight - window.innerHeight;
+      const prog = Math.max(0, Math.min(1, -rect.top / total));
+      const idx = Math.min(Math.floor(prog * steps.length), steps.length - 1);
+      if (prog > 0) show(idx);
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  </script>
+</body>
+
+</html>

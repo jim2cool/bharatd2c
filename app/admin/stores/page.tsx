@@ -31,18 +31,37 @@ export default function StoresPage() {
       return
     }
 
-    // 2. Fetch stores owned by user
-    const { data, error } = await supabaseBrowser
+    // 2. Fetch stores where the user is an owner/admin via store_roles OR owner_id
+    // To do this reliably with Supabase we can fetch roles first, or just query stores directly and let RLS handle it if RLS is set up,
+    // but the most reliable way without auth context issues is to query store_roles.
+    const { data: roles } = await supabaseBrowser
+      .from('store_roles')
+      .select('store_id, stores(id, name, store_code, domain)')
+      .eq('user_id', user.id)
+
+    // Fallback: also fetch stores where owner_id is set
+    const { data: directStores } = await supabaseBrowser
       .from('stores')
       .select('id, name, store_code, domain')
-      .eq('owner_id', user.id) // Strict filtering
-      .order('created_at', { ascending: true })
+      .eq('owner_id', user.id)
 
-    if (error) {
-      console.error('Failed to load stores', error)
+    if (!roles && !directStores) {
+      console.error('Failed to load stores')
       setLoading(false)
       return
     }
+
+    const uniqueStores = new Map()
+    roles?.forEach((r: any) => {
+      if (r.stores) {
+        uniqueStores.set(r.stores.id, r.stores)
+      }
+    })
+    directStores?.forEach((s: any) => {
+      uniqueStores.set(s.id, s)
+    })
+
+    const data = Array.from(uniqueStores.values())
 
     setStores(data || [])
     setLoading(false)

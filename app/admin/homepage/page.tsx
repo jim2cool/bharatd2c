@@ -223,7 +223,7 @@ export default function HomepageEditor() {
                                 {section.type === "hero" && (
                                     <>
                                         <div className="space-y-4">
-                                            <label className="block text-xs font-black text-neutral-400 uppercase tracking-widest">Main Title</label>
+                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Main Title</label>
                                             <input
                                                 type="text"
                                                 value={section.data.slides[0].title}
@@ -232,11 +232,11 @@ export default function HomepageEditor() {
                                                     slides[0].title = e.target.value;
                                                     updateSectionData(idx, { slides });
                                                 }}
-                                                className="w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl font-bold focus:ring-2 focus:ring-black outline-none"
+                                                className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all shadow-sm"
                                             />
                                         </div>
                                         <div className="space-y-4">
-                                            <label className="block text-xs font-black text-neutral-400 uppercase tracking-widest">Sub-text</label>
+                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Sub-text</label>
                                             <input
                                                 type="text"
                                                 value={section.data.slides[0].subtitle}
@@ -245,7 +245,7 @@ export default function HomepageEditor() {
                                                     slides[0].subtitle = e.target.value;
                                                     updateSectionData(idx, { slides });
                                                 }}
-                                                className="w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl font-bold focus:ring-2 focus:ring-black outline-none"
+                                                className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all shadow-sm"
                                             />
                                         </div>
                                     </>
@@ -253,11 +253,11 @@ export default function HomepageEditor() {
 
                                 {section.type === "marquee" && (
                                     <div className="col-span-2 space-y-4">
-                                        <label className="block text-xs font-black text-neutral-400 uppercase tracking-widest">Marquee Text (separate by comma)</label>
+                                        <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">Marquee Text (separate by comma)</label>
                                         <textarea
                                             value={section.data.items.join(", ")}
                                             onChange={(e) => updateSectionData(idx, { items: e.target.value.split(",").map(i => i.trim()) })}
-                                            className="w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl font-bold focus:ring-2 focus:ring-black outline-none min-h-[100px]"
+                                            className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all min-h-[100px] shadow-sm"
                                         />
                                     </div>
                                 )}
@@ -270,7 +270,7 @@ export default function HomepageEditor() {
                                                 type="text"
                                                 value={section.data.title}
                                                 onChange={(e) => updateSectionData(idx, { title: e.target.value })}
-                                                className="w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl font-bold focus:ring-2 focus:ring-black outline-none"
+                                                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
                                             />
                                         </div>
                                         <div className="space-y-4">
@@ -279,7 +279,7 @@ export default function HomepageEditor() {
                                                 type="text"
                                                 value={section.data.description}
                                                 onChange={(e) => updateSectionData(idx, { description: e.target.value })}
-                                                className="w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl font-bold focus:ring-2 focus:ring-black outline-none"
+                                                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
                                             />
                                         </div>
                                     </>
@@ -288,12 +288,12 @@ export default function HomepageEditor() {
                                 {section.type === "image_with_text" && (
                                     <>
                                         <div className="space-y-4">
-                                            <label className="block text-xs font-black text-neutral-400 uppercase tracking-widest">Title</label>
+                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Title</label>
                                             <input
                                                 type="text"
                                                 value={section.data.title}
                                                 onChange={(e) => updateSectionData(idx, { title: e.target.value })}
-                                                className="w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl font-bold focus:ring-2 focus:ring-black outline-none"
+                                                className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all shadow-sm"
                                             />
                                         </div>
                                         <div className="space-y-4">
@@ -311,7 +311,7 @@ export default function HomepageEditor() {
                                             <textarea
                                                 value={section.data.text}
                                                 onChange={(e) => updateSectionData(idx, { text: e.target.value })}
-                                                className="w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl font-bold focus:ring-2 focus:ring-black outline-none min-h-[120px]"
+                                                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all min-h-[120px]"
                                             />
                                         </div>
                                     </>

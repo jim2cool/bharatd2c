@@ -6,7 +6,7 @@ import path from 'path'
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json()
-        const { amount, productinfo, firstname, email, phone } = body
+        const { amount, productinfo, firstname, email, phone, udf1, udf2, udf3, udf4, udf5 } = body
 
         // Validate required fields
         if (!amount || !productinfo || !firstname || !email || !phone) {
@@ -52,6 +52,7 @@ export async function POST(request: NextRequest) {
             email: cleanEmail,
             phone: phone,
             salt: merchantSalt,
+            udf1, udf2, udf3, udf4, udf5
         })
 
         // Debug logging
@@ -72,6 +73,7 @@ export async function POST(request: NextRequest) {
             phone,
             surl: `${callbackBaseUrl}/api/payment/callback`,
             furl: `${callbackBaseUrl}/api/payment/callback`,
+            udf1, udf2, udf3, udf4, udf5,
             hash,
             api_version: '19',
             paymentUrl: `${baseUrl}/_payment`,
