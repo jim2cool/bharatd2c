@@ -43,30 +43,30 @@ export function MobileStickyCTA({ sellingPrice, onAddToCart, onPrepaidClick, cod
     if (!cartEnabled && !prepaidEnabled && !codEnabled) return null
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-neutral-100 p-4 z-50 md:hidden animate-in slide-in-from-bottom duration-500 shadow-[0_-8px_30px_rgb(0,0,0,0.06)] transform-gpu safe-area-pb">
+        <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-black/5 p-4 z-50 md:hidden animate-in slide-in-from-bottom duration-500 shadow-[0_-8px_30px_rgb(0,0,0,0.04)] transform-gpu safe-area-pb">
             <div className="flex gap-4 items-center max-w-lg mx-auto">
-                <div className="flex flex-col min-w-[70px]">
-                    <span className="text-base font-black tracking-tight text-neutral-900">₹{sellingPrice.toLocaleString()}</span>
-                    <span className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Total Price</span>
+                <div className="flex flex-col min-w-[80px]">
+                    <span className="text-xl font-display font-black tracking-tight text-foreground">₹{sellingPrice.toLocaleString()}</span>
+                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Total</span>
                 </div>
 
                 <div className="flex-1 flex gap-2">
-                    {/* 1. Add to Cart (if enabled) */}
+                    {/* 1. Add to Cart (Ghost) */}
                     {cartEnabled && (
                         <Button
-                            className="flex-1 h-12 text-[10px] font-black uppercase tracking-widest rounded-2xl border-2 border-neutral-100 hover:bg-neutral-50 active:scale-95 transition-all duration-200"
+                            className="h-14 w-14 rounded-2xl border border-black/5 bg-white hover:bg-neutral-50 active:scale-95 transition-all duration-200 shadow-sm"
                             onClick={onAddToCart}
-                            variant="secondary"
+                            variant="ghost"
+                            size="icon"
                         >
-                            <ShoppingCart className="mr-2 h-4 w-4 stroke-[2.5px]" />
-                            Cart
+                            <ShoppingCart className="h-6 w-6 text-foreground opacity-80" />
                         </Button>
                     )}
 
-                    {/* 2. Buy Now (Prepaid) - taking priority or space */}
+                    {/* 2. Buy Now (Prepaid) - DOMINANT */}
                     {prepaidEnabled && (
                         <Button
-                            className="flex-1 h-12 text-[11px] font-black uppercase tracking-widest rounded-2xl bg-primary text-primary-foreground shadow-[0_4px_14px_rgba(var(--primary-rgb),0.3)] active:scale-95 transition-all duration-200"
+                            className="flex-1 h-14 text-sm font-display font-black uppercase tracking-widest rounded-2xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-[0_8px_20px_rgba(37,99,235,0.25)] active:scale-95 transition-all duration-300 shimmer-effect"
                             onClick={onPrepaidClick}
                             variant="default"
                         >

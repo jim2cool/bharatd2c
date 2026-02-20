@@ -1,6 +1,5 @@
 "use client"
 import * as React from 'react'
-
 import { useState, useCallback } from "react"
 import Image from "next/image"
 import useEmblaCarousel from "embla-carousel-react"
@@ -8,6 +7,8 @@ import { MediaItem } from "../../types/pdp"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import { motion } from "framer-motion"
+import { FadeIn, ScaleTap } from "@/components/ui/motion-primitives"
 
 interface MediaGalleryProps {
     media: MediaItem[]
@@ -19,6 +20,8 @@ export function MediaGallery({ media }: MediaGalleryProps) {
 
     const [canScrollPrev, setCanScrollPrev] = useState(false)
     const [canScrollNext, setCanScrollNext] = useState(false)
+
+    // ... callbacks remain the same
 
     const onSelect = useCallback(() => {
         if (!emblaApi) return
@@ -50,27 +53,28 @@ export function MediaGallery({ media }: MediaGalleryProps) {
     if (!media.length) return null
 
     return (
-        <div className="flex flex-col gap-4 w-full relative group">
+        <FadeIn className="flex flex-col gap-4 w-full relative group">
             {/* Main Carousel */}
             <div
-                className="overflow-hidden border bg-muted relative"
+                className="overflow-visible md:overflow-hidden border-none md:border bg-transparent md:bg-muted relative"
                 ref={emblaRef}
                 style={{ borderRadius: 'var(--radius-gallery, 0.75rem)' }}
             >
-                <div className="flex touch-pan-y shadow-inner">
+                {/* ... Carousel Content ... */}
+                <div className="flex touch-pan-y shadow-none md:shadow-inner gap-2 md:gap-0 pl-4 md:pl-0">
                     {media.map((item) => (
                         <div
                             key={item.id}
-                            className="relative min-w-full flex-[0_0_100%]"
+                            className="relative min-w-0 flex-[0_0_85%] md:flex-[0_0_100%] pl-4 first:pl-0 md:pl-0"
                         >
-                            <div className={cn("relative w-full overflow-hidden", "aspect-square")}>
+                            <div className={cn("relative w-full overflow-hidden rounded-lg md:rounded-none", "aspect-[4/5] md:aspect-square")}>
                                 <Image
                                     src={item.src}
                                     alt={item.alt}
                                     fill
                                     className="object-cover"
-                                    priority={true} // Priority for LCP on first render
-                                    sizes="(max-width: 768px) 100vw, 50vw"
+                                    priority={true}
+                                    sizes="(max-width: 768px) 85vw, 50vw"
                                 />
                             </div>
                         </div>
@@ -125,29 +129,39 @@ export function MediaGallery({ media }: MediaGalleryProps) {
                 </div>
             </div>
 
-            {/* Thumbnails - Desktop Only */}
-            <div className="hidden md:flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-                {media.map((item, index) => (
-                    <button
-                        key={item.id}
-                        onClick={() => scrollTo(index)}
-                        className={cn(
-                            "relative h-16 w-16 shrink-0 overflow-hidden border transition-all",
-                            item.aspectRatio || "aspect-square",
-                            index === selectedIndex ? "ring-2 ring-primary ring-offset-1 border-primary" : "border-transparent opacity-70 hover:opacity-100"
-                        )}
-                        style={{ borderRadius: 'var(--radius-image, 0.5rem)' }}
-                    >
-                        <Image
-                            src={item.src}
-                            alt={`Thumbnail ${index + 1}`}
-                            fill
-                            className="object-cover"
-                            sizes="64px"
-                        />
-                    </button>
-                ))}
+            {/* Thumbnails - Desktop Only - With Shared Layout Animation */}
+            <div className="hidden md:flex gap-2 overflow-x-auto pb-1 scrollbar-hide p-1">
+                {media.map((item, index) => {
+                    const isSelected = index === selectedIndex;
+                    return (
+                        <ScaleTap key={item.id}>
+                            <button
+                                onClick={() => scrollTo(index)}
+                                className={cn(
+                                    "relative h-16 w-16 shrink-0 overflow-hidden border transition-opacity rounded-[var(--radius-image,0.5rem)]",
+                                    item.aspectRatio || "aspect-square",
+                                    isSelected ? "" : "border-transparent opacity-70 hover:opacity-100"
+                                )}
+                            >
+                                {isSelected && (
+                                    <motion.div
+                                        layoutId="gallery-ring"
+                                        className="absolute inset-0 border-2 border-primary z-10 rounded-[var(--radius-image,0.5rem)]"
+                                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                    />
+                                )}
+                                <Image
+                                    src={item.src}
+                                    alt={`Thumbnail ${index + 1}`}
+                                    fill
+                                    className="object-cover"
+                                    sizes="64px"
+                                />
+                            </button>
+                        </ScaleTap>
+                    )
+                })}
             </div>
-        </div>
+        </FadeIn>
     )
 }

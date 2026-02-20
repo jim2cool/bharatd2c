@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react"
 import { Check, X } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { motion } from "framer-motion"
+import { ScaleTap } from "@/components/ui/motion-primitives"
 
 interface Variant {
     id: string
@@ -57,12 +59,12 @@ export function VariantSelector({ options, variants, onVariantSelect }: VariantS
     }
 
     return (
-        <div className="space-y-4 py-4 border-t border-neutral-100">
+        <div className="space-y-4 py-4 border-t border-border">
             {options.map((option) => (
                 <div key={option.name} className="space-y-3">
                     <div className="flex items-center justify-between">
-                        <span className="text-sm font-bold text-neutral-900 uppercase tracking-wide">
-                            {option.name}: <span className="text-neutral-500">{selectedOptions[option.name]}</span>
+                        <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                            {option.name}: <span className="text-foreground">{selectedOptions[option.name]}</span>
                         </span>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -71,25 +73,29 @@ export function VariantSelector({ options, variants, onVariantSelect }: VariantS
                             const available = isOptionAvailable(option.name, value)
 
                             return (
-                                <button
-                                    key={value}
-                                    onClick={() => setSelectedOptions(prev => ({ ...prev, [option.name]: value }))}
-                                    disabled={!available}
-                                    className={cn(
-                                        "relative px-5 py-2.5 rounded-xl text-xs font-bold border transition-all duration-200",
-                                        isSelected
-                                            ? "bg-primary text-primary-foreground border-primary shadow-[0_4px_12px_rgba(var(--primary-rgb),0.2)] transform scale-105"
-                                            : "bg-white text-neutral-600 border-neutral-200 hover:border-neutral-900 hover:text-neutral-900",
-                                        !available && "opacity-40 cursor-not-allowed bg-neutral-50 text-neutral-400 border-neutral-100 line-through"
-                                    )}
-                                >
-                                    {value}
-                                    {isSelected && (
-                                        <div className="absolute -top-1.5 -right-1.5 w-4.5 h-4.5 rounded-full bg-white border border-neutral-100 flex items-center justify-center shadow-md">
-                                            <Check className="w-3 h-3 text-primary stroke-[3px]" />
-                                        </div>
-                                    )}
-                                </button>
+                                <ScaleTap key={value}>
+                                    <button
+                                        onClick={() => setSelectedOptions(prev => ({ ...prev, [option.name]: value }))}
+                                        disabled={!available}
+                                        className={cn(
+                                            "relative h-10 min-w-[3rem] px-4 flex items-center justify-center rounded-[var(--radius-md)] text-sm font-bold border transition-all duration-300",
+                                            isSelected
+                                                ? "bg-primary text-primary-foreground border-primary shadow-[var(--shadow-elevation)]"
+                                                : "bg-surface text-foreground border-border hover:border-foreground/30 hover:bg-surface-hover",
+                                            !available && "opacity-40 cursor-not-allowed bg-muted text-muted-foreground border-transparent line-through"
+                                        )}
+                                    >
+                                        {value}
+                                        {isSelected && (
+                                            <motion.div
+                                                layoutId={`active-${option.name}`}
+                                                className="absolute inset-0 border-2 border-primary z-10 rounded-[var(--radius-md)]"
+                                                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                            />
+                                        )}
+                                    </button>
+                                </ScaleTap>
+
                             )
                         })}
                     </div>

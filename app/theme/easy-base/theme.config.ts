@@ -12,8 +12,8 @@ import "./final-cta.css";
 
 export const EasyBaseTheme = {
   id: "easy-base",
-  name: "Easy Base",
-  description: "India-first, conversion-led base theme",
+  name: "Easy Max Theme",
+  description: "High-performance, conversion-first theme for general inventory.",
   defaults: {
     pdpTemplate: "easy-basic",
     currency: "INR",

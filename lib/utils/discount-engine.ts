@@ -1,6 +1,6 @@
 export type PrepaidScope = 'store' | 'collection' | 'product';
 export type DiscountType = 'flat' | 'percentage';
-export type StackingLogic = 'highest_only' | 'stack_all';
+export type StackingLogic = 'highest_only' | 'stack';
 
 export interface PrepaidRule {
     id: string;
@@ -65,7 +65,7 @@ export function calculatePrepaidDiscount(
         });
 
         // 3. Apply Stacking Logic
-        if (stackingLogic === 'stack_all') {
+        if (stackingLogic === 'stack') {
             // Sum all valid rules
             const itemTotal = potentialSavings.reduce((sum, s) => sum + s.amount, 0);
             // Cap at total line item price

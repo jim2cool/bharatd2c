@@ -2,6 +2,8 @@
 
 import { Button } from "@/components/ui/button"
 import { ShoppingCart, CreditCard, Banknote } from "lucide-react"
+import { ScaleTap, Magnetic } from "@/components/ui/motion-primitives"
+import { motion } from "framer-motion"
 
 interface CTAGroupProps {
     sellingPrice: number
@@ -33,49 +35,62 @@ export function CTAGroup({
 
             {/* 1. Primary: Prepaid (Pay Online) - Saffron Accent */}
             {prepaidEnabled && (
-                <Button
-                    size="lg"
-                    className="w-full h-14 text-base font-bold uppercase tracking-widest rounded-none shadow-sm hover:shadow-md transition-all relative overflow-hidden group"
-                    onClick={onPrepaidClick}
-                    data-cta="prepaid"
-                    style={{
-                        backgroundColor: 'var(--saffron-500, #e26a00)',
-                        color: '#ffffff',
-                        border: 'none'
-                    }}
-                >
-                    <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 ease-in-out" />
-                    <CreditCard className="mr-2 h-5 w-5" />
-                    {prepaidOfferText || `Buy Now - Pay Online${prepaidSavings > 0 ? ` & Save ₹${prepaidSavings}` : ''}`}
-                </Button>
+                <Magnetic>
+                    <ScaleTap className="w-full">
+                        <Button
+                            size="lg"
+                            className="w-full h-14 text-base font-bold uppercase tracking-widest rounded-[var(--radius-button)] shadow-[var(--shadow-elevation)] hover:shadow-lg transition-all relative overflow-hidden group bg-primary text-primary-foreground border-transparent active:scale-[0.98]"
+                            onClick={onPrepaidClick}
+                            data-cta="prepaid"
+                        >
+                            <motion.div
+                                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[-20deg]"
+                                initial={{ x: "-150%" }}
+                                animate={{ x: "150%" }}
+                                transition={{
+                                    repeat: Infinity,
+                                    repeatDelay: 3,
+                                    duration: 1.5,
+                                    ease: "easeInOut"
+                                }}
+                            />
+                            <CreditCard className="mr-2 h-5 w-5" />
+                            {prepaidOfferText || `Buy Now - Pay Online${prepaidSavings > 0 ? ` & Save ₹${prepaidSavings}` : ''}`}
+                        </Button>
+                    </ScaleTap>
+                </Magnetic>
             )}
 
             {/* 2. Secondary: Cash On Delivery - Outline (Conditional) */}
             {codEnabled && (
-                <Button
-                    variant="outline"
-                    size="lg"
-                    className="w-full h-14 text-sm font-bold uppercase tracking-widest rounded-none border-2 border-foreground/10 hover:border-foreground/30 hover:bg-muted/30 transition-colors"
-                    onClick={onCodClick}
-                    data-cta="cod"
-                >
-                    <Banknote className="mr-2 h-4 w-4 opacity-60" />
-                    Order Now - Cash on Delivery
-                </Button>
+                <ScaleTap className="w-full">
+                    <Button
+                        variant="outline"
+                        size="lg"
+                        className="w-full h-14 text-sm font-bold uppercase tracking-widest rounded-[var(--radius-button)] border-[var(--border-width)] border-border hover:border-foreground/30 hover:bg-surface-hover transition-colors text-foreground"
+                        onClick={onCodClick}
+                        data-cta="cod"
+                    >
+                        <Banknote className="mr-2 h-4 w-4 opacity-60" />
+                        Order Now - Cash on Delivery
+                    </Button>
+                </ScaleTap>
             )}
 
             {/* 3. Tertiary: Add to Cart - Visible Button (Same Size) */}
             {cartEnabled && (
-                <Button
-                    variant="secondary"
-                    size="lg"
-                    className="w-full h-14 text-sm font-bold uppercase tracking-widest rounded-none bg-muted hover:bg-muted/80 text-foreground transition-colors"
-                    onClick={onAddToCart}
-                    data-cta="cart"
-                >
-                    <ShoppingCart className="mr-2 h-4 w-4 opacity-60" />
-                    Add to Cart
-                </Button>
+                <ScaleTap className="w-full">
+                    <Button
+                        variant="secondary"
+                        size="lg"
+                        className="w-full h-14 text-sm font-bold uppercase tracking-widest rounded-[var(--radius-button)] bg-card hover:bg-muted text-foreground transition-colors border border-border/50"
+                        onClick={onAddToCart}
+                        data-cta="cart"
+                    >
+                        <ShoppingCart className="mr-2 h-4 w-4 opacity-60" />
+                        Add to Cart
+                    </Button>
+                </ScaleTap>
             )}
         </div>
     )

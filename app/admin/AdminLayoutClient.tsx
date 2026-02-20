@@ -50,6 +50,7 @@ export function AdminLayoutClient({
   const router = useRouter()
   const [storeId, setStoreId] = useState<string | null>(null)
   const [storeUrl, setStoreUrl] = useState<string>('/')
+  const [architecture, setArchitecture] = useState<string>('product-engine')
 
   useEffect(() => {
     const sid = getActiveStoreIdClient()
@@ -57,6 +58,13 @@ export function AdminLayoutClient({
 
     if (sid) {
       getStoreBaseUrl(supabaseBrowser).then(url => setStoreUrl(url))
+
+      // Fetch architecture
+      supabaseBrowser.from('stores').select('theme_config').eq('id', sid).single().then(({ data }) => {
+        if (data?.theme_config?.architecture) {
+          setArchitecture(data.theme_config.architecture)
+        }
+      })
 
       // 🛰️ REAL-TIME ORDER NOTIFICATIONS (Optimized)
       const channel = supabaseBrowser.channel('admin-order-pulse')
@@ -112,7 +120,10 @@ export function AdminLayoutClient({
         { label: 'Customers', href: '#', icon: Users },
         { label: 'Discounts', href: '/admin/discounts', icon: Percent },
         { label: 'Marketing', href: '/admin/marketing', icon: Megaphone },
-      ]
+      ].filter(item => {
+        if (architecture === 'story-first' && (item.label === 'Discounts' || item.label === 'Customers')) return false;
+        return true;
+      })
     },
     {
       section: 'Storefront',
@@ -129,6 +140,16 @@ export function AdminLayoutClient({
       items: [
         { label: 'Logistics', href: '/admin/logistics', icon: Truck },
         { label: 'Dropshipping', href: '/admin/dropshipping', icon: Package },
+      ].filter(item => {
+        if (architecture === 'story-first') return false;
+        return true;
+      })
+    },
+    {
+      section: 'Channels',
+      items: [
+        { label: 'Meta (Instagram/FB)', href: '/admin/channels/meta', icon: Globe2 },
+        { label: 'Google (Ads/Analytics)', href: '/admin/channels/google', icon: Globe2 },
       ]
     },
     {
@@ -138,7 +159,7 @@ export function AdminLayoutClient({
         { label: 'Settings', href: '/admin/settings/general', icon: Settings },
       ]
     }
-  ]
+  ].filter(group => group.items.length > 0);
 
   const [isOpen, setIsOpen] = useState(false)
 

@@ -85,12 +85,15 @@ export default async function middleware(request: NextRequest) {
                 setAll(cookiesToSet) {
                     cookiesToSet.forEach(({ name, value, options }) => {
                         request.cookies.set(name, value)
-                        response.cookies.set(name, value, {
+                        const isLocalhost = cleanHostname.includes('localhost')
+                        const cookieOptions = {
                             ...options,
-                            httpOnly: true,
-                            sameSite: 'lax',
-                            secure: process.env.NODE_ENV === 'production',
-                        })
+                            // Ensure the cookie is accessible by subdomains if we have a root domain, but not on localhost
+                            domain: (process.env.NEXT_PUBLIC_ROOT_DOMAIN && !isLocalhost)
+                                ? `.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
+                                : undefined,
+                        }
+                        response.cookies.set(name, value, cookieOptions)
                     })
                 },
             },

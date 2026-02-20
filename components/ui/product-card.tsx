@@ -6,7 +6,7 @@ import { addToCart } from "@/lib/cart";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
-export default function ProductCard({ product, priority = false }: { product: any, priority?: boolean }) {
+export default function ProductCard({ product, priority = false, onQuickAdd }: { product: any, priority?: boolean, onQuickAdd?: (e: React.MouseEvent) => void }) {
   const {
     id,
     title,
@@ -38,6 +38,12 @@ export default function ProductCard({ product, priority = false }: { product: an
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (onQuickAdd) {
+      onQuickAdd(e);
+      return;
+    }
+
     addToCart({
       product_id: id,
       title,

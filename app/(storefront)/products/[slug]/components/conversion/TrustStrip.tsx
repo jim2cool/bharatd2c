@@ -34,13 +34,13 @@ export function TrustStrip({ indicators }: TrustStripProps) {
     return (
         <div className="space-y-4">
             {/* Main Trust Row */}
-            <div className="flex items-center justify-between gap-2 p-6 bg-neutral-50/50 border border-neutral-100 rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.02)]">
+            <div className="flex items-center justify-between gap-2 p-6 bg-card border-[var(--border-width)] border-border rounded-[var(--radius-card)] shadow-[var(--shadow-elevation)] opacity-[var(--social-proof-opacity)]">
                 {displayIndicators.map((item, idx) => (
                     <div key={idx} className="flex flex-col items-center gap-3 text-center group flex-1">
-                        <div className="w-12 h-12 rounded-2xl bg-white border border-neutral-100 flex items-center justify-center text-primary shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:border-primary/20 group-hover:shadow-md">
+                        <div className="w-12 h-12 rounded-[var(--radius-md)] bg-white border border-border flex items-center justify-center text-primary shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:border-primary/20 group-hover:shadow-md">
                             {React.createElement((TRUST_ICONS as any)[item.icon] || BadgeCheck, { className: "w-5 h-5 stroke-[2.5px]" })}
                         </div>
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-900 leading-tight px-1">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-foreground leading-tight px-1">
                             {item.text}
                         </span>
                     </div>

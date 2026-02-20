@@ -9,202 +9,88 @@
    ========================================================= */
 :root {
   /* =======================================================
-     CORE NEUTRALS (Editorial/Luxury Inspired)
+     CORE PALETTE (5-Color High-Conversion System)
      ======================================================= */
+  /* 1. CANVAS: Pure White - Clean backgrounds */
+  --canvas: #FFFFFF;
+
+  /* 2. SURFACE: Subtle Neutral - Backgrounds/Borders */
+  --surface: #F9FAFB;
+  /* Cool Gray 50 */
+  --surface-hover: #F3F4F6;
+  /* Cool Gray 100 */
+
+  /* 3. INK: Deep Charcoal - Text */
+  --ink-900: #111827;
+  /* Primary */
+  --ink-500: #6B7280;
+  /* Secondary/Muted */
+  --ink-300: #D1D5DB;
+  /* Borders/Lines */
+
+  /* 4. URGENCY: Signal Red - Scarcity/Error */
+  --urgency: #DC2626;
+  --urgency-bg: #FEF2F2;
+
+  /* 5. CONVERSION: Royal Blue - Primary Action */
+  /* CONSTANT across light/dark modes for brand recognition */
+  --conversion: #2563EB;
+  --conversion-hover: #1D4ED8;
+  --conversion-foreground: #FFFFFF;
+
+  /* Mappings to generic variables for compatibility */
+  --background: var(--canvas);
+  --foreground: var(--ink-900);
+
+  --primary: var(--conversion);
+  --primary-foreground: var(--conversion-foreground);
+
+  --bg-page: var(--canvas);
+  --bg-surface: var(--surface);
+
   --white: #ffffff;
-  --black: #1A1A1A;
-
-  /* Cool Neutral Palette (Re-engineered from reference) */
-  --beige-50: #FDFDFD;
-  /* Cool Bone - Page Background */
-  --beige-100: #F6F6F6;
-  /* Light Grey - Section Background */
-  --beige-200: #EAEAEA;
-  --beige-300: #A8A398;
-  /* Muted Sage/Taupe Accent */
-
-  /* Charcoal Scale */
-  --charcoal-900: #1A1A1A;
-  /* Primary Text */
-  --charcoal-700: #333333;
-  --charcoal-500: #666666;
-  /* Secondary Text */
-  --charcoal-300: #999999;
-  --charcoal-100: #E5E5E5;
-  /* Borders */
+  --black: #000000;
 
   /* =======================================================
-     SAFFRON SYSTEM (PRIMARY ACCENT)
+     TYPOGRAPHY & SPACING
      ======================================================= */
-  --saffron-900: #7a2e00;
-  --saffron-700: #b34700;
-  --saffron-500: #e26a00;
-  /* PRIMARY SAFFRON */
-  --saffron-300: #f4b183;
-  --saffron-100: #fff1e6;
+  --font-sans: var(--font-body), system-ui, sans-serif;
+  --font-display: var(--font-heading), system-ui, sans-serif;
 
-  /* =======================================================
-     SEMANTIC COLORS
-     ======================================================= */
-  --color-primary: var(--saffron-500);
-  --color-accent: var(--saffron-500);
-  --color-accent-soft: var(--saffron-100);
-
-  /* Updated semantic colors for better conversion */
-  --color-success: #16a34a;
-  /* green-600 */
-  --color-error: #dc2626;
-  /* red-600 */
-  --color-warning: #f59e0b;
-  /* amber-500 */
-  --color-info: #0369a1;
-  /* sky-700 */
-
-  /* =======================================================
-     BACKGROUNDS
-     ======================================================= */
-  --bg-page: var(--beige-50);
-  --bg-section: var(--beige-50);
-  --bg-surface: var(--white);
-  --bg-muted: var(--beige-100);
-
-  /* =======================================================
-     TYPOGRAPHY
-     ======================================================= */
-  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-serif: var(--font-serif), 'Playfair Display', serif;
-
-  /* Refined type scale (8pt grid aligned) */
-  --text-xs: 0.75rem;
-  /* 12px */
-  --text-sm: 0.875rem;
-  /* 14px */
-  --text-base: 1rem;
-  /* 16px */
-  --text-md: 1.125rem;
-  /* 18px */
-  --text-lg: 1.25rem;
-  /* 20px */
-  --text-xl: 1.5rem;
-  /* 24px */
-  --text-2xl: 1.875rem;
-  /* 30px */
-  --text-3xl: 2.25rem;
-  /* 36px */
-  --text-4xl: 3rem;
-  /* 48px */
-
-  /* =======================================================
-     LINE HEIGHT & TRACKING
-     ======================================================= */
-  --lh-tight: 1.25;
-  /* headings */
-  --lh-normal: 1.5;
-  /* body */
-  --lh-relaxed: 1.75;
-  /* long-form content */
-
-  /* =======================================================
-     SPACING (8pt GRID)
-     ======================================================= */
-  --space-1: 0.25rem;
-  /* 4px */
-  --space-2: 0.5rem;
-  /* 8px */
-  --space-3: 0.75rem;
-  /* 12px */
-  --space-4: 1rem;
-  /* 16px */
-  --space-6: 1.5rem;
-  /* 24px */
-  --space-8: 2rem;
-  /* 32px */
-  --space-10: 2.5rem;
-  /* 40px */
-  --space-12: 3rem;
-  /* 48px */
-  --space-16: 4rem;
-  /* 64px */
-  --space-20: 5rem;
-  /* 80px */
-
-  /* =======================================================
-     RADIUS
-     ======================================================= */
   --radius-sm: 0.375rem;
-  /* 6px - buttons, inputs */
+  /* 6px */
   --radius-md: 0.5rem;
-  /* 8px - cards, small components */
+  /* 8px */
   --radius-lg: 0.75rem;
-  /* 12px - large cards, modals */
+  /* 12px */
   --radius-xl: 1rem;
-  /* 16px - hero sections, feature blocks */
+  /* 16px */
 
   /* =======================================================
-     LAYOUT
+     SHADCN TOKENS (Mapped to System)
      ======================================================= */
-  --container-max: 1280px;
-  --radius: 0.625rem;
+  --card: var(--canvas);
+  --card-foreground: var(--ink-900);
+  --popover: var(--canvas);
+  --popover-foreground: var(--ink-900);
+  --secondary: var(--surface);
+  --secondary-foreground: var(--ink-900);
+  --muted: var(--surface);
+  --muted-foreground: var(--ink-500);
+  --accent: var(--surface);
+  --accent-foreground: var(--ink-900);
+  --destructive: var(--urgency);
+  --destructive-foreground: var(--white);
+  --border: var(--ink-300);
+  --input: var(--ink-300);
+  --ring: var(--conversion);
 
-  /* =======================================================
-     ANIMATIONS & TRANSITIONS (IMPULSE-INSPIRED)
-     ======================================================= */
-  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-bounce: 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
-
-  /* Hover Effects */
-  --hover-lift: translateY(-4px);
-  --hover-lift-sm: translateY(-2px);
-  --hover-scale: scale(1.02);
-  --hover-scale-sm: scale(1.01);
-
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
-  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.12);
-  --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.08);
-
-  /* =======================================================
-     SHADCN UI TOKENS (Lifestyle Theme)
-     ======================================================= */
-  --background: oklch(0.99 0 0);
-  /* #FDFDFD approx */
-  --foreground: oklch(0.15 0 0);
-  /* #1A1A1A */
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.15 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.15 0 0);
-  --primary: oklch(0.15 0 0);
-  /* Black as primary */
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.623 0.22 40.09);
-  /* Saffron */
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.623 0.22 40.09);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Charts - Keeping generic for now */
+  --chart-1: #2563EB;
+  --chart-2: #16A34A;
+  --chart-3: #DC2626;
+  --chart-4: #F59E0B;
+  --chart-5: #6B7280;
 }
 
 /* =========================================================
@@ -398,8 +284,63 @@ textarea:focus {
 }
 
 /* =========================================================
-   UTILITIES
+   UTILITIES (Custom)
    ========================================================= */
+
+@layer utilities {
+  .shimmer-effect {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .shimmer-effect::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(to right,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%);
+    transform: skewX(-20deg) translateX(-150%);
+    animation: shimmer 2.5s infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      transform: skewX(-20deg) translateX(-150%);
+    }
+
+    15% {
+      transform: skewX(-20deg) translateX(150%);
+    }
+
+    100% {
+      transform: skewX(-20deg) translateX(150%);
+    }
+  }
+
+  .bg-noise {
+    position: relative;
+  }
+
+  .bg-noise::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.02;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+  }
+}
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -444,7 +385,7 @@ button,
   --radius-button: var(--radius-button);
   --radius-card: var(--radius-card);
   --radius-image: var(--radius-image);
-  
+
   /* Map standard tailwind radius keys to dynamic defaults or fallback */
   --radius-sm: calc(var(--radius-button) * 0.75);
   --radius-md: var(--radius-button);
@@ -455,7 +396,22 @@ button,
   /* Dynamic Color Mapping */
   --color-primary: var(--color-primary);
   --color-accent: var(--color-accent);
-  
+
+  /* Force Gray Scale to matching Inks for Consistency */
+  --color-gray-50: var(--surface);
+  --color-gray-100: var(--surface-hover);
+  --color-gray-200: var(--ink-300);
+  /* Borders */
+  --color-gray-300: var(--ink-300);
+  --color-gray-400: var(--ink-500);
+  --color-gray-500: var(--ink-500);
+  --color-gray-600: var(--ink-500);
+  --color-gray-700: var(--ink-900);
+  --color-gray-800: var(--ink-900);
+  --color-gray-900: var(--ink-900);
+  --color-neutral-50: var(--surface);
+  --color-neutral-900: var(--ink-900);
+
   /* Fallbacks for Shadcn-like variables */
   --color-background: var(--background);
   --color-foreground: var(--foreground);

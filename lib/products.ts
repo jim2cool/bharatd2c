@@ -99,7 +99,8 @@ export async function getProductsByCollection(
   slug: string,
   page: number,
   pageSize: number,
-  sort: string
+  sort: string,
+  filters?: { minPrice?: number; maxPrice?: number; inStock?: boolean; subcategories?: string[] }
 ) {
   // 1. Fetch collection metadata to check source type
   const { data: collectionContent, error: collectionError } = await supabase
@@ -114,9 +115,18 @@ export async function getProductsByCollection(
 
   let query = supabase
     .from("products")
-    .select("*", { count: "exact" })
+    .select("*, product_variants!inner(inventory)", { count: "exact" }) // Join to check stock if needed
     .eq("store_id", storeId)
     .eq("status", "published");
+
+  // 1.5 Apply Filters
+  if (filters?.minPrice !== undefined) query = query.gte("price", filters.minPrice);
+  if (filters?.maxPrice !== undefined) query = query.lte("price", filters.maxPrice);
+  if (filters?.inStock) query = query.gt("product_variants.inventory", 0);
+  if (filters?.subcategories && filters.subcategories.length > 0) {
+    // Simplified subcategory filtering - assuming category slug matches
+    query = query.in("category", filters.subcategories);
+  }
 
   // 2. Apply Dynamic Source Logic
   if (collectionContent?.source_type === 'latest') {

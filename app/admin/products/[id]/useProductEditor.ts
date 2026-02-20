@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { supabaseBrowser } from '@/lib/supabase-browser'
 import { revalidateProduct } from '../actions'
 import { ResolutionEngine } from '@/lib/utils/resolution'
+import { CategoryType } from '@/types/architecture'
 
 export type Testimonial = {
   quote: string
@@ -17,6 +18,8 @@ export type Testimonial = {
 export type ProductFormData = {
   title: string
   status: 'draft' | 'published'
+  category: CategoryType
+  category_data?: Record<string, any>
   price: number
   mrp?: number | null
   cogs: number
@@ -128,6 +131,8 @@ export function useProductEditor(id: string) {
           cross_sell_title: 'Related product',
           ...data.bundle_settings
         },
+        category: data.category || 'multi',
+        category_data: data.category_data || {},
         use_store_payment_settings: data.use_store_payment_settings !== false, // Default to true if null/undefined
         urgency_settings: {
           enabled: false,
@@ -220,6 +225,8 @@ export function useProductEditor(id: string) {
     const updatePayload = {
       title: payload.title,
       status: payload.status,
+      category: payload.category,
+      category_data: payload.category_data,
       price: payload.price,
       mrp: payload.mrp,
       cogs: payload.cogs,

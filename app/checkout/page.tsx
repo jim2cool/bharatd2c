@@ -194,7 +194,7 @@ function CheckoutContent() {
       collection_ids: productCollections[item.product_id] || []
     }));
 
-    return calculatePrepaidDiscount(itemsForEngine, prepaidRules, stackingLogic);
+    return calculatePrepaidDiscount(itemsForEngine, prepaidRules, stackingLogic as any); // Cast as any if type mismatch persists, or fix upstream
   };
 
   const subtotal = total;

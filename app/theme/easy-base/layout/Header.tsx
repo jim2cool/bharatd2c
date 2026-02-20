@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { getCart } from "@/lib/cart";
 import { SlideOutCart } from "@/components/SlideOutCart";
 import { ShoppingBag, Menu, X } from "lucide-react";
+import MegaMenu from "@/components/storefront/navigation/MegaMenu";
 
 export default function Header({ store }: { store?: any }) {
   const [count, setCount] = useState(0);
@@ -52,11 +53,9 @@ export default function Header({ store }: { store?: any }) {
 
   const NavLinks = () => (
     <nav className="site-nav flex items-center gap-8">
-      <Link href="/products" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors tracking-wide">
-        Shop
-      </Link>
-      <Link href="/collections" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors tracking-wide">
-        Collections
+      <MegaMenu storeId={store?.id} />
+      <Link href="/collections" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors tracking-wide py-4">
+        All Collections
       </Link>
       <Link href="/track-order" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors tracking-wide">
         Track Order
@@ -65,7 +64,7 @@ export default function Header({ store }: { store?: any }) {
   );
 
   const Actions = () => (
-    <div className="flex items-center gap-6">
+    <div className="flex items-center gap-4 md:gap-6">
       <button
         onClick={() => setCartOpen(true)}
         className="site-cart flex items-center gap-2 relative group"
@@ -90,7 +89,7 @@ export default function Header({ store }: { store?: any }) {
     <header className={`site-header bg-white border-b border-gray-100 transition-all duration-300 ${store?.theme_config?.header?.sticky ? 'sticky top-0 z-50' : ''}`}>
       {/* ================= DESKTOP ================= */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+        <div className="flex justify-between items-center h-14 md:h-20">
           {headerStyle === "default" && (
             <>
               <Logo />

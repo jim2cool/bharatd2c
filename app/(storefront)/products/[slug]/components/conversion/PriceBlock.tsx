@@ -14,19 +14,20 @@ export function PriceBlock({ mrp, sellingPrice, percentageOff, savingsAmount, pr
     return (
         <div className={cn("flex flex-col gap-1", className)}>
             {/* Dawn-style price: simple, clean, left-aligned */}
-            <div className="flex items-baseline gap-2">
-                <span className="text-xl md:text-2xl font-semibold text-foreground">
-                    ₹{sellingPrice.toLocaleString()}
+            <div className="flex items-baseline gap-1.5">
+                <span className="text-sm md:text-base font-bold text-muted-foreground -mb-2 md:-mb-1">₹</span>
+                <span className="text-3xl md:text-4xl font-black tracking-tighter text-foreground">
+                    {sellingPrice.toLocaleString()}
                 </span>
                 {savingsAmount > 0 && (
-                    <>
-                        <span className="text-sm text-muted-foreground line-through">
+                    <div className="flex flex-col items-start leading-none ml-2">
+                        <span className="text-[10px] md:text-xs text-muted-foreground line-through decoration-red-500/50">
                             ₹{mrp.toLocaleString()}
                         </span>
-                        <span className="text-sm font-medium text-green-700 dark:text-green-500">
+                        <span className="text-[10px] md:text-xs font-bold text-green-600 uppercase tracking-wider">
                             {calculatedPercentage}% off
                         </span>
-                    </>
+                    </div>
                 )}
             </div>
 

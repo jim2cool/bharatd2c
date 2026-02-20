@@ -6,6 +6,8 @@ export interface MediaItem {
     aspectRatio?: string; // e.g. "aspect-square", "aspect-[4/5]"
 }
 
+import { SellerModifier, CategoryType } from '@/types/architecture';
+
 export interface Review {
     id: string;
     author: string;
@@ -127,7 +129,10 @@ export interface ProductData {
     relatedProducts: RelatedProduct[]; // AOV / People also bought
     related_products_title?: string;
 
+    seller_config?: SellerModifier;
+
     // Phase 17: Admin Alignment
+    category: CategoryType;
     has_variants?: boolean;
     variant_options?: { name: string; values: string[] }[];
     variants?: {
@@ -139,6 +144,8 @@ export interface ProductData {
         sku?: string;
         options: Record<string, string>; // e.g. { Color: "Red", Size: "M" }
     }[];
+
+    category_data?: Record<string, any>;
 
     debug?: {
         store: any;

@@ -1,647 +1,177 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { useForm, FormProvider } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+import { Loader2, Layout, Zap, Palette, MousePointer2, Save } from "lucide-react";
 import { supabaseBrowser } from "@/lib/supabase-browser";
 import { getActiveStoreIdClient } from "@/lib/getActiveStore.client";
-import { useRouter } from "next/navigation";
-import { ChevronDown, Check, Palette, Type, Layout, Sparkles, Save, RotateCcw } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { toast } from "sonner";
+import { ThemeConfig, DEFAULT_CONFIG } from "@/components/ThemeProvider";
 
-// ═══════════════════════════════════════════════════════════════════════════
-// TYPES & SCHEMA
-// ═══════════════════════════════════════════════════════════════════════════
-
-const configSchema = z.object({
-    presetId: z.string().optional(),
-    colors: z.object({
-        primary: z.string(),
-        secondary: z.string(),
-        accent: z.string(),
-        background: z.string(),
-        surface: z.string(),
-        text: z.string(),
-    }),
-    corners: z.object({
-        buttons: z.enum(["sharp", "subtle", "rounded", "pill"]),
-        cards: z.enum(["sharp", "subtle", "rounded"]),
-        inputs: z.enum(["sharp", "subtle", "rounded"]),
-        images: z.enum(["sharp", "subtle", "rounded", "circle"]),
-        badges: z.enum(["sharp", "subtle", "pill"]),
-        selectors: z.enum(["sharp", "subtle", "rounded"]),
-    }),
-    buttons: z.object({
-        primaryStyle: z.enum(["solid", "gradient", "glow"]),
-        secondaryStyle: z.enum(["outline", "ghost", "subtle"]),
-        shadow: z.enum(["none", "subtle", "elevated"]),
-    }),
-    spacing: z.object({
-        sectionGap: z.enum(["tight", "default", "spacious"]),
-        cardGap: z.enum(["tight", "default", "relaxed"]),
-    }),
-    typography: z.object({
-        headingFont: z.string(),
-        bodyFont: z.string(),
-        scale: z.enum(["compact", "default", "large"]),
-        lineHeight: z.enum(["tight", "default", "spacious"]),
-        paragraphGap: z.enum(["compact", "default", "loose"]),
-    }),
-    announcementBar: z.object({
-        text: z.string(),
-        style: z.enum(["static", "marquee"]),
-        background: z.string(),
-        text_color: z.string(),
-        enabled: z.boolean(),
-    }).optional(),
-    header: z.object({
-        style: z.enum(["default", "minimal", "modern"]),
-        sticky: z.boolean(),
-        transparentOnHero: z.boolean(),
-    }).optional(),
-    footer: z.object({
-        style: z.enum(["standard", "minimal"]),
-        copyrightText: z.string(),
-        showSocials: z.boolean(),
-    }).optional(),
-    cro_strategy: z.object({
-        pdp_order: z.array(z.string()),
-        trust_elements: z.array(z.string()),
-    }).optional(),
-});
-
-type ThemeConfig = z.infer<typeof configSchema>;
-
-// ═══════════════════════════════════════════════════════════════════════════
-// PRESETS
-// ═══════════════════════════════════════════════════════════════════════════
-const PRESETS: any[] = [
-    {
-        id: "modern",
-        presetId: "modern",
-        name: "Modern Minimalist",
-        description: "Clean lines, subtle corners",
-        colors: { primary: "#111111", secondary: "#333333", accent: "#e26a00", background: "#ffffff", surface: "#f9f9f9", text: "#111111" },
-        corners: { buttons: "subtle", cards: "subtle", inputs: "subtle", images: "subtle", badges: "pill", selectors: "subtle" },
-        buttons: { primaryStyle: "solid", secondaryStyle: "outline", shadow: "subtle" },
-        spacing: { sectionGap: "default", cardGap: "default" },
-        typography: { headingFont: "Inter", bodyFont: "Inter", scale: "default", lineHeight: "default", paragraphGap: "default" },
-    },
-    {
-        id: "nature",
-        presetId: "nature",
-        name: "Nature & Organic",
-        description: "Earthy tones, soft corners",
-        colors: { primary: "#2f4f4f", secondary: "#5f7f7f", accent: "#8fbc8f", background: "#fdfbf7", surface: "#f5f2eb", text: "#2f3f2f" },
-        corners: { buttons: "rounded", cards: "rounded", inputs: "rounded", images: "rounded", badges: "pill", selectors: "rounded" },
-        buttons: { primaryStyle: "solid", secondaryStyle: "outline", shadow: "none" },
-        spacing: { sectionGap: "spacious", cardGap: "relaxed" },
-        typography: { headingFont: "Outfit", bodyFont: "DM Sans", scale: "default", lineHeight: "spacious", paragraphGap: "loose" },
-    },
-    {
-        id: "luxury",
-        presetId: "luxury",
-        name: "Luxury Premium",
-        description: "Sharp edges, gold accents",
-        colors: { primary: "#0f172a", secondary: "#1e293b", accent: "#d4af37", background: "#fafafa", surface: "#ffffff", text: "#0f172a" },
-        corners: { buttons: "sharp", cards: "sharp", inputs: "sharp", images: "sharp", badges: "subtle", selectors: "sharp" },
-        buttons: { primaryStyle: "solid", secondaryStyle: "outline", shadow: "elevated" },
-        spacing: { sectionGap: "spacious", cardGap: "default" },
-        typography: { headingFont: "Playfair Display", bodyFont: "Inter", scale: "default", lineHeight: "spacious", paragraphGap: "default" },
-    },
-    {
-        id: "friendly",
-        presetId: "friendly",
-        name: "Soft & Friendly",
-        description: "Pill buttons, rounded everything",
-        colors: { primary: "#7c3aed", secondary: "#a78bfa", accent: "#f59e0b", background: "#ffffff", surface: "#faf5ff", text: "#1f2937" },
-        corners: { buttons: "pill", cards: "rounded", inputs: "rounded", images: "rounded", badges: "pill", selectors: "rounded" },
-        buttons: { primaryStyle: "solid", secondaryStyle: "ghost", shadow: "subtle" },
-        spacing: { sectionGap: "default", cardGap: "relaxed" },
-        typography: { headingFont: "Poppins", bodyFont: "Poppins", scale: "large", lineHeight: "default", paragraphGap: "default" },
-    },
-    {
-        id: "editorial",
-        presetId: "editorial",
-        name: "Bold Editorial",
-        description: "Sharp cards, pill CTAs",
-        colors: { primary: "#dc2626", secondary: "#1f2937", accent: "#f59e0b", background: "#ffffff", surface: "#f3f4f6", text: "#111827" },
-        corners: { buttons: "pill", cards: "sharp", inputs: "subtle", images: "sharp", badges: "pill", selectors: "subtle" },
-        buttons: { primaryStyle: "solid", secondaryStyle: "outline", shadow: "elevated" },
-        spacing: { sectionGap: "tight", cardGap: "tight" },
-        typography: { headingFont: "Space Grotesk", bodyFont: "Inter", scale: "default", lineHeight: "tight", paragraphGap: "compact" },
-    },
-    {
-        id: "tech",
-        presetId: "tech",
-        name: "Tech Blue",
-        description: "Professional SaaS look",
-        colors: { primary: "#2563eb", secondary: "#3b82f6", accent: "#06b6d4", background: "#f8fafc", surface: "#ffffff", text: "#0f172a" },
-        corners: { buttons: "subtle", cards: "subtle", inputs: "subtle", images: "subtle", badges: "pill", selectors: "subtle" },
-        buttons: { primaryStyle: "solid", secondaryStyle: "outline", shadow: "subtle" },
-        spacing: { sectionGap: "default", cardGap: "default" },
-        typography: { headingFont: "Inter", bodyFont: "Inter", scale: "default", lineHeight: "default", paragraphGap: "default" },
-    },
-];
-
-const DEFAULT_CONFIG: ThemeConfig = {
-    presetId: "modern",
-    colors: PRESETS[0].colors,
-    corners: PRESETS[0].corners,
-    buttons: PRESETS[0].buttons,
-    spacing: PRESETS[0].spacing,
-    typography: PRESETS[0].typography,
-    announcementBar: {
-        enabled: true,
-        text: "Free Shipping on Orders Above ₹999 | COD Available",
-        style: "static",
-        background: "#000000",
-        text_color: "#ffffff"
-    },
-    header: {
-        style: "default",
-        sticky: true,
-        transparentOnHero: false
-    },
-    footer: {
-        style: "standard",
-        copyrightText: "© 2026 Easy D2C Platform",
-        showSocials: true
-    }
-};
-
-const FONT_OPTIONS = [
-    { value: "Inter", label: "Inter (Modern)" },
-    { value: "Poppins", label: "Poppins (Friendly)" },
-    { value: "Playfair Display", label: "Playfair (Elegant)" },
-    { value: "Space Grotesk", label: "Space Grotesk (Tech)" },
-    { value: "DM Sans", label: "DM Sans (Clean)" },
-    { value: "Outfit", label: "Outfit (Contemporary)" },
-];
-
-// ═══════════════════════════════════════════════════════════════════════════
-// COMPONENTS
-// ═══════════════════════════════════════════════════════════════════════════
-
-function Accordion({ title, icon: Icon, children, defaultOpen = false }: { title: string; icon: any; children: React.ReactNode; defaultOpen?: boolean; }) {
-    const [open, setOpen] = useState(defaultOpen);
-    return (
-        <div className="border border-neutral-200 rounded-xl overflow-hidden bg-white shadow-sm transition-all mb-4">
-            <button
-                type="button"
-                onClick={() => setOpen(!open)}
-                className="w-full flex items-center justify-between p-4 hover:bg-neutral-50 transition-colors"
-            >
-                <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-neutral-100 flex items-center justify-center">
-                        <Icon className="w-4 h-4 text-neutral-600" />
-                    </div>
-                    <span className="font-bold text-neutral-800">{title}</span>
-                </div>
-                <ChevronDown className={`w-5 h-5 text-neutral-400 transition-transform duration-300 ${open ? "rotate-180" : ""}`} />
-            </button>
-            {open && <div className="p-5 pt-2 border-t border-neutral-100 animate-in slide-in-from-top-2 duration-300">{children}</div>}
-        </div>
-    );
-}
-
-function CornerSelector({ value, onChange, options = ["sharp", "subtle", "rounded", "pill"] }: { value: string; onChange: (val: any) => void; options?: string[]; }) {
-    const labels: Record<string, string> = { sharp: "Sharp", subtle: "Subtle", rounded: "Rounded", pill: "Pill", circle: "Circle" };
-    const radii: Record<string, string> = { sharp: "0px", subtle: "0.5rem", rounded: "1rem", pill: "9999px", circle: "50%" };
-    return (
-        <div className="flex gap-2 flex-wrap">
-            {options.map((opt) => (
-                <button
-                    key={opt}
-                    type="button"
-                    onClick={() => onChange(opt)}
-                    className={`px-4 py-2 text-xs border font-bold transition-all ${value === opt ? "bg-black text-white border-black shadow-md scale-105" : "bg-white text-neutral-600 border-neutral-200 hover:border-black hover:text-black"}`}
-                    style={{ borderRadius: radii[opt] }}
-                >
-                    {labels[opt]}
-                </button>
-            ))}
-        </div>
-    );
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// MAIN PAGE
-// ═══════════════════════════════════════════════════════════════════════════
+// Components
+import { StructureSection } from "./components/StructureSection";
+import { IntelligenceSection } from "./components/IntelligenceSection";
+import { StyleSection } from "./components/StyleSection";
+import { MotionSection } from "./components/MotionSection";
+import { ThemePreview } from "./components/ThemePreview";
+import { configSchema } from "./components/schema";
 
 export default function AppearancePage() {
-    const router = useRouter();
     const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
-    const [storeId, setStoreId] = useState<string | null>(null);
+    const [activeTab, setActiveTab] = useState<'structure' | 'intelligence' | 'style' | 'motion'>('structure');
+    const supabase = supabaseBrowser;
 
-    const {
-        register,
-        handleSubmit,
-        reset,
-        watch,
-        setValue,
-        formState: { isDirty },
-    } = useForm<ThemeConfig>({
+    const form = useForm<ThemeConfig>({
         resolver: zodResolver(configSchema),
-        defaultValues: DEFAULT_CONFIG
+        defaultValues: DEFAULT_CONFIG,
     });
 
-    const config = watch();
+    const { reset, handleSubmit, watch, formState: { isDirty } } = form;
 
+    // Load initial data
     useEffect(() => {
-        const fetchStore = async () => {
-            const id = getActiveStoreIdClient();
-            if (!id) {
+        async function loadSettings() {
+            try {
+                const storeId = getActiveStoreIdClient();
+                if (!storeId) {
+                    setLoading(false);
+                    return;
+                }
+
+                const { data, error } = await supabase
+                    .from('stores')
+                    .select('theme_config')
+                    .eq('id', storeId)
+                    .single();
+
+                if (error) throw error;
+
+                if (data?.theme_config) {
+                    // Merge with default config
+                    reset({ ...DEFAULT_CONFIG, ...data.theme_config });
+                }
+            } catch (err) {
+                console.error("Failed to load theme settings:", err);
+                toast.error("Failed to load settings");
+            } finally {
                 setLoading(false);
-                return;
             }
-            setStoreId(id);
-            const { data } = await supabaseBrowser.from("stores").select("theme_config").eq("id", id).single();
-            if (data?.theme_config && Object.keys(data.theme_config).length > 0) {
-                reset({ ...DEFAULT_CONFIG, ...data.theme_config });
-            }
-            setLoading(false);
-        };
-        fetchStore();
+        }
+        loadSettings();
     }, [reset]);
 
-    const onSave = async (data: ThemeConfig) => {
-        if (!storeId) return;
-        setSaving(true);
-        const { error } = await supabaseBrowser.from("stores").update({ theme_config: data }).eq("id", storeId);
-        setSaving(false);
-        if (error) {
-            toast.error("Failed to save theme settings");
-        } else {
-            toast.success("Theme settings saved");
-            router.refresh();
+    const onSave = async (values: ThemeConfig) => {
+        try {
+            const storeId = getActiveStoreIdClient();
+            if (!storeId) throw new Error("No active store");
+
+            const { error } = await supabase
+                .from('stores')
+                .update({ theme_config: values })
+                .eq('id', storeId);
+
+            if (error) throw error;
+            toast.success("Theme updated successfully");
+            // Optionally reload inputs to reset dirty state properly
+            reset(values);
+        } catch (err) {
+            console.error("Error saving theme:", err);
+            toast.error("Failed to save changes");
         }
     };
 
-    const applyPreset = (presetId: string) => {
-        const preset = PRESETS.find((p) => p.id === presetId);
-        if (preset) {
-            reset({ ...config, ...preset, presetId });
-        }
-    };
-
-    if (loading) return <div className="p-8 text-center bg-white min-h-[400px] flex items-center justify-center">Loading settings...</div>;
+    if (loading) {
+        return (
+            <div className="flex h-96 items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-neutral-400" />
+            </div>
+        );
+    }
 
     return (
-        <form onSubmit={handleSubmit(onSave)} className="max-w-6xl mx-auto py-8 px-4 pb-24">
-            <div className="flex items-center justify-between mb-10 border-b border-neutral-100 pb-6">
-                <div>
-                    <h1 className="text-3xl font-extrabold text-neutral-900 tracking-tight">Appearance</h1>
-                    <p className="text-neutral-500 mt-1 font-medium">Define your store's visual identity</p>
-                </div>
-                <div className="flex items-center gap-4">
-                    {isDirty && <span className="text-xs text-orange-600 font-bold bg-orange-50 px-3 py-1 rounded-full border border-orange-100">Pending Changes</span>}
-                    <button
-                        type="submit"
-                        disabled={saving}
-                        className="flex items-center gap-2 px-8 py-3 bg-black text-white font-bold rounded-xl hover:bg-neutral-800 disabled:opacity-50 transition-all shadow-xl hover:shadow-2xl active:scale-95"
-                    >
-                        {saving ? <RotateCcw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                        {saving ? "Saving..." : "Save Changes"}
-                    </button>
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-                <div className="lg:col-span-7 space-y-8">
-                    <section className="bg-white p-8 rounded-2xl border border-neutral-200 shadow-sm relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                            <Sparkles className="w-24 h-24" />
-                        </div>
-                        <h2 className="text-xl font-extrabold text-neutral-800 mb-2">Style Presets</h2>
-                        <p className="text-sm text-neutral-500 mb-6 font-medium">Jumpstart your design with curated collections</p>
-                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                            {PRESETS.map((preset) => (
-                                <button
-                                    key={preset.id}
-                                    type="button"
-                                    onClick={() => applyPreset(preset.id)}
-                                    className={`relative flex flex-col items-start gap-3 p-4 rounded-2xl border-2 text-left transition-all hover:shadow-lg ${config.presetId === preset.id ? "border-black bg-neutral-50 shadow-md" : "border-neutral-100 hover:border-neutral-300 bg-white"}`}
-                                >
-                                    {config.presetId === preset.id && <div className="absolute top-3 right-3 bg-black text-white p-1 rounded-full"><Check className="w-3 h-3" /></div>}
-                                    <div className="flex -space-x-2">
-                                        <div className="w-6 h-6 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: preset.colors.primary }} />
-                                        <div className="w-6 h-6 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: preset.colors.accent }} />
-                                        <div className="w-6 h-6 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: preset.colors.background }} />
-                                    </div>
-                                    <div>
-                                        <span className="text-sm font-extrabold text-neutral-900 block leading-tight">{preset.name}</span>
-                                        <span className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">{preset.description}</span>
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
-                    </section>
-
-                    <section className="bg-white p-8 rounded-2xl border border-neutral-200 shadow-sm">
-                        <h2 className="text-xl font-extrabold text-neutral-800 mb-2">Core Branding</h2>
-                        <p className="text-sm text-neutral-500 mb-8 font-medium">Your signature colors and typography</p>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div className="space-y-6">
-                                <div>
-                                    <label className="block text-sm font-bold text-neutral-700 mb-3 ml-1">Brand Color (Primary)</label>
-                                    <div className="flex items-center gap-4 bg-neutral-50 p-3 rounded-xl border border-neutral-100">
-                                        <input type="color" value={config.colors.primary} onChange={(e) => setValue("colors.primary", e.target.value, { shouldDirty: true })} className="h-10 w-16 rounded-lg pointer cursor-pointer border-none bg-transparent" />
-                                        <span className="text-sm font-mono font-bold text-neutral-800 uppercase tracking-widest">{config.colors.primary}</span>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-bold text-neutral-700 mb-3 ml-1">Accent Highlighting</label>
-                                    <div className="flex items-center gap-4 bg-neutral-50 p-3 rounded-xl border border-neutral-100">
-                                        <input type="color" value={config.colors.accent} onChange={(e) => setValue("colors.accent", e.target.value, { shouldDirty: true })} className="h-10 w-16 rounded-lg pointer cursor-pointer border-none bg-transparent" />
-                                        <span className="text-sm font-mono font-bold text-neutral-800 uppercase tracking-widest">{config.colors.accent}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="space-y-6">
-                                <div>
-                                    <label className="block text-sm font-bold text-neutral-700 mb-3 ml-1">Typography Style</label>
-                                    <select
-                                        value={config.typography.headingFont}
-                                        onChange={(e) => setValue("typography.headingFont", e.target.value, { shouldDirty: true })}
-                                        className="w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl text-sm font-bold focus:ring-2 focus:ring-black outline-none transition-all"
-                                    >
-                                        {FONT_OPTIONS.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-bold text-neutral-700 mb-3 ml-1">Layout Spacing</label>
-                                    <div className="flex gap-2 bg-neutral-50 p-1.5 rounded-xl border border-neutral-100">
-                                        {(["tight", "default", "spacious"] as const).map((s) => (
-                                            <button
-                                                key={s}
-                                                type="button"
-                                                onClick={() => setValue("spacing.sectionGap", s, { shouldDirty: true })}
-                                                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all capitalize ${config.spacing.sectionGap === s ? "bg-white text-black shadow-sm" : "text-neutral-500 hover:text-neutral-800"}`}
-                                            >
-                                                {s}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <div className="space-y-4 pt-4 border-t border-neutral-100">
-                        <h3 className="text-xs font-black text-neutral-400 uppercase tracking-widest ml-1">Advanced Controls</h3>
-                        <Accordion title="Announcement Bar" icon={Sparkles}>
-                            <div className="space-y-6 py-4">
-                                <div className="flex items-center justify-between">
-                                    <label className="text-sm font-bold text-neutral-800">Enable Announcement Bar</label>
-                                    <input
-                                        type="checkbox"
-                                        checked={config.announcementBar?.enabled}
-                                        onChange={(e) => setValue("announcementBar.enabled", e.target.checked, { shouldDirty: true })}
-                                        className="w-10 h-6 rounded-full appearance-none bg-neutral-200 checked:bg-black transition-all cursor-pointer relative after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:w-4 after:h-4 after:rounded-full after:transition-all checked:after:left-5"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-bold text-neutral-700 mb-3">Message Text</label>
-                                    <input
-                                        type="text"
-                                        value={config.announcementBar?.text}
-                                        onChange={(e) => setValue("announcementBar.text", e.target.value, { shouldDirty: true })}
-                                        className="w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl text-sm font-bold focus:ring-2 focus:ring-black outline-none transition-all"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-bold text-neutral-700 mb-3">Animation Style</label>
-                                    <div className="flex gap-2 bg-neutral-50 p-1.5 rounded-xl border border-neutral-100">
-                                        {(["static", "marquee"] as const).map((s) => (
-                                            <button
-                                                key={s}
-                                                type="button"
-                                                onClick={() => setValue("announcementBar.style", s, { shouldDirty: true })}
-                                                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all capitalize ${config.announcementBar?.style === s ? "bg-white text-black shadow-sm" : "text-neutral-500 hover:text-neutral-800"}`}
-                                            >
-                                                {s}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-[10px] font-black text-neutral-400 uppercase tracking-wider mb-2">Background</label>
-                                        <div className="flex items-center gap-3 bg-neutral-50 p-2.5 rounded-xl border border-neutral-100">
-                                            <input type="color" value={config.announcementBar?.background} onChange={(e) => setValue("announcementBar.background", e.target.value, { shouldDirty: true })} className="h-8 w-12 rounded cursor-pointer border-none bg-transparent" />
-                                            <span className="text-xs font-mono font-bold text-neutral-600 uppercase">{config.announcementBar?.background}</span>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-[10px] font-black text-neutral-400 uppercase tracking-wider mb-2">Text Color</label>
-                                        <div className="flex items-center gap-3 bg-neutral-50 p-2.5 rounded-xl border border-neutral-100">
-                                            <input type="color" value={config.announcementBar?.text_color} onChange={(e) => setValue("announcementBar.text_color", e.target.value, { shouldDirty: true })} className="h-8 w-12 rounded cursor-pointer border-none bg-transparent" />
-                                            <span className="text-xs font-mono font-bold text-neutral-600 uppercase">{config.announcementBar?.text_color}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </Accordion>
-
-                        <Accordion title="Header Variations" icon={Layout}>
-                            <div className="space-y-6 py-4">
-                                <div>
-                                    <label className="block text-sm font-bold text-neutral-700 mb-3">Header Layout</label>
-                                    <div className="grid grid-cols-3 gap-3">
-                                        {(["default", "modern", "minimal"] as const).map((s) => (
-                                            <button
-                                                key={s}
-                                                type="button"
-                                                onClick={() => setValue("header.style", s, { shouldDirty: true })}
-                                                className={`py-6 px-4 text-xs font-bold rounded-xl border-2 transition-all capitalize flex flex-col items-center gap-2 ${config.header?.style === s ? "border-black bg-neutral-50 shadow-md" : "border-neutral-100 hover:border-neutral-300 text-neutral-500"}`}
-                                            >
-                                                <div className="w-full h-1 bg-neutral-200 rounded-full" />
-                                                {s}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div className="flex items-center justify-between">
-                                    <label className="text-sm font-bold text-neutral-800">Sticky Header</label>
-                                    <input
-                                        type="checkbox"
-                                        checked={config.header?.sticky}
-                                        onChange={(e) => setValue("header.sticky", e.target.checked, { shouldDirty: true })}
-                                        className="w-10 h-6 rounded-full appearance-none bg-neutral-200 checked:bg-black transition-all cursor-pointer relative after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:w-4 after:h-4 after:rounded-full after:transition-all checked:after:left-5"
-                                    />
-                                </div>
-                            </div>
-                        </Accordion>
-
-                        <Accordion title="Footer Designer" icon={Layout}>
-                            <div className="space-y-6 py-4">
-                                <div>
-                                    <label className="block text-sm font-bold text-neutral-700 mb-3">Copyright Text</label>
-                                    <input
-                                        type="text"
-                                        value={config.footer?.copyrightText}
-                                        onChange={(e) => setValue("footer.copyrightText", e.target.value, { shouldDirty: true })}
-                                        className="w-full px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl text-sm font-bold focus:ring-2 focus:ring-black outline-none transition-all"
-                                    />
-                                </div>
-                                <div className="flex items-center justify-between">
-                                    <label className="text-sm font-bold text-neutral-800">Show Social Connections</label>
-                                    <input
-                                        type="checkbox"
-                                        checked={config.footer?.showSocials}
-                                        onChange={(e) => setValue("footer.showSocials", e.target.checked, { shouldDirty: true })}
-                                        className="w-10 h-6 rounded-full appearance-none bg-neutral-200 checked:bg-black transition-all cursor-pointer relative after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:w-4 after:h-4 after:rounded-full after:transition-all checked:after:left-5"
-                                    />
-                                </div>
-                            </div>
-                        </Accordion>
-
-                        <Accordion title="Advanced CRO Strategy (PDP Order)" icon={Sparkles}>
-                            <div className="space-y-6 py-4">
-                                <p className="text-xs text-neutral-500 font-medium">Drag-and-drop or toggle order of components on your product pages.</p>
-                                <div className="space-y-3">
-                                    {config.cro_strategy?.pdp_order?.map((item, index) => (
-                                        <div key={item} className="flex items-center justify-between p-3 bg-neutral-50 border border-neutral-100 rounded-xl">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-6 h-6 rounded bg-neutral-200 flex items-center justify-center text-[10px] font-bold">{index + 1}</div>
-                                                <span className="text-sm font-bold capitalize">{item.replace('_', ' ')}</span>
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <button
-                                                    type="button"
-                                                    disabled={index === 0}
-                                                    onClick={() => {
-                                                        const newOrder = [...config.cro_strategy!.pdp_order];
-                                                        [newOrder[index - 1], newOrder[index]] = [newOrder[index], newOrder[index - 1]];
-                                                        setValue("cro_strategy.pdp_order", newOrder, { shouldDirty: true });
-                                                    }}
-                                                    className="p-1.5 hover:bg-neutral-200 rounded text-neutral-600 disabled:opacity-30"
-                                                >
-                                                    <ChevronDown className="w-4 h-4 rotate-180" />
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    disabled={index === config.cro_strategy!.pdp_order!.length - 1}
-                                                    onClick={() => {
-                                                        const newOrder = [...config.cro_strategy!.pdp_order];
-                                                        [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1], newOrder[index]];
-                                                        setValue("cro_strategy.pdp_order", newOrder, { shouldDirty: true });
-                                                    }}
-                                                    className="p-1.5 hover:bg-neutral-200 rounded text-neutral-600 disabled:opacity-30"
-                                                >
-                                                    <ChevronDown className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                    {!config.cro_strategy?.pdp_order && (
-                                        <div className="text-center py-6 border-2 border-dashed border-neutral-100 rounded-2xl">
-                                            <span className="text-xs text-neutral-400 font-bold">Standard Industry Order Active</span>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </Accordion>
-
-                        <Accordion title="Color Palette Detail" icon={Palette}>
-                            <div className="grid grid-cols-2 gap-6 py-4">
-                                {Object.entries(config.colors).map(([key, value]) => (
-                                    <div key={key}>
-                                        <label className="block text-[10px] font-black text-neutral-400 uppercase tracking-wider mb-2 ml-1">{key}</label>
-                                        <div className="flex items-center gap-3 bg-neutral-50 p-2.5 rounded-xl border border-neutral-100">
-                                            <input type="color" value={value} onChange={(e) => setValue(`colors.${key}` as any, e.target.value, { shouldDirty: true })} className="h-8 w-12 rounded cursor-pointer border-none bg-transparent" />
-                                            <span className="text-xs font-mono font-bold text-neutral-600 uppercase">{value}</span>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </Accordion>
-
-                        <Accordion title="Corners & Radius" icon={Layout}>
-                            <div className="space-y-6 py-4">
-                                {Object.entries(config.corners).map(([key, value]) => (
-                                    <div key={key}>
-                                        <label className="block text-sm font-bold text-neutral-800 mb-3 capitalize">{key} Shapes</label>
-                                        <CornerSelector value={value} onChange={(v) => setValue(`corners.${key}` as any, v, { shouldDirty: true })} options={key === "cards" || key === "inputs" || key === "images" || key === "selectors" ? ["sharp", "subtle", "rounded"] : ["sharp", "subtle", "rounded", "pill"]} />
-                                    </div>
-                                ))}
-                            </div>
-                        </Accordion>
+        <FormProvider {...form}>
+            <form onSubmit={handleSubmit(onSave)} className="max-w-7xl mx-auto py-8 px-4 pb-24">
+                {/* HEADER */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                    <div>
+                        <h1 className="text-3xl font-black text-neutral-900 tracking-tight">Appearance & Theme</h1>
+                        <p className="text-neutral-500 mt-1">Customize your storefront's visual architecture and intelligence.</p>
                     </div>
-                </div>
-
-                <div className="lg:col-span-5 relative">
-                    <div className="sticky top-6">
-                        <h2 className="text-xs font-black text-neutral-400 uppercase tracking-widest mb-4 ml-1">Live Storefront Preview</h2>
-                        <div
-                            className="border border-neutral-200 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white p-3 ring-8 ring-neutral-100"
-                            style={{ fontFamily: config.typography.bodyFont, backgroundColor: config.colors.background }}
+                    <div className="flex items-center gap-3">
+                        <button
+                            type="button"
+                            onClick={() => reset()}
+                            className="px-4 py-2 text-sm font-bold text-neutral-600 hover:text-neutral-900"
+                            disabled={!isDirty}
                         >
-                            <div className="rounded-[2rem] overflow-hidden border border-neutral-100 h-[700px] flex flex-col">
-                                {config.announcementBar?.enabled && (
-                                    <div
-                                        className="py-1.5 px-4 text-[9px] font-bold uppercase tracking-widest text-center overflow-hidden whitespace-nowrap"
-                                        style={{ backgroundColor: config.announcementBar.background, color: config.announcementBar.text_color }}
-                                    >
-                                        <div className={config.announcementBar.style === 'marquee' ? 'animate-marquee inline-block' : ''}>
-                                            {config.announcementBar.text}
-                                            {config.announcementBar.style === 'marquee' && <span className="ml-8">{config.announcementBar.text}</span>}
-                                        </div>
-                                    </div>
-                                )}
-                                <div className="px-6 py-5 border-b border-neutral-100 flex items-center justify-between" style={{ backgroundColor: config.colors.surface }}>
-                                    <span className="font-black text-xl tracking-tighter" style={{ fontFamily: config.typography.headingFont, color: config.colors.text }}>LUMINA</span>
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-5 h-5 rounded-full border border-neutral-200" style={{ color: config.colors.text }} />
-                                        <div className="w-5 h-5 rounded-full border border-neutral-200" style={{ color: config.colors.text }} />
-                                    </div>
-                                </div>
-
-                                <div className="flex-1 overflow-y-auto bg-white" style={{ backgroundColor: config.colors.background }}>
-                                    <div className="px-6 py-12 text-center" style={{ gap: config.typography.paragraphGap === "compact" ? "0.75rem" : "1.5rem", display: "flex", flexDirection: "column", alignItems: "center" }}>
-                                        <div className="px-3 py-1 bg-neutral-100 text-[10px] font-black tracking-widest rounded-full uppercase mb-2 inline-block mx-auto" style={{ color: config.colors.accent }}>Seasonal Collection</div>
-                                        <h3 className="text-4xl font-extrabold tracking-tight leading-none" style={{ fontFamily: config.typography.headingFont, color: config.colors.text, fontSize: config.typography.scale === "large" ? "3rem" : config.typography.scale === "compact" ? "2.25rem" : "2.75rem" }}>Ethereal Summer</h3>
-                                        <p className="text-sm font-medium leading-relaxed max-w-xs mx-auto opacity-70" style={{ color: config.colors.text }}>Experience the intersection of traditional craft and modern silhouettes.</p>
-                                        <div className="mt-4">
-                                            <button
-                                                type="button"
-                                                className={`px-8 py-4 text-xs font-black uppercase tracking-widest transition-all ${config.buttons.primaryStyle === "glow" ? "shadow-[0_0_20px_rgba(0,0,0,0.1)]" : ""}`}
-                                                style={{
-                                                    backgroundColor: config.colors.primary,
-                                                    color: "#fff",
-                                                    borderRadius: config.corners.buttons === "sharp" ? "0px" : config.corners.buttons === "subtle" ? "0.75rem" : config.corners.buttons === "rounded" ? "1.5rem" : "9999px",
-                                                    boxShadow: config.buttons.shadow === "none" ? "none" : config.buttons.shadow === "subtle" ? "0 4px 12px rgba(0,0,0,0.1)" : "0 10px 25px rgba(0,0,0,0.15)",
-                                                }}
-                                            >
-                                                Explore Shop
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div className="px-6 py-8 grid grid-cols-2 gap-4">
-                                        {[1, 2].map(i => (
-                                            <div key={i} className="group cursor-pointer">
-                                                <div className="aspect-[3/4] bg-neutral-50 mb-4 overflow-hidden"
-                                                    style={{
-                                                        borderRadius: config.corners.images === "sharp" ? "0px" : config.corners.images === "subtle" ? "1rem" : "1.5rem"
-                                                    }}>
-                                                    <div className="w-full h-full bg-neutral-200 group-hover:scale-110 transition-transform duration-500" />
-                                                </div>
-                                                <div className="text-[10px] font-black tracking-widest mb-1 opacity-50 uppercase" style={{ color: config.colors.text }}>New Drop</div>
-                                                <div className="text-xs font-bold" style={{ color: config.colors.text }}>Aura Pendant {i}</div>
-                                                <div className="text-[10px] font-bold mt-1" style={{ color: config.colors.accent }}>₹3,499</div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                            Discard
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={!isDirty}
+                            className="flex items-center gap-2 px-6 py-2 bg-black text-white rounded-lg font-bold shadow-lg hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        >
+                            <Save className="w-4 h-4" />
+                            Save Changes
+                        </button>
                     </div>
                 </div>
-            </div>
-        </form>
+
+                {/* TABS */}
+                <div className="mb-8 border-b border-neutral-200">
+                    <div className="flex gap-8 overflow-x-auto">
+                        <button
+                            type="button"
+                            onClick={() => setActiveTab('structure')}
+                            className={`pb-4 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'structure' ? "border-black text-black" : "border-transparent text-neutral-400 hover:text-neutral-600"}`}
+                        >
+                            <Layout className="w-4 h-4" />
+                            Structure
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setActiveTab('intelligence')}
+                            className={`pb-4 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'intelligence' ? "border-black text-black" : "border-transparent text-neutral-400 hover:text-neutral-600"}`}
+                        >
+                            <Zap className="w-4 h-4" />
+                            Intelligence
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setActiveTab('style')}
+                            className={`pb-4 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'style' ? "border-black text-black" : "border-transparent text-neutral-400 hover:text-neutral-600"}`}
+                        >
+                            <Palette className="w-4 h-4" />
+                            Style
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setActiveTab('motion')}
+                            className={`pb-4 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'motion' ? "border-black text-black" : "border-transparent text-neutral-400 hover:text-neutral-600"}`}
+                        >
+                            <MousePointer2 className="w-4 h-4" />
+                            Alive Engine
+                        </button>
+                    </div>
+                </div>
+
+                {/* CONTENT GRID */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                    {/* LEFT COLUMN: SETTINGS */}
+                    <div className="lg:col-span-7 space-y-8">
+                        {activeTab === 'structure' && <StructureSection />}
+                        {activeTab === 'intelligence' && <IntelligenceSection />}
+                        {activeTab === 'style' && <StyleSection />}
+                        {activeTab === 'motion' && <MotionSection />}
+                    </div>
+
+                    {/* RIGHT COLUMN: PREVIEW */}
+                    <div className="lg:col-span-5 relative hidden lg:block">
+                        <ThemePreview />
+                    </div>
+                </div>
+            </form>
+        </FormProvider>
     );
 }

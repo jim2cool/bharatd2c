@@ -1,14 +1,8 @@
 import { notFound } from "next/navigation"
 import { getProductDataForPDP } from "@/lib/pdp-adapter"
-import { MediaGallery } from "./components/hero/MediaGallery"
-import { ProductInfo } from "./components/ProductInfo"
-import { Highlights } from "./components/highlights/Highlights"
-import { Conversion } from "./components/conversion/Conversion"
-import { Proof } from "./components/proof/Proof"
-import { ContentAccordions } from "./components/content/ContentAccordions"
-import { PeopleAlsoBought } from "./components/aov/PeopleAlsoBought"
 import { getActiveStore } from "@/lib/getActiveStore"
 import { Metadata, ResolvingMetadata } from "next"
+import { PDPClientWrapper } from "./components/PDPClientWrapper"
 
 export async function generateMetadata(
   { params }: { params: Promise<{ slug: string }> },
@@ -108,16 +102,23 @@ export default async function ProductPage(props: {
   }
 
   const themeConfig = store.theme_config
-  const pdpOrder = themeConfig?.cro_strategy?.pdp_order || ['highlights', 'conversion', 'content']
-  const belowFoldOrder = ['reviews', 'related'] // Default below fold
+  const architectureId = themeConfig?.architecture || 'product-engine'
+  const categoryConfig = {
+    category: product.category || themeConfig?.category?.category || 'multi',
+    requiredModules: themeConfig?.category?.requiredModules || [],
+    optionalModules: themeConfig?.category?.optionalModules || [],
+    imageRatio: themeConfig?.category?.imageRatio || '1:1',
+    variantSelectorType: themeConfig?.category?.variantSelectorType || 'dropdown',
+    data: product.category_data || {}
+  }
 
   return (
-    <main className="min-h-screen bg-background pb-32 md:pb-12">
+    <main className="min-h-screen bg-background pb-32 md:pb-12 text-foreground">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="max-w-[1200px] mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-10">
+      <div className="max-w-[1200px] mx-auto px-4 md:px-6 lg:px-8 py-3 md:py-10">
 
         {/* PREVIEW MODE BANNER */}
         {isPreviewMode && (
@@ -128,65 +129,13 @@ export default async function ProductPage(props: {
           </div>
         )}
 
-        {/* Dawn-Style Two Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-10">
+        {/* Deterministic Architecture-Based Rendering */}
+        <PDPClientWrapper
+          product={product}
+          architectureId={architectureId}
+          categoryConfig={categoryConfig as any}
+        />
 
-          {/* LEFT COLUMN: Media Gallery */}
-          <div className="w-full min-w-0">
-            <MediaGallery media={product.media} />
-          </div>
-
-          {/* RIGHT COLUMN: Product Info + Dynamic Order Components */}
-          <div className="relative">
-            <div className="lg:sticky lg:top-6 h-fit flex flex-col gap-3">
-              {/* Product Info is always first */}
-              <ProductInfo product={product} />
-
-              {/* Dynamic RHS Components */}
-              {pdpOrder.map((compId: string) => {
-                switch (compId) {
-                  case 'highlights':
-                    return <Highlights key="highlights" highlights={product.highlights} />
-                  case 'conversion':
-                  case 'bundles':
-                    return <Conversion key="conversion" product={product} />
-                  case 'content':
-                  case 'ingredients':
-                  case 'how_to_use':
-                  case 'specs':
-                    return <ContentAccordions key="content" sections={product.content} intro={product.description_intro} />
-                  case 'reviews':
-                    // If reviews are requested in RHS
-                    return (
-                      <div key="reviews-rhs" className="border-t pt-4 mt-2">
-                        <Proof rating={product.rating} reviewCount={product.reviewCount} reviews={product.reviews} compact />
-                      </div>
-                    )
-                  default:
-                    return null
-                }
-              })}
-            </div>
-          </div>
-
-        </div>
-
-        {/* FULL WIDTH SECTIONS (Below Fold) */}
-        <div className="mt-8 space-y-8 border-t pt-8">
-          {belowFoldOrder.map((sectionId) => {
-            // Avoid double rendering if reviews are in RHS
-            if (sectionId === 'reviews' && pdpOrder.includes('reviews')) return null;
-
-            switch (sectionId) {
-              case 'reviews':
-                return <Proof key="proof" rating={product.rating} reviewCount={product.reviewCount} reviews={product.reviews} />
-              case 'related':
-                return <PeopleAlsoBought key="related" products={product.relatedProducts} title={product.related_products_title} />
-              default:
-                return null;
-            }
-          })}
-        </div>
       </div>
     </main>
   )

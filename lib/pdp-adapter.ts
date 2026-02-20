@@ -2,6 +2,14 @@ import { supabaseAdmin } from './supabase-admin'
 import { ProductData, MediaItem, ProductHighlight, BundleOption, Review, ContentSection } from '@/app/(storefront)/products/[slug]/types/pdp'
 import { calculatePrepaidDiscount, PrepaidRule, CartItemForDiscount } from '@/lib/utils/discount-engine'
 import { ResolutionEngine } from './utils/resolution'
+import { ProductEntity, StoreEntity, ProductVariantEntity, PlatformSettingsEntity, PrepaidConfigEntity, ShippingSettingsEntity } from '@/types/supabase'
+
+// Helper Types for Joined Data
+interface ProductJoined extends ProductEntity {
+    stores: StoreEntity | null;
+    product_variants: ProductVariantEntity[];
+    product_collections: { collection_id: string }[];
+}
 
 export async function getProductDataForPDP(slug: string, storeId: string, options?: { isPreview?: boolean }): Promise<ProductData | null> {
     // 1. Fetch Product with variants AND Store Settings AND Platform Settings
@@ -14,6 +22,8 @@ export async function getProductDataForPDP(slug: string, storeId: string, option
             *,
             urgency_settings,
             bundle_settings,
+            category,
+            category_data,
             cod_enabled,
             prepaid_discount_type,
             prepaid_discount_value,
@@ -73,10 +83,10 @@ export async function getProductDataForPDP(slug: string, storeId: string, option
 
     const [productRes, platformRes, rulesRes, shippingRes] = await Promise.all([productQuery.single(), platformQuery, rulesQuery, shippingSettingsQuery])
 
-    const product = productRes.data
+    const product = productRes.data as ProductJoined | null
     const productError = productRes.error
-    const rules = (rulesRes.data || []) as PrepaidRule[]
-    const shippingSettings = shippingRes.data || null
+    const rules = (rulesRes.data || []) as unknown as PrepaidRule[] // Adapted for internal logic
+    const shippingSettings = (shippingRes.data || null) as ShippingSettingsEntity | null
 
     // Default platform settings if missing (fail open or closed? closed for safety)
     const platform = platformRes.data || { cod_enabled: true, prepaid_enabled: true, cart_button_enabled: true }
@@ -89,7 +99,7 @@ export async function getProductDataForPDP(slug: string, storeId: string, option
     // --- PAYMENT LOGIC RESOLUTION ---
     const ctx = {
         platform,
-        store: product.stores,
+        store: product.stores || {},
         product: product,
         useStoreDefaults: product.use_store_payment_settings !== false
     }
@@ -107,7 +117,7 @@ export async function getProductDataForPDP(slug: string, storeId: string, option
             product_id: product.id,
             price: Number(product.price),
             qty: 1,
-            collection_ids: product.product_collections?.map((pc: any) => pc.collection_id) || []
+            collection_ids: product.product_collections?.map(pc => pc.collection_id) || []
         }
 
         const stackingLogic = store?.prepaid_stacking_logic || 'highest_only'
@@ -141,8 +151,8 @@ export async function getProductDataForPDP(slug: string, storeId: string, option
     // 4. Map Bundles from variants
     const variants = product.product_variants || []
     const bundles: BundleOption[] = variants
-        .filter((v: any) => v.status === 'active')
-        .map((variant: any) => ({
+        .filter(v => v.status === 'active')
+        .map(variant => ({
             id: variant.id,
             unitCount: variant.unit_count || 1,
             sellingPrice: Number(variant.price),
@@ -163,7 +173,7 @@ export async function getProductDataForPDP(slug: string, storeId: string, option
     }
 
     // 5. Map Reviews (Testimonials)
-    const testimonials = product.testimonials || []
+    const testimonials = (product.testimonials as any[]) || []
     const reviews: Review[] = testimonials.map((t: any, index: number) => ({
         id: `rev_${index}`,
         author: t.name || 'Anonymous',
@@ -233,7 +243,8 @@ export async function getProductDataForPDP(slug: string, storeId: string, option
 
     // 7. Fetch Related Products (Smart Cross-sells)
     let relatedData: any[] = []
-    const crossSellIds = product.bundle_settings?.cross_sell_ids || []
+    // @ts-ignore - Supabase JSONB typing is tricky
+    const crossSellIds = (product.bundle_settings as any)?.cross_sell_ids || []
 
     if (crossSellIds.length > 0) {
         // Fetch specific cross-sells
@@ -260,7 +271,7 @@ export async function getProductDataForPDP(slug: string, storeId: string, option
         relatedData = data || []
     }
 
-    const relatedProducts = relatedData.map((p: any) => ({
+    const relatedProducts = relatedData.map(p => ({
         id: p.id,
         slug: p.slug,
         title: p.title,
@@ -270,14 +281,14 @@ export async function getProductDataForPDP(slug: string, storeId: string, option
     }))
 
     // 8. Map Variants (Phase 17)
-    const mappedVariants = product.has_variants ? product.product_variants.map((v: any) => ({
+    const mappedVariants = product.has_variants ? product.product_variants.map(v => ({
         id: v.id,
         title: v.title,
         price: Number(v.price),
         mrp: v.mrp ? Number(v.mrp) : undefined,
         inventory: Number(v.inventory || 0),
-        sku: v.sku,
-        options: v.attributes || {}
+        sku: v.sku || undefined,
+        options: (v.attributes as Record<string, string>) || {}
     })) : undefined
 
     return {
@@ -299,9 +310,9 @@ export async function getProductDataForPDP(slug: string, storeId: string, option
             },
             prepaid: prepaidDiscount // Updated with resolved discount
         },
-        urgency_settings: product.urgency_settings || undefined,
-        bundle_settings: product.bundle_settings || undefined,
-        trust_indicators: product.trust_indicators,
+        urgency_settings: (product.urgency_settings as any) || undefined,
+        bundle_settings: (product.bundle_settings as any) || undefined,
+        trust_indicators: (product.trust_indicators as any) || undefined,
         trust_strip_image_url: product.trust_strip_image_url || null,
 
         // Final Resolved Flags
@@ -309,7 +320,7 @@ export async function getProductDataForPDP(slug: string, storeId: string, option
         prepaid_enabled: finalPrepaid,
         cart_button_enabled: finalCart,
         show_estimated_delivery: product.show_estimated_delivery !== false, // Default to true
-        shipping_settings: shippingSettings || undefined,
+        shipping_settings: (shippingSettings as any) || undefined,
 
         bundles,
         reviews: {
@@ -321,11 +332,13 @@ export async function getProductDataForPDP(slug: string, storeId: string, option
         },
         content,
         relatedProducts,
-        related_products_title: product.bundle_settings?.cross_sell_title || product.related_products_title || 'People also bought',
+        related_products_title: (product.bundle_settings as any)?.cross_sell_title || product.related_products_title || 'People also bought',
+        category: (product.category as any) || 'multi',
+        category_data: (product.category_data as Record<string, any>) || {},
 
         // Phase 17
         has_variants: !!product.has_variants,
-        variant_options: product.variant_options || [],
+        variant_options: (product.variant_options as any[]) || [],
         variants: mappedVariants,
     }
 }

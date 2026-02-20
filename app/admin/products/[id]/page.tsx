@@ -18,11 +18,15 @@ import { supabaseBrowser } from '@/lib/supabase-browser'
 import { slugify } from '@/lib/utils'
 import { useState } from 'react'
 import { Card } from '../components/ProductFormUI'
+import { CategorySelector } from '../components/CategorySelector'
+import { CategoryDataFields } from '../components/CategoryDataFields'
 
 // Schema definition
 const productSchema = z.object({
   title: z.string().min(1, 'Product title is required'),
   status: z.enum(['draft', 'published']),
+  category: z.string().optional() as any,
+  category_data: z.record(z.string(), z.any()).optional(),
   price: z.number().min(0, 'Price cannot be negative'),
   mrp: z.number().nullable().optional(),
   cogs: z.number().min(0, 'COGS cannot be negative'),
@@ -114,6 +118,7 @@ export default function EditProductPage() {
   const methods = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
     defaultValues: {
+      category: 'multi',
       highlights: [],
       images: [],
       testimonials: [],
@@ -143,6 +148,8 @@ export default function EditProductPage() {
       reset({
         title: product.title,
         status: product.status,
+        category: product.category || 'multi',
+        category_data: product.category_data || {},
         price: product.price,
         mrp: product.mrp,
         cogs: product.cogs,
@@ -287,8 +294,13 @@ export default function EditProductPage() {
 
         {/* SINGLE COLUMN LAYOUT */}
         <div className="max-w-4xl mx-auto space-y-4">
+          {/* 0. Category Selection */}
+          <CategorySelector />
+
           {/* 1. Core Info (Always Open) */}
           <CoreSection />
+
+          <CategoryDataFields category={watch('category')} />
 
           {/* 2. Product Gallery */}
           <Controller

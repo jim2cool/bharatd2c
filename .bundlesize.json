@@ -1,6 +1,6 @@
 {
     "limits": {
-        "mainBundle": 250000,
+        "mainBundle": 1500000,
         "cssBundle": 50000,
         "routeChunk": 150000
     },

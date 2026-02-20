@@ -200,7 +200,7 @@ export function PrepaidRulesSection() {
                             className="text-xs font-bold text-neutral-900 bg-transparent outline-none cursor-pointer pr-8"
                         >
                             <option value="highest_only">Highest Wins (Recommended)</option>
-                            <option value="stack_all">Stack All Discounts</option>
+                            <option value="stack">Stack All Discounts</option>
                         </select>
                         <div className="absolute top-full right-0 mt-2 w-64 bg-white p-4 rounded-xl border border-neutral-100 shadow-xl z-50 opacity-0 group-hover:opacity-100 pointer-events-none transition-all">
                             <h4 className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-neutral-900 mb-2">

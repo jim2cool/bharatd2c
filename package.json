@@ -9,7 +9,8 @@
     "build": "next build && node scripts/check-bundle-size.mjs",
     "build:skip-checks": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "check:architecture": "tsx scripts/validate-architecture.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.986.0",

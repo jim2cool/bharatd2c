@@ -1,53 +1,43 @@
-"use client";
+import { ArchitectureConfig, StylePreset, SellerModifier } from "@/types/architecture";
 
-import React from "react";
-
-// ═══════════════════════════════════════════════════════════════════════════
-// ENHANCED THEME CONFIG SCHEMA - Component-Level Styling
-// ═══════════════════════════════════════════════════════════════════════════
-export type ThemeConfig = {
+export type ThemeConfig = ArchitectureConfig & {
   presetId?: string;
 
-  // 1. COLOR SYSTEM (6 semantic colors)
-  colors: {
-    primary: string;      // Brand main color (CTA buttons)
-    secondary: string;    // Supporting brand color
-    accent: string;       // Highlights, badges
-    background: string;   // Page background
-    surface: string;      // Card/section backgrounds
-    text: string;         // Base text color
+  // 1. BRAND TOKENS (Identity) - BACKWARD COMPAT (Mapped to Style)
+  colors: StylePreset['colors'];
+  brand: {
+    gradientStyle: "none" | "subtle" | "bold";
+    darkMode: boolean;
   };
 
-  // 2. COMPONENT-LEVEL CORNERS
-  corners: {
-    buttons: "sharp" | "subtle" | "rounded" | "pill";
-    cards: "sharp" | "subtle" | "rounded";
-    inputs: "sharp" | "subtle" | "rounded";
-    images: "sharp" | "subtle" | "rounded" | "circle";
-    badges: "sharp" | "subtle" | "pill";
-    selectors: "sharp" | "subtle" | "rounded";
+  // 2. TYPOGRAPHY SYSTEM (Mapped to Style)
+  typography: StylePreset['typography'] & {
+    accentFont?: string;
   };
 
-  // 3. BUTTON STYLING
-  buttons: {
-    primaryStyle: "solid" | "gradient" | "glow";
-    secondaryStyle: "outline" | "ghost" | "subtle";
-    shadow: "none" | "subtle" | "elevated";
+  // 3. SHAPE & DEPTH (Mapped to Style)
+  shape: StylePreset['shape'] & {
+    cornerSmoothing: boolean;
   };
 
-  // 4. SPACING & LAYOUT
-  spacing: {
-    sectionGap: "tight" | "default" | "spacious";
-    cardGap: "tight" | "default" | "relaxed";
+  // 4. DENSITY & SPACING (Mapped to Seller)
+  density: SellerModifier & {
+    sectionPadding: number;
+    componentGap: number;
+    gridTightness: "tight" | "normal" | "relaxed";
   };
 
-  // 5. TYPOGRAPHY
-  typography: {
-    headingFont: string;
-    bodyFont: string;
-    scale: "compact" | "default" | "large";
-    lineHeight: "tight" | "default" | "spacious";
-    paragraphGap: "compact" | "default" | "loose";
+  // 5. MOTION & INTERACTION (Mapped to Style)
+  motion: StylePreset['motion'] & {
+    enabled: boolean;
+    hoverMode: string;
+    scrollReveal: string;
+  };
+
+  // 6. CONVERSION VISUALS (Mapped to Seller)
+  conversion: SellerModifier & {
+    urgencyStyle: "simple" | "highlighted" | "alarming";
+    badgeStyle: string;
   };
 };
 
@@ -55,120 +45,240 @@ export type ThemeConfig = {
 // DEFAULTS & HELPERS
 // ═══════════════════════════════════════════════════════════════════════════
 
-const DEFAULT_CONFIG: ThemeConfig = {
+const DEFAULT_STYLE: StylePreset = {
+  id: 'minimal',
   colors: {
-    primary: "#111111",
-    secondary: "#333333",
-    accent: "#e26a00",
     background: "#ffffff",
-    surface: "#f9f9f9",
-    text: "#111111",
-  },
-  corners: {
-    buttons: "rounded",
-    cards: "subtle",
-    inputs: "subtle",
-    images: "subtle",
-    badges: "pill",
-    selectors: "subtle",
-  },
-  buttons: {
-    primaryStyle: "solid",
-    secondaryStyle: "outline",
-    shadow: "subtle",
-  },
-  spacing: {
-    sectionGap: "default",
-    cardGap: "default",
+    surface: "#f9fafb",
+    textPrimary: "#111827",
+    textSecondary: "#6b7280",
+    primary: "#111111",
+    primaryForeground: "#ffffff",
+    secondary: "#f3f4f6",
+    secondaryForeground: "#1f2937",
+    accent: "#ef4444",
+    border: "#e5e7eb",
+    success: "#22c55e",
+    error: "#ef4444",
+    warning: "#f59e0b",
   },
   typography: {
     headingFont: "Inter",
     bodyFont: "Inter",
-    scale: "default",
-    lineHeight: "default",
-    paragraphGap: "default",
+    headingCase: "normal",
+    headingWeight: 700,
+    letterSpacing: "normal",
+    lineHeight: "normal",
+    scale: "modern",
+  },
+  shape: {
+    radiusScale: "clean",
+    elevation: "soft",
+    borderStyle: "subtle",
+  },
+  motion: {
+    intensity: "normal",
+    speed: "normal",
   },
 };
 
-// Corner value mappings
-const CORNER_VALUES = {
-  sharp: "0px",
-  subtle: "0.5rem",
-  rounded: "1rem",
-  pill: "9999px",
-  circle: "50%",
+const DEFAULT_SELLER: SellerModifier = {
+  urgencyLevel: 'medium',
+  socialProofWeight: 'medium',
+  trustDensity: 'medium',
+  ctaProminence: 'balanced',
+  densityScale: 'balanced',
+  codBias: true,
 };
 
-// Spacing value mappings
-const SPACING_VALUES = {
-  sectionGap: { tight: "2rem", default: "4rem", spacious: "6rem" },
-  cardGap: { tight: "0.75rem", default: "1.5rem", relaxed: "2rem" },
+const DEFAULT_CONFIG: ThemeConfig = {
+  presetId: "custom",
+  architecture: 'product-engine',
+  seller: DEFAULT_SELLER,
+  category: {
+    category: 'multi',
+    requiredModules: [],
+    optionalModules: [],
+    imageRatio: '1:1',
+    variantSelectorType: 'dropdown',
+  },
+  style: DEFAULT_STYLE,
+
+  // Backward Compat Fields
+  colors: DEFAULT_STYLE.colors,
+  brand: {
+    gradientStyle: "none",
+    darkMode: false,
+  },
+  typography: {
+    ...DEFAULT_STYLE.typography,
+    accentFont: "Inter",
+  },
+  shape: {
+    ...DEFAULT_STYLE.shape,
+    cornerSmoothing: true,
+  },
+  density: {
+    ...DEFAULT_SELLER,
+    sectionPadding: 1,
+    componentGap: 1,
+    gridTightness: "normal",
+  },
+  motion: {
+    ...DEFAULT_STYLE.motion,
+    enabled: true,
+    hoverMode: "lift",
+    scrollReveal: "fade",
+  },
+  conversion: {
+    ...DEFAULT_SELLER,
+    urgencyStyle: "highlighted",
+    badgeStyle: "bold",
+  },
 };
 
-// Shadow value mappings
-const SHADOW_VALUES = {
-  none: "none",
-  subtle: "0 2px 8px rgba(0,0,0,0.08)",
-  elevated: "0 4px 20px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06)",
+// --- MAPPINGS ---
+
+const RADIUS_MAP = {
+  sharp: { sm: "0px", md: "0px", lg: "0px", full: "0px" },
+  clean: { sm: "0.25rem", md: "0.375rem", lg: "0.5rem", full: "9999px" },
+  soft: { sm: "0.375rem", md: "0.5rem", lg: "0.75rem", full: "9999px" },
+  round: { sm: "0.5rem", md: "0.75rem", lg: "1rem", full: "9999px" },
+  pill: { sm: "0.75rem", md: "1rem", lg: "1.5rem", full: "9999px" },
 };
 
-// Typography scale mappings
-const TYPOGRAPHY_SCALE = {
-  compact: { h1: "2rem", h2: "1.5rem", h3: "1.25rem", body: "0.875rem" },
-  default: { h1: "2.5rem", h2: "1.75rem", h3: "1.5rem", body: "1rem" },
-  large: { h1: "3rem", h2: "2rem", h3: "1.75rem", body: "1.125rem" },
+const SHADOW_MAP = {
+  flat: "none",
+  soft: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+  raised: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+  floating: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
 };
 
-const LINE_HEIGHTS = {
-  tight: "1.25",
-  default: "1.5",
-  spacious: "1.75",
+const TYPE_SCALE = {
+  classic: { h1: "2.5rem", h2: "2rem", h3: "1.75rem", body: "1rem" },
+  modern: { h1: "3.5rem", h2: "2.5rem", h3: "2rem", body: "1rem" },
+  expressive: { h1: "4.5rem", h2: "3.5rem", h3: "2.5rem", body: "1.125rem" },
 };
 
-const PARAGRAPH_GAPS = {
-  compact: "0.5rem",
-  default: "1rem",
-  loose: "1.5rem",
-};
-
-// Helper: Convert hex to RGB for oklch approximation
-function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16),
-    }
-    : null;
+// Helper functions
+function isObject(item: any) {
+  return (item && typeof item === 'object' && !Array.isArray(item));
 }
 
-// Helper: Determine if color is light or dark for contrast
-function isLightColor(hex: string): boolean {
-  const rgb = hexToRgb(hex);
-  if (!rgb) return false;
-  const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255;
-  return luminance > 0.5;
-}
+function deepMerge(target: any, source: any): any {
+  if (!source) return target;
 
-// Deep merge helper
-function deepMerge<T extends object>(defaults: T, overrides: Partial<T> | null | undefined): T {
-  if (!overrides) return defaults;
-  const result = { ...defaults };
-  for (const key in overrides) {
-    if (Object.prototype.hasOwnProperty.call(overrides, key)) {
-      const val = overrides[key];
-      if (val && typeof val === "object" && !Array.isArray(val)) {
-        (result as Record<string, unknown>)[key] = deepMerge(
-          (defaults as Record<string, unknown>)[key] as object,
-          val as object
-        );
-      } else if (val !== undefined) {
-        (result as Record<string, unknown>)[key] = val;
+  const output = { ...target };
+  if (isObject(target) && isObject(source)) {
+    Object.keys(source).forEach(key => {
+      if (isObject(source[key])) {
+        if (!(key in target)) {
+          Object.assign(output, { [key]: source[key] });
+        } else {
+          output[key] = deepMerge(target[key], source[key]);
+        }
+      } else {
+        Object.assign(output, { [key]: source[key] });
       }
-    }
+    });
   }
-  return result;
+  return output;
+}
+
+// CSS Generation Logic
+function generateCss(config: ThemeConfig) {
+  const { style, seller } = config;
+
+  // 1. Colors
+  const colors = `
+        --background: ${style.colors.background};
+        --foreground: ${style.colors.textPrimary};
+        --card: ${style.colors.surface};
+        --card-foreground: ${style.colors.textPrimary};
+        --popover: ${style.colors.surface};
+        --popover-foreground: ${style.colors.textPrimary};
+        --primary: ${style.colors.primary};
+        --primary-foreground: ${style.colors.primaryForeground};
+        --secondary: ${style.colors.secondary};
+        --secondary-foreground: ${style.colors.secondaryForeground};
+        --muted: ${style.colors.surface}; 
+        --muted-foreground: ${style.colors.textSecondary};
+        --accent: ${style.colors.secondary};
+        --accent-foreground: ${style.colors.secondaryForeground};
+        --destructive: ${style.colors.error};
+        --destructive-foreground: #ffffff;
+        --border: ${style.colors.border};
+        --input: ${style.colors.border};
+        --ring: ${style.colors.primary};
+        
+        --color-success: ${style.colors.success};
+        --color-warning: ${style.colors.warning};
+        --color-urgency: ${style.colors.accent};
+        --gradient-opacity: ${config.brand?.gradientStyle === 'bold' ? '0.15' : config.brand?.gradientStyle === 'subtle' ? '0.05' : '0'};
+        
+        /* Tailwind v4 Color Aliases */
+        --color-primary: ${style.colors.primary};
+        --color-accent: ${style.colors.secondary};
+        --color-background: ${style.colors.background};
+        --color-foreground: ${style.colors.textPrimary};
+    `;
+
+  // 2. Shape
+  const radius = RADIUS_MAP[style.shape.radiusScale] || RADIUS_MAP.clean;
+  const shapes = `
+        --radius: ${radius.md};
+        --radius-sm: ${radius.sm};
+        --radius-md: ${radius.md};
+        --radius-lg: ${radius.lg};
+        --radius-full: ${radius.full};
+        
+        /* Semantic Radius Mappings */
+        --radius-button: ${radius.md};
+        --radius-card: ${radius.lg};
+        --radius-input: ${radius.sm};
+        --radius-image: ${radius.lg};
+
+        --shadow-elevation: ${SHADOW_MAP[style.shape.elevation] || SHADOW_MAP.soft};
+        --border-width: ${style.shape.borderStyle === 'none' ? '0px' : style.shape.borderStyle === 'hairline' ? '1px' : '2px'};
+    `;
+
+  // 3. Typography
+  const scale = TYPE_SCALE[style.typography.scale] || TYPE_SCALE.modern;
+  const typography = `
+        --font-heading: "${style.typography.headingFont}", system-ui, sans-serif;
+        --font-body: "${style.typography.bodyFont}", system-ui, sans-serif;
+        --text-h1: ${scale.h1};
+        --text-h2: ${scale.h2};
+        --text-h3: ${scale.h3};
+        --text-body: ${scale.body};
+        --font-weight-heading: ${style.typography.headingWeight};
+        --text-transform-heading: ${style.typography.headingCase};
+        --letter-spacing: ${style.typography.letterSpacing === 'tight' ? '-0.025em' : style.typography.letterSpacing === 'wide' ? '0.05em' : '0'};
+        --line-height: ${style.typography.lineHeight === 'compact' ? '1.2' : style.typography.lineHeight === 'loose' ? '1.75' : '1.5'};
+    `;
+
+  // 4. Density
+  const density = `
+        --spacing-section: calc(4rem * ${config.density?.sectionPadding || 1});
+        --spacing-gap: calc(1.5rem * ${config.density?.componentGap || 1});
+        --container-max: ${seller.densityScale === 'compact' ? '1024px' : seller.densityScale === 'airy' ? '1536px' : '1280px'};
+    `;
+
+  // 5. Conversion
+  const conversion = `
+        --social-proof-opacity: ${seller.socialProofWeight === 'light' ? '0.5' : seller.socialProofWeight === 'medium' ? '0.8' : '1.0'};
+        --cta-scale: ${seller.ctaProminence === 'dominant' ? '1.05' : '1.0'};
+  `;
+
+  return `
+        :root {
+            ${colors}
+            ${shapes}
+            ${typography}
+            ${density}
+            ${conversion}
+        }
+    `;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -184,170 +294,11 @@ export default function ThemeProvider({
 }) {
   // Merge with defaults to ensure all values exist
   const config = deepMerge(DEFAULT_CONFIG, themeConfig);
-
-  // Extract values
-  const { colors, corners, buttons, spacing, typography } = config;
-
-  // Determine foreground colors for contrast
-  const primaryForeground = isLightColor(colors.primary) ? "#111111" : "#ffffff";
-  const secondaryForeground = isLightColor(colors.secondary) ? "#111111" : "#ffffff";
-  const accentForeground = isLightColor(colors.accent) ? "#111111" : "#ffffff";
-  const bgForeground = isLightColor(colors.background) ? "#111111" : "#f5f5f5";
-
-  // Get typography values with fallbacks
-  const scaleKey = typography?.scale || "default";
-  const scale = TYPOGRAPHY_SCALE[scaleKey as keyof typeof TYPOGRAPHY_SCALE] || TYPOGRAPHY_SCALE.default;
-
-  const lineHeightKey = typography?.lineHeight || "default";
-  const lineHeightValue = LINE_HEIGHTS[lineHeightKey as keyof typeof LINE_HEIGHTS] || LINE_HEIGHTS.default;
-
-  const paragraphGapKey = typography?.paragraphGap || "default";
-  const paragraphGapValue = PARAGRAPH_GAPS[paragraphGapKey as keyof typeof PARAGRAPH_GAPS] || PARAGRAPH_GAPS.default;
-
-  // CSS Variables
-  const css = `
-    :root {
-      /* ══════════════════════════════════════════════════════════════════════
-         COLOR SYSTEM (6 semantic colors)
-         ══════════════════════════════════════════════════════════════════════ */
-      --color-primary: ${colors.primary};
-      --color-secondary: ${colors.secondary};
-      --color-accent: ${colors.accent};
-      --color-background: ${colors.background};
-      --color-surface: ${colors.surface};
-      --color-text: ${colors.text};
-      
-      --color-primary-foreground: ${primaryForeground};
-      --color-secondary-foreground: ${secondaryForeground};
-      --color-accent-foreground: ${accentForeground};
-      
-      /* ══════════════════════════════════════════════════════════════════════
-         COMPONENT-LEVEL CORNER RADIUS
-         ══════════════════════════════════════════════════════════════════════ */
-      --radius-button: ${CORNER_VALUES[corners.buttons]};
-      --radius-card: ${CORNER_VALUES[corners.cards]};
-      --radius-input: ${CORNER_VALUES[corners.inputs]};
-      --radius-image: ${CORNER_VALUES[corners.images === "circle" ? "circle" : corners.images]};
-      --radius-badge: ${CORNER_VALUES[corners.badges]};
-      --radius-selector: ${CORNER_VALUES[corners.selectors]};
-      
-      /* Legacy fallbacks */
-      --radius-sm: 0.375rem;
-      --radius-md: 0.5rem;
-      --radius-lg: 1rem;
-      --radius: 0.5rem;
-      
-      /* ══════════════════════════════════════════════════════════════════════
-         BUTTON STYLING
-         ══════════════════════════════════════════════════════════════════════ */
-      --button-shadow: ${SHADOW_VALUES[buttons.shadow]};
-      
-      /* ══════════════════════════════════════════════════════════════════════
-         SPACING & LAYOUT
-         ══════════════════════════════════════════════════════════════════════ */
-      --spacing-section: ${SPACING_VALUES.sectionGap[spacing.sectionGap]};
-      --spacing-card-gap: ${SPACING_VALUES.cardGap[spacing.cardGap]};
-      
-      /* ══════════════════════════════════════════════════════════════════════
-         TYPOGRAPHY
-         ══════════════════════════════════════════════════════════════════════ */
-      --font-heading: "${typography.headingFont}", system-ui, sans-serif;
-      --font-body: "${typography.bodyFont}", system-ui, sans-serif;
-      --font-sans: "${typography.bodyFont}", system-ui, sans-serif;
-      
-      --text-h1: ${scale.h1};
-      --text-h2: ${scale.h2};
-      --text-h3: ${scale.h3};
-      --text-body: ${scale.body};
-      
-      --line-height: ${lineHeightValue};
-      --paragraph-gap: ${paragraphGapValue};
-      
-      /* ══════════════════════════════════════════════════════════════════════
-         SHADCN UI TOKENS (Override for compatibility)
-         ══════════════════════════════════════════════════════════════════════ */
-      --primary: ${colors.primary};
-      --primary-foreground: ${primaryForeground};
-      
-      --secondary: ${colors.secondary};
-      --secondary-foreground: ${secondaryForeground};
-      
-      --accent: ${colors.accent};
-      --accent-foreground: ${accentForeground};
-      
-      --background: ${colors.background};
-      --foreground: ${bgForeground};
-      
-      --card: ${colors.surface};
-      --card-foreground: ${bgForeground};
-      
-      --muted: ${isLightColor(colors.background) ? "#f6f6f6" : "#2a2a2a"};
-      --muted-foreground: ${isLightColor(colors.background) ? "#666666" : "#a0a0a0"};
-      
-      --border: ${isLightColor(colors.background) ? "#e6e6e6" : "#3a3a3a"};
-      --input: ${isLightColor(colors.background) ? "#e6e6e6" : "#3a3a3a"};
-      --ring: ${colors.primary};
-    }
-    
-    /* ══════════════════════════════════════════════════════════════════════
-       COMPONENT-SPECIFIC UTILITY CLASSES
-       ══════════════════════════════════════════════════════════════════════ */
-    
-    /* Buttons */
-    .btn-primary {
-      background-color: var(--color-primary);
-      color: var(--color-primary-foreground);
-      border-radius: var(--radius-button);
-      box-shadow: var(--button-shadow);
-    }
-    
-    .btn-secondary {
-      background-color: var(--color-secondary);
-      color: var(--color-secondary-foreground);
-      border-radius: var(--radius-button);
-    }
-    
-    .btn-accent {
-      background-color: var(--color-accent);
-      color: var(--color-accent-foreground);
-      border-radius: var(--radius-button);
-    }
-    
-    /* Cards */
-    .theme-card {
-      border-radius: var(--radius-card);
-      background-color: var(--color-surface);
-    }
-    
-    /* Inputs */
-    .theme-input {
-      border-radius: var(--radius-input);
-    }
-    
-    /* Images */
-    .theme-image {
-      border-radius: var(--radius-image);
-    }
-    
-    /* Badges */
-    .theme-badge {
-      border-radius: var(--radius-badge);
-    }
-    
-    /* Selectors (quantity, variants) */
-    .theme-selector {
-      border-radius: var(--radius-selector);
-    }
-    
-    /* Section spacing */
-    .theme-section {
-      padding-top: var(--spacing-section);
-      padding-bottom: var(--spacing-section);
-    }
-  `;
+  const css = generateCss(config);
 
   return (
     <>
+      {/* Security: css content is generated from trusted configuration objects (enums, numbers, hex codes). Font names should be validated at input source. */}
       <style dangerouslySetInnerHTML={{ __html: css }} />
       {children}
     </>

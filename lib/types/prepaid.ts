@@ -1,6 +1,6 @@
 export type PrepaidScope = 'store' | 'collection' | 'product';
 export type DiscountType = 'flat' | 'percentage';
-export type StackingLogic = 'highest_only' | 'stack_all';
+export type StackingLogic = 'highest_only' | 'stack';
 
 export interface PrepaidConfig {
     id: string;

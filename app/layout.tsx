@@ -1,22 +1,38 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
+import { Outfit, Plus_Jakarta_Sans, Playfair_Display, JetBrains_Mono, Anton, Dancing_Script } from "next/font/google";
 import "./globals.css";
 import "@/app/theme/easy-base/theme.config";
 import ThemeProvider from "@/components/ThemeProvider";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const outfit = Outfit({
+  variable: "--font-heading",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const plusJakarta = Plus_Jakarta_Sans({
+  variable: "--font-body",
   subsets: ["latin"],
 });
 
 const playfair = Playfair_Display({
   variable: "--font-serif",
+  subsets: ["latin"],
+});
+
+const jetbrains = JetBrains_Mono({
+  variable: "--font-mono",
+  subsets: ["latin"],
+});
+
+const anton = Anton({
+  weight: "400",
+  variable: "--font-heavy",
+  subsets: ["latin"],
+});
+
+const dancing = Dancing_Script({
+  variable: "--font-cursive",
   subsets: ["latin"],
 });
 
@@ -53,7 +69,7 @@ export default async function RootLayout({
   return (
     <html lang="en-IN">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} antialiased bg-white text-gray-900`}
+        className={`${outfit.variable} ${plusJakarta.variable} ${playfair.variable} ${jetbrains.variable} ${anton.variable} ${dancing.variable} antialiased bg-background text-foreground bg-noise`}
       >
         <ThemeProvider themeConfig={themeConfig}>
           {children}
